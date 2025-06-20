@@ -87,6 +87,24 @@ class Meilisearch
     }
 
     /**
+     * @param $indexName
+     * @return array
+     */
+    public function createIndex($indexName): array
+    {
+        return $this->client->createIndex($indexName, ['primaryKey' => 'id']);
+    }
+
+    /**
+     * @param $indexName
+     * @return array
+     */
+    public function deleteIndex($indexName): array
+    {
+        return $this->client->deleteIndex($indexName);
+    }
+
+    /**
      * @return bool
      */
     public function isHealthy(): bool

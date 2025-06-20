@@ -65,6 +65,38 @@ class BaseIndexerHandler implements IndexerInterface
     }
 
     /**
+     * @param $dimensions
+     * @param \Traversable $documents
+     * @return void
+     */
+    public function deleteIndex($dimensions, \Traversable $documents): void
+    {
+        foreach ($dimensions as $dimension) {
+            $storeId = $dimension->getValue();
+            $indexerId = $this->getIndexerId();
+            $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
+
+            $this->meilisearchAdapter->deleteIndex($indexName);
+        }
+    }
+
+    /**
+     * @param $dimensions
+     * @return void
+     */
+    public function cleanIndex($dimensions): void
+    {
+        foreach ($dimensions as $dimension) {
+            $storeId = $dimension->getValue();
+            $indexerId = $this->getIndexerId();
+            $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
+
+            $this->meilisearchAdapter->deleteIndex($indexName);
+            $this->meilisearchAdapter->createIndex($indexName);
+        }
+    }
+
+    /**
      * @param Dimension[] $dimensions
      * @return bool
      */
