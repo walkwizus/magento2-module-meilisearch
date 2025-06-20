@@ -1,0 +1,8 @@
+<ul id="search_autocomplete" class="autocomplete-results" data-bind="visible: $parent.results().length, foreach: $parent.results">
+    <li>
+        <a data-bind="attr: { href: $parents[0].getProductUrl(url_key) }">
+            <img data-bind="attr: { src: $parents[0].getProductImage(image), alt: name }" />
+            <span data-bind="text: name"></span>
+        </a>
+    </li>
+</ul>

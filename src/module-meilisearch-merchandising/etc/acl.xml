@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::marketing">
+                    <resource id="Walkwizus_MeilisearchMerchandising::merchandising" title="Merchandising" translate="title" sortOrder="10">
+                        <resource id="Walkwizus_MeilisearchMerchandising::merchandising_search" title="Meilisearch Searchandising" translate="title" sortOrder="10" />
+                        <resource id="Walkwizus_MeilisearchMerchandising::merchandising_category" title="Meilisearch Category Merchandising" translate="title" sortOrder="20" />
+                        <resource id="Walkwizus_MeilisearchMerchandising::merchandising_facet" title="Meilisearch Facet Merchandising" translate="title" sortOrder="30" />
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

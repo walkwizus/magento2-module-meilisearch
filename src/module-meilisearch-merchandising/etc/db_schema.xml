@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="meilisearch_merchandising_category" engine="innodb" comment="Meilisearch Merchandising Category">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Id"/>
+        <column xsi:type="text" name="category_id" nullable="false" comment="Category Id"/>
+        <column xsi:type="text" name="query" nullable="false" comment="Query"/>
+        <column xsi:type="int" name="store_id" padding="10" unsigned="true" nullable="false" comment="Store Id"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+    <table name="catalog_eav_attribute" resource="default" engine="innodb">
+        <column xsi:type="varchar" default="or" name="meilisearch_operator" length="255" nullable="false" comment="Operator"/>
+        <column xsi:type="boolean" default="0" name="meilisearch_show_more" nullable="false" comment="Show More"/>
+        <column xsi:type="int" default="10" name="meilisearch_show_more_limit" padding="11" nullable="false" comment="Show More Limit"/>
+        <column xsi:type="boolean" default="0" name="meilisearch_searchable" nullable="false" comment="Searchable"/>
+        <column xsi:type="varchar" default="magento" name="meilisearch_sort_values_by" nullable="false" comment="Sort Values By"/>
+    </table>
+</schema>

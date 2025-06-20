@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="before.body.end">
+            <block class="Walkwizus\MeilisearchFrontend\Block\Search" name="meilisearch.frontend.store" template="Walkwizus_MeilisearchFrontend::search-store.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\JsConfig</argument>
+                    <argument name="jsLayout" xsi:type="array">
+                        <item name="components" xsi:type="array">
+                            <item name="meilisearch-frontend-store" xsi:type="array">
+                                <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/search-store</item>
+                                <item name="config" xsi:type="array">
+                                    <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
+                                </item>
+                            </item>
+                        </item>
+                    </argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+        <referenceBlock class="Walkwizus\MeilisearchFrontend\Block\Autocomplete" name="top.search">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">Walkwizus_MeilisearchFrontend::form.mini.phtml</argument>
+            </action>
+            <arguments>
+                <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\JsConfig</argument>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="meilisearch-frontend-autocomplete" xsi:type="array">
+                            <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/autocomplete</item>
+                            <item name="config" xsi:type="array">
+                                <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/autocomplete</item>
+                            </item>
+                            <item name="children" xsi:type="array">
+                                <item name="hits" xsi:type="array">
+                                    <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/hits</item>
+                                    <item name="config" xsi:type="array">
+                                        <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/autocomplete/hits</item>
+                                        <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
+                                        <item name="deps" xsi:type="array">
+                                            <item name="0" xsi:type="string">meilisearch-frontend-store</item>
+                                            <item name="1" xsi:type="string">meilisearch-frontend-autocomplete</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

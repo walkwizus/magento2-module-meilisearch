@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Walkwizus\MeilisearchMerchandising\Api\CategoryRepositoryInterface" type="Walkwizus\MeilisearchMerchandising\Model\CategoryRepository"/>
+    <preference for="Walkwizus\MeilisearchMerchandising\Api\Data\CategoryInterface" type="Walkwizus\MeilisearchMerchandising\Model\Category"/>
+    <virtualType name="Walkwizus\MeilisearchMerchandising\Model\ResourceModel\MerchandisingCategory\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">meilisearch_merchandising_category</argument>
+            <argument name="resourceModel" xsi:type="string">Walkwizus\MeilisearchMerchandising\Model\ResourceModel\MerchandisingCategory</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="category_merch_listing_data_source" xsi:type="string">Walkwizus\MeilisearchMerchandising\Model\ResourceModel\MerchandisingCategory\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="index" xsi:type="array">
+                        <item name="categoryPromote" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeProvider\CatalogProduct\Index\CategoryPromote</item>
+                    </item>
+                    <item name="merchandising" xsi:type="array">
+                        <item name="eav" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeProvider\CatalogProduct\Merchandising\Eav</item>
+                    </item>
+                    <item name="category_merchandising" xsi:type="array">
+                        <item name="eav" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeProvider\CatalogProduct\CategoryMerchandising\Eav</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeResolver">
+        <arguments>
+            <argument name="resolvers" xsi:type="array">
+                <item name="price" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeResolver\Attribute\PriceResolver</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

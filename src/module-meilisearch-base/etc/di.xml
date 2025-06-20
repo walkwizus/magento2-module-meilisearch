@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Search\Model\Adminhtml\System\Config\Source\Engine">
+        <arguments>
+            <argument name="engines" xsi:type="array">
+                <item name="meilisearch" sortOrder="50" xsi:type="string">Meilisearch</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Search\Model\EngineResolver">
+        <arguments>
+            <argument name="engines" xsi:type="array">
+                <item name="meilisearch" xsi:type="string">meilisearch</item>
+            </argument>
+            <argument name="defaultEngine" xsi:type="string">meilisearch</argument>
+        </arguments>
+    </type>
+    <type name="Magento\CatalogSearch\Model\ResourceModel\EngineProvider">
+        <arguments>
+            <argument name="engines" xsi:type="array">
+                <item name="meilisearch" xsi:type="string">Walkwizus\MeilisearchBase\Model\ResourceModel\Engine</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

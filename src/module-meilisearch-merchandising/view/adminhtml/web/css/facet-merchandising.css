@@ -1,0 +1,78 @@
+.facets-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.facet-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    cursor: move;
+}
+
+.facet-content {
+    padding: 15px;
+}
+
+.facet-header {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.facet-drag-handle {
+    cursor: move;
+    margin-right: 10px;
+    color: #999;
+    font-size: 20px;
+}
+
+.facet-header strong {
+    font-size: 16px;
+}
+
+.facet-header small {
+    color: #666;
+    margin-left: 8px;
+}
+
+.facet-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.facet-field {
+    margin-bottom: 15px;
+}
+
+.facet-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.facet-field input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.facet-actions {
+    margin-top: 20px;
+    text-align: right;
+    padding: 0 20px 20px;
+}
+
+.ui-sortable-helper {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.ui-sortable-placeholder {
+    visibility: visible !important;
+    background: #f7f7f7;
+    border: 2px dashed #ccc;
+    margin-bottom: 15px;
+}

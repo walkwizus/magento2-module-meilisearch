@@ -1,0 +1,13 @@
+{
+    "meilisearch_merchandising_category": {
+        "column": {
+            "id": true,
+            "category_id": true,
+            "query": true,
+            "store_id": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

@@ -1,0 +1,12 @@
+<?php /** @var \Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Facet\Configuration $block */ ?>
+<?php $block->getJsLayout(); ?>
+<div id="facet-merchandising-container" data-bind="scope: 'meilisearch-merchandising-facet'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+    {
+        "#facet-merchandising-container": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+    }
+}
+</script>

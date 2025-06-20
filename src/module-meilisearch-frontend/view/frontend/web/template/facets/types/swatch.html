@@ -1,0 +1,81 @@
+<div class="swatch-attribute color">
+    <div class="swatch-attribute-options clearfix" data-bind="
+        foreach: { data: filter.visibleOptions(), as: 'option' },
+        afterRender: $parents[1].renderSwatchTooltip"
+    >
+        <!-- ko if: option.swatchType === 1 -->
+        <div class="swatch-option color"
+             data-bind="
+                 attr: {
+                     'data-option-id': option.value,
+                     'data-option-label': option.label,
+                     'data-option-type': option.swatchType,
+                     'data-option-tooltip-value': option.swatchValue,
+                     'aria-label': option.label,
+                     'title': option.label
+                 },
+                 style: {
+                     background: option.swatchValue
+                 },
+                 css: {
+                     selected: $parent.selectedFacets()[filter.code] && $parent.selectedFacets()[filter.code].includes(option.value),
+                     disabled: option.count === 0
+                 },
+                 event: {
+                     click: function () {
+                         $parent.toggle(filter.code, option.value);
+                     }
+                 }">
+        </div>
+        <!-- /ko -->
+        <!-- ko if: option.swatchType === 2 -->
+        <div class="swatch-option image"
+             data-bind="
+                 attr: {
+                     'data-option-id': option.value,
+                     'data-option-label': option.label,
+                     'data-option-type': option.swatchType,
+                     'data-option-tooltip-value': option.swatchValue,
+                     'aria-label': option.label,
+                     'title': option.label
+                 },
+                 style: {
+                     background: 'url(' + option.swatchValue + ') no-repeat center',
+                     backgroundSize: 'cover'
+                 },
+                 css: {
+                     selected: $parent.selectedFacets()[filter.code] && $parent.selectedFacets()[filter.code].includes(option.value),
+                     disabled: option.count === 0
+                 },
+                 event: {
+                     click: function () {
+                         $parent.toggle(filter.code, option.value);
+                     }
+                 }">
+        </div>
+        <!-- /ko -->
+        <!-- ko if: !option.swatchType || option.swatchType === 0 -->
+        <div class="swatch-option text"
+             data-bind="
+                 text: option.label,
+                 attr: {
+                     'data-option-id': option.value,
+                     'data-option-label': option.label,
+                     'data-option-type': option.swatchType,
+                     'data-option-tooltip-value': option.label,
+                     'aria-label': option.label,
+                     'title': option.label
+                 },
+                 css: {
+                     selected: $parent.selectedFacets()[filter.code] && $parent.selectedFacets()[filter.code].includes(option.value),
+                     disabled: option.count === 0
+                 },
+                 event: {
+                     click: function () {
+                         $parent.toggle(filter.code, option.value);
+                     }
+                 }">
+        </div>
+        <!-- /ko -->
+    </div>
+</div>

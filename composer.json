@@ -1,0 +1,47 @@
+{
+    "name": "walkwizus/magento2-module-meilisearch",
+    "description": "Meilisearch integration for Magento 2",
+    "type": "magento2-module",
+    "license": "OSL-3.0",
+    "authors": [
+        {
+            "name": "Jimmy Carricart",
+            "email": "jimmy@walkwizus.fr"
+        }
+    ],
+    "homepage": "https://github.com/walkwizus/magento2-module-meilisearch",
+    "keywords": [
+        "Adobe Commerce",
+        "Magento",
+        "Magento 2",
+        "Meilisearch",
+        "Search",
+        "InstantSearch"
+    ],
+    "require": {
+        "magento/framework": ">=103.0.4",
+        "meilisearch/meilisearch-php": ">=v1.13.0"
+    },
+    "replace": {
+        "walkwizus/module-meilisearch-base": "self.version",
+        "walkwizus/module-meilisearch-catalog": "self.version",
+        "walkwizus/module-meilisearch-frontend": "self.version",
+        "walkwizus/module-meilisearch-merchandising": "self.version"
+    },
+    "autoload": {
+        "files": [
+            "src/module-meilisearch-base/registration.php",
+            "src/module-meilisearch-catalog/registration.php",
+            "src/module-meilisearch-frontend/registration.php",
+            "src/module-meilisearch-merchandising/registration.php"
+        ],
+        "psr-4": {
+            "Walkwizus\\MeilisearchBase\\": "src/module-meilisearch-base",
+            "Walkwizus\\MeilisearchCatalog\\": "src/module-meilisearch-catalog",
+            "Walkwizus\\MeilisearchFrontend\\": "src/module-meilisearch-frontend",
+            "Walkwizus\\MeilisearchMerchandising\\": "src/module-meilisearch-merchandising"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

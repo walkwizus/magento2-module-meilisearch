@@ -1,0 +1,13 @@
+<?php /** @var \Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Tree $block */ ?>
+<?php if ($block->getStoreId()) : ?>
+<div id="category-merchandising-tree-container" data-bind="scope: 'meilisearch-merchandising-category-tree'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+    {
+        "#category-merchandising-tree-container": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+        }
+    }
+</script>
+<?php endif; ?>

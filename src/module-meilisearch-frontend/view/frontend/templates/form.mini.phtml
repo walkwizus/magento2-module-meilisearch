@@ -1,0 +1,11 @@
+<?php /** @var \Magento\Framework\View\Element\Template $block */ ?>
+<div id="meilisearch-frontend-autocomplete" data-bind="scope: 'meilisearch-frontend-autocomplete'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+    {
+        "#meilisearch-frontend-autocomplete": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+    }
+}
+</script>

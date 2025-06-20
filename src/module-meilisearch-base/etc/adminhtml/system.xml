@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="meilisearch" translate="label" sortOrder="200">
+            <label>Meilisearch</label>
+        </tab>
+        <section id="meilisearch_server" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Server Settings</label>
+            <tab>meilisearch</tab>
+            <resource>Walkwizus_MeilisearchBase::config</resource>
+            <group id="settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Server Settings</label>
+                <field id="address" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Meilisearch Server Address (Server Side)</label>
+                    <comment>Server Address [host]:[port] (e.g. : "meilisearch:7700")</comment>
+                </field>
+                <field id="api_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Meilisearch Server Api Key (Server Side)</label>
+                </field>
+                <field id="client_address" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Meilisearch Server Address (Client Side)</label>
+                    <comment>Server Address [host]:[port] (e.g. : "meilisearch:7700")</comment>
+                </field>
+                <field id="client_api_key" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Meilisearch Server Api Key (Client Side)</label>
+                </field>
+                <field id="indexes_prefix" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
+                    <label>Indexes Name Prefix</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

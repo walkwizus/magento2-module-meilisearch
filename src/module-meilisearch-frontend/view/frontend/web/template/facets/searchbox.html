@@ -1,0 +1,21 @@
+<div class="facet-search-wrapper">
+    <div class="facet-search">
+        <input
+            autocomplete="off"
+            type="text"
+            class="facet-search-input"
+            data-bind="
+                attr: {
+                    placeholder: $parent.label,
+                    id: $parent.code
+                },
+                event: {
+                    input: function(data, event) {
+                        search($parent.code, event.target.value);
+                        return true;
+                    }
+                }
+            "
+        />
+    </div>
+</div>

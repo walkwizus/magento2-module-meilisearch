@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="catalogProductIndexHandler" type="Walkwizus\MeilisearchBase\Model\Indexer\BaseIndexerHandler">
+        <arguments>
+            <argument name="indexerId" xsi:type="string">catalog_product</argument>
+            <argument name="indexPrimaryKey" xsi:type="string">id</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\CatalogSearch\Model\Indexer\IndexerHandlerFactory">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="meilisearch" xsi:type="string">catalogProductIndexHandler</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="index" xsi:type="array">
+                        <item name="categoryPosition" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeProvider\CatalogProduct\CategoryPosition</item>
+                        <item name="eav" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeProvider\CatalogProduct\Eav</item>
+                        <item name="price" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeProvider\CatalogProduct\Price</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeMapper">
+        <arguments>
+            <argument name="mappers" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="category" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Category</item>
+                    <item name="eav" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Eav</item>
+                    <item name="image" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Image</item>
+                    <item name="inventory" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Inventory</item>
+                    <item name="price" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Price</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>

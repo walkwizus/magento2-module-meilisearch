@@ -1,0 +1,22 @@
+<div class="toolbar-sorter sorter">
+    <label class="sorter-label" for="sorter"><!-- ko i18n: 'Sort By' --><!-- /ko --></label>
+    <select id="sorter"
+            data-role="sorter"
+            class="sorter-options"
+            data-bind="
+                options: sortOptions,
+                optionsText: 'label',
+                optionsValue: 'value',
+                value: currentSort,
+                event: {change: updateSort}">
+    </select>
+    <a class="action sorter-action"
+       href="#"
+       data-bind="
+            click: toggleSortDirection,
+            css: {
+                'sort-asc': !isDescending(),
+                'sort-desc': isDescending()
+            }">
+    </a>
+</div>

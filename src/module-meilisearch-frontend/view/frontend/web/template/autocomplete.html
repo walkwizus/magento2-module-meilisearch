@@ -1,0 +1,38 @@
+<div class="block block-search">
+    <div class="block block-title"><strong>Search</strong></div>
+    <div class="block block-content">
+        <form class="form minisearch" id="search_mini_form" method="get" data-bind="attr: { action: getSearchUrl() }">
+            <div class="field search">
+                <label class="label" for="search" data-role="minisearch-label">
+                    <span><!-- ko i18n: 'Search' --><!-- /ko --></span>
+                </label>
+                <div class="control">
+                    <input
+                        id="search"
+                        name="q"
+                        type="text"
+                        class="input-text"
+                        autocomplete="off"
+                        role="combobox"
+                        aria-haspopup="false"
+                        aria-autocomplete="both"
+                        aria-expanded="false"
+                        data-bind="
+                            value: searchTerm,
+                            valueUpdate: 'afterkeydown',
+                            attr: { placeholder: $t('Search entire store here...') }
+                        "
+                    />
+                    <div data-bind="scope: requestChild('hits')">
+                        <!-- ko template: getTemplate() --><!-- /ko -->
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="submit" title="Search" class="action search" aria-label="Search">
+                    <span><!-- ko i18n: 'Search' --><!-- /ko --></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

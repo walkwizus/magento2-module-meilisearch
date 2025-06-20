@@ -1,0 +1,23 @@
+<div class="modes">
+    <strong class="modes-label" id="modes-label"><!-- ko i18n: 'View as' --><!-- /ko --></strong>
+    <!-- ko foreach: getViewModeEntries() -->
+        <!-- ko if: $parent.isActive(code) -->
+            <strong data-bind="css: 'modes-mode active mode-' + code, attr: { title: label, 'data-value': code }">
+                <span data-bind="text: label"></span>
+            </strong>
+        <!-- /ko -->
+        <!-- ko ifnot: $parent.isActive(code) -->
+            <a href="#" data-role="mode-switcher"
+               data-bind="click: function(_, e) { $parent.switchViewMode(code, e) },
+                  css: 'modes-mode mode-' + code,
+                  attr: {
+                  title: label,
+                  'data-value': code,
+                  id: 'mode-' + code,
+                  'aria-labelledby': 'modes-label mode-' + code
+                }">
+                <span data-bind="text: label"></span>
+            </a>
+        <!-- /ko -->
+    <!-- /ko -->
+</div>

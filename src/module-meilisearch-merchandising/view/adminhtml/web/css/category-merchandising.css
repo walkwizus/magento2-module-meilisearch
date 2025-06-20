@@ -1,0 +1,156 @@
+.category-merchandising {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8f8f8;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#category-merchandising-preview {
+    margin-top: 20px;
+}
+
+.product-grid {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
+}
+
+.product-card {
+    float: left;
+    width: 220px;
+    height: 320px;
+    margin: 0 16px 16px 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+
+.product-card:hover {
+    cursor: grab;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-card:active {
+    cursor: grabbing;
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+.product-card, .sortable-placeholder {
+    height: 320px;
+}
+
+.product-card > * {
+    display: block;
+}
+
+.product-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.product-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.product-price {
+    margin-top: auto;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.sortable-placeholder {
+    float: left;
+    width: 220px;
+    height: 320px;
+    background-color: #e6f0ff;
+    border: 2px dashed #007bff;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.product-grid::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.product-sku {
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+
+.copy-sku-button {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    position: relative;
+}
+
+.copy-sku-button:hover {
+    background-color: #e6f0ff;
+}
+
+.copy-sku-icon {
+    width: 16px;
+    height: 16px;
+    fill: #007bff;
+    display: block;
+    pointer-events: none;
+}
+
+.copy-tooltip {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+    z-index: 10;
+}
+
+.copy-sku-button.show-tooltip .copy-tooltip {
+    opacity: 1;
+}
+
+.fadeout {
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+.fadeout.hide {
+    opacity: 0;
+}

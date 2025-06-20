@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeResolver">
+        <arguments>
+            <argument name="resolvers" xsi:type="array">
+                <item name="position" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\AttributeResolver\Attribute\PositionResolver</item>
+                <item name="price" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\AttributeResolver\Attribute\PriceResolver</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="frontend" xsi:type="array">
+                        <item name="eav" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\AttributeProvider\CatalogProduct\Frontend\Eav</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchFrontend\Model\ConfigProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="meilisearch-frontend-store" xsi:type="array">
+                    <item name="category_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\CategoryConfigProvider</item>
+                    <item name="url_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\UrlConfigProvider</item>
+                    <item name="facet_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\FacetConfigProvider</item>
+                    <item name="price_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\PriceConfigProvider</item>
+                    <item name="server_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\ServerConfigProvider</item>
+                </item>
+                <item name="meilisearch-frontend-autocomplete" xsi:type="array">
+                    <item name="server_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\ServerConfigProvider</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>

@@ -1,0 +1,30 @@
+<div data-bind="foreach: { data: filter.visibleOptions, as: 'option' }">
+    <div class="filter-option">
+        <input type="checkbox"
+               data-bind="attr: {
+                   id: 'filter-' + filter.code + '-' + option.value,
+                   name: filter.code + '[]',
+                   value: option.value
+               },
+               checked: $parents[0].selectedFacets()[filter.code] && $parents[0].selectedFacets()[filter.code].includes(option.value),
+               event: {
+                   change: () => {
+                       $parents[0].toggle(filter.code, option.value)
+                   }
+               }" />
+        <label data-bind="attr: { for: 'filter-' + filter.code + '-' + option.value }">
+            <span data-bind="text: option.label"></span>
+            <span class="count" data-bind="text: option.count"></span>
+        </label>
+    </div>
+</div>
+<!-- ko if: filter.showMore && filter.options().length > filter.showMoreLimit && !filter.hasSelection() -->
+<a href="#"
+   class="facet-show-more-link"
+   data-bind="
+       click: function() { filter.showAllOptions(!filter.showAllOptions()); return false; },
+       text: filter.showAllOptions()
+           ? $t('Show less')
+           : $t('Show more (%1 more)').replace('%1', filter.options().length - filter.showMoreLimit)">
+</a>
+<!-- /ko -->

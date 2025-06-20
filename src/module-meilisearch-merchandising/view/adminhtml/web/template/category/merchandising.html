@@ -1,0 +1,41 @@
+<div id="messages" data-bind="visible: merchandising.message(), css: 'fadeout'">
+    <div class="messages">
+        <div class="message message-success success">
+            <div data-bind="text: merchandising.message()"></div>
+        </div>
+    </div>
+</div>
+<div class="category-merchandising">
+    <button data-bind="click: saveRule" type="button" id="save-rule" class="save primary">
+        <span data-bind="i18n: 'Save Rule'"></span>
+    </button>
+    <button data-bind="click: deleteRule, enable: merchandising.currentRule()" type="button" class="save secondary">
+        <span data-bind="i18n: 'Delete Rule'"></span>
+    </button>
+    <div id="query-builder" data-bind="initQueryBuilder"></div>
+    <button data-bind="click: preview" type="button" class="save secondary">
+        <span data-bind="i18n: 'Preview'"></span>
+    </button>
+    <div id="category-merchandising-preview">
+        <div class="product-grid" data-bind="foreach: merchandising.docs()">
+            <div class="product-card" data-bind="attr: {'data-product-id': id}">
+                <img data-bind="attr: { src: $parent.productMediaUrl + image, alt: name }" class="product-image">
+                <div class="product-name" data-bind="text: name"></div>
+                <div class="product-sku">
+                    <span data-bind="text: 'SKU: ' + sku"></span>
+                    <button type="button"
+                            class="copy-sku-button"
+                            data-bind="attr: { 'data-sku': sku }, click: $parent.copySku"
+                            aria-label="Copy SKU">
+                        <svg class="copy-sku-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                            <path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/>
+                        </svg>
+                        <span class="copy-tooltip">Copied!</span>
+                    </button>
+                </div>
+                <div class="product-qty" data-bind="text: 'QTY: ' + stock.qty"></div>
+                <div class="product-price" data-bind="text: $parent.formatPrice(price_0)"></div>
+            </div>
+        </div>
+    </div>
+</div>

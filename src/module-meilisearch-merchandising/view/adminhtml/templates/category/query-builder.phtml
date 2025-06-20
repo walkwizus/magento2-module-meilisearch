@@ -1,0 +1,23 @@
+<?php
+/** @var \Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Query\Builder $block */
+?>
+<?php if (!$block->getStoreId()) : ?>
+    <div class="notices-wrapper">
+        <div class="messages">
+            <div class="message">
+                <strong><?= __('To configure category merchandising, please select a store') ?></strong>
+            </div>
+        </div>
+    </div>
+<?php else : ?>
+<div id="category-merchandising-query-builder-container" data-bind="scope: 'meilisearch-merchandising-query-builder'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+    {
+        "#category-merchandising-query-builder-container": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+        }
+    }
+</script>
+<?php endif; ?>

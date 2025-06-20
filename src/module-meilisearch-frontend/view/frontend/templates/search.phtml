@@ -1,0 +1,13 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<div id="meilisearch-frontend-search" data-bind="scope: 'meilisearch-frontend-search'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+    {
+        "#meilisearch-frontend-search": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?: '{}' ?>
+        }
+    }
+</script>

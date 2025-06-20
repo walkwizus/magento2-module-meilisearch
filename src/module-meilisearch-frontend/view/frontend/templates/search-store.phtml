@@ -1,0 +1,11 @@
+<?php
+/** @var \Walkwizus\MeilisearchFrontend\Block\Search $block */
+?>
+<div id="meilisearch-frontend-store" data-bind="scope: 'meilisearch-frontend-store'"></div>
+<script type="text/x-magento-init">
+    {
+        "#meilisearch-frontend-store": {
+            "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?: '{}' ?>
+    }
+}
+</script>

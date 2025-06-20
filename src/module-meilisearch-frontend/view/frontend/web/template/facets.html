@@ -1,0 +1,58 @@
+<div id="layered-filter-block" class="block filter" data-bind="css: { active: isFilterActive }">
+    <div class="block-title filter-title">
+        <strong data-bind="click: toggleFilter"><!-- ko i18n: 'Shop By' --><!-- /ko --></strong>
+    </div>
+    <div class="block-content filter-content">
+        <!-- ko if: computedCurrentFacets().length -->
+        <div class="filter-current" data-bind="css: { active: isCurrentFilterExpanded }">
+            <strong class="block-subtitle filter-current-subtitle"
+                    role="heading"
+                    aria-level="2"
+                    data-bind="attr: { 'data-count': computedCurrentFacets().length }, click: toggleCurrentFilter"
+            >
+                <!-- ko i18n: 'Now Shopping by' --><!-- /ko -->
+            </strong>
+            <ol class="items" data-bind="foreach: { data: computedCurrentFacets, as: 'currentFilter' }">
+                <li class="item">
+                    <span class="filter-label" data-bind="text: currentFilter.label"></span>
+                    <span class="filter-value" data-bind="text: currentFilter.valueLabel"></span>
+                    <a href="#" class="action remove"
+                       data-bind="click: function() { $parent.removeFacet(currentFilter.code, currentFilter.value) }">
+                        <span><!-- ko i18n: 'Remove' --><!-- /ko --></span>
+                        <span class="filter-label" data-bind="text: currentFilter.valueLabel"></span>
+                    </a>
+                </li>
+            </ol>
+        </div>
+        <div class="block-actions filter-actions">
+            <a href="#" class="action clear filter-clear" data-bind="click: clearAllFacets">
+                <span><!-- ko i18n: 'Clear All' --><!-- /ko --></span>
+            </a>
+        </div>
+        <!-- /ko -->
+        <div id="narrow-by-list" class="filter-options">
+            <!-- ko foreach: { data: computedFacets, as: 'filter' } -->
+            <div class="filter-options-item" data-role="collapsible" data-bind="attr: { id: filter.code }, mageInit: {
+                 'collapsible': {
+                     'collapsible': true,
+                     'openedState': 'active',
+                     'saveState': true,
+                     'active': $index() === 0
+                 }
+            }">
+                <div class="filter-options-title" data-role="title" data-bind="text: filter.label"></div>
+                <div class="filter-options-content" data-role="content">
+                    <!-- ko if: filter.searchable == '1' -->
+                        <!-- ko foreach: $parent.getRegion('searchbox') -->
+                            <!-- ko template: getTemplate() --><!-- /ko -->
+                        <!-- /ko -->
+                    <!--/ko-->
+                    <!-- ko foreach: $parent.getRegion(filter.renderRegion) -->
+                        <!-- ko template: getTemplate() --><!-- /ko -->
+                    <!--/ko-->
+                </div>
+            </div>
+            <!-- /ko -->
+        </div>
+    </div>
+</div>

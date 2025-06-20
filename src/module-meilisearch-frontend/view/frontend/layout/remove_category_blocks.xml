@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="catalog.leftnav" remove="true"/>
+        <referenceBlock name="category.products" remove="true"/>
+        <referenceBlock name="search.result" remove="true"/>
+        <referenceBlock name="catalogsearch.leftnav" remove="true"/>
+    </body>
+</page>

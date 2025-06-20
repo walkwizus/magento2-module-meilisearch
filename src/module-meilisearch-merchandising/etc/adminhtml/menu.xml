@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add
+            id="Walkwizus_MeilisearchMerchandising::merchandising"
+            title="Meilisearch Merchandising"
+            translate="title"
+            module="Walkwizus_MeilisearchMerchandising"
+            parent="Magento_Backend::marketing"
+            resource="Walkwizus_MeilisearchMerchandising::merchandising"
+            sortOrder="10"
+        />
+        <add
+            id="Walkwizus_MeilisearchMerchandising::merchandising_category"
+            title="Category Merchandising"
+            translate="title"
+            module="Walkwizus_MeilisearchMerchandising"
+            parent="Walkwizus_MeilisearchMerchandising::merchandising"
+            resource="Walkwizus_MeilisearchMerchandising::merchandising_category"
+            action="meilisearch_merchandising/category/index/"
+            sortOrder="30"
+        />
+        <add
+            id="Walkwizus_MeilisearchMerchandising::merchandising_facet"
+            title="Facet Merchandising"
+            translate="title"
+            module="Walkwizus_MeilisearchMerchandising"
+            parent="Walkwizus_MeilisearchMerchandising::merchandising"
+            resource="Walkwizus_MeilisearchMerchandising::merchandising_facet"
+            action="meilisearch_merchandising/facet/index/"
+            sortOrder="40"
+        />
+    </menu>
+</config>
