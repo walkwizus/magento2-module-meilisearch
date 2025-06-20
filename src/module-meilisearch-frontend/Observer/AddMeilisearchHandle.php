@@ -41,9 +41,10 @@ class AddMeilisearchHandle implements ObserverInterface
         /** @var LayoutInterface $layout */
         $layout = $observer->getData('layout');
 
+        $layout->getUpdate()->addHandle('meilisearch_common');
+
         if (in_array($fullActionName, $this->fullActionName, true)) {
             $layout->getUpdate()->addHandle('remove_category_blocks');
-            $layout->getUpdate()->addHandle('meilisearch_common');
             $layout->getUpdate()->addHandle('meilisearch_result');
         }
     }
