@@ -22,7 +22,7 @@
                 </a>
                 <div class="product details product-item-details">
                     <strong class="product name product-item-name">
-                        <a data-bind="attr: { href: url_key }, text: name" class="product-item-link"></a>
+                        <a data-bind="attr: { href: $parent.getProductUrl(url_key) }, text: name" class="product-item-link"></a>
                     </strong>
                     <div class="price-box price-final_price">
                         <span class="normal-price">
