@@ -59,8 +59,8 @@ define([
 
                 return facetList
                     .filter(code => {
-                        const values = facetDistribution[code];
-                        const cfg = facetConfig[code];
+                        const values = facetDistribution?.[code];
+                        const cfg = facetConfig?.[code];
 
                         if (!values || !cfg) {
                             return false;
@@ -74,7 +74,7 @@ define([
                     })
                     .map(code => {
                         const cfg = facetConfig[code];
-                        const values = facetDistribution[code];
+                        const values = facetDistribution?.[code] || {};
 
                         const optionsData = Object.entries(values).reduce((acc, [val, count]) => {
                             if (cfg.hasOptions) {

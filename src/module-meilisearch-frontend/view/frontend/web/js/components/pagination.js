@@ -19,7 +19,13 @@ define([
             });
 
             this.visiblePages = ko.computed(() => {
-                return Array.from({ length: this.totalPages() }, (_, i) => i + 1);
+                const total = this.totalPages();
+
+                if (!Number.isFinite(total)) {
+                    return [];
+                }
+
+                return Array.from({ length: total }, (_, i) => i + 1);
             });
 
             this.totalHits.subscribe(() => {
