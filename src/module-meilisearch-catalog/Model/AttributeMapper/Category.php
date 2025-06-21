@@ -28,40 +28,35 @@ class Category implements AttributeMapperInterface
     public function map(array $documentData, $storeId): array
     {
         $documents = [];
+        $productIds = array_keys($documentData);
+        $categoriesData = $this->getProductsCategories($productIds, $storeId);
 
-        foreach ($documentData as $id => $indexData) {
-            $categories = $this->getProductCategories($id, $storeId);
-            foreach ($categories as $category) {
-                $documents[$id]['category_ids'][] = $category['category_id'];
-                $documents[$id]['position_category_' . $category['category_id']] = $category['position'] ?? 0;
-            }
+        foreach ($categoriesData as $row) {
+            $productId = (int)$row['product_id'];
+            $categoryId = (int)$row['category_id'];
+            $position = (int)($row['position'] ?? 0);
+
+            $documents[$productId]['category_ids'][] = $categoryId;
+            $documents[$productId]['position_category_' . $categoryId] = $position;
         }
 
         return $documents;
     }
 
     /**
-     * @param $productId
+     * @param array $productIds
      * @param $storeId
      * @return array
      */
-    protected function getProductCategories($productId, $storeId): array
+    protected function getProductsCategories(array $productIds, $storeId): array
     {
+        $mainTable = $this->tableMaintainer->getMainTable((int)$storeId);
         $select = $this->resourceConnection->getConnection()
             ->select()
-            ->from(['cpi' => $this->getCategoryProductIndexTable($storeId)])
+            ->from(['cpi' => $mainTable], ['product_id', 'category_id', 'position'])
             ->where('cpi.store_id = ?', $storeId)
-            ->where('cpi.product_id = ?', $productId);
+            ->where('cpi.product_id IN (?)', $productIds);
 
         return $this->resourceConnection->getConnection()->fetchAll($select);
-    }
-
-    /**
-     * @param $storeId
-     * @return string
-     */
-    protected function getCategoryProductIndexTable($storeId): string
-    {
-        return $this->tableMaintainer->getMainTable((int)$storeId);
     }
 }
