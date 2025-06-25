@@ -4,6 +4,7 @@ define([
     'use strict';
 
     const selectedFacets = ko.observable({});
+    const currentPage = ko.observable(1);
 
     function updateFacet(code, values) {
         const current = { ...selectedFacets() };
@@ -25,6 +26,7 @@ define([
 
     return {
         selectedFacets,
+        currentPage,
         updateFacet,
         resetFacet
     };

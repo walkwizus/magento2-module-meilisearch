@@ -25,6 +25,18 @@
                                     </item>
                                 </item>
                                 <item name="children" xsi:type="array">
+                                    <item name="meilisearch-frontend-layers-url" xsi:type="array">
+                                        <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/facets/url</item>
+                                        <item name="config" xsi:type="array">
+                                            <!--<item name="provider" xsi:type="string">meilisearch-frontend-store</item>-->
+                                            <item name="deps" xsi:type="array">
+                                                <item name="0" xsi:type="string">meilisearch-frontend-layers</item>
+                                            </item>
+                                            <item name="imports" xsi:type="array">
+                                                <item name="facets" xsi:type="string">${ $.parentName }:facets</item>
+                                            </item>
+                                        </item>
+                                    </item>
                                     <item name="meilisearch-frontend-layers-searchbox" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/facets/searchbox</item>
                                         <item name="config" xsi:type="array">

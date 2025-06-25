@@ -12,7 +12,6 @@ define([
             searchResults: ko.observable({}),
             totalHits: ko.observable(0),
             hitsPerPage: ko.observable(0),
-            currentPage: ko.observable(1),
             sortBy: ko.observable(''),
             isDescending: ko.observable(false)
         },
@@ -29,13 +28,14 @@ define([
             });
 
             this.query = new URLSearchParams(window.location.search).get('q') || '';
+            facetsModel.currentPage(parseInt(new URLSearchParams(window.location.search).get('page')) || 1);
 
             let lastFilters = JSON.stringify(facetsModel.selectedFacets());
             facetsModel.selectedFacets.subscribe((f) => {
                 const newFilters = JSON.stringify(f);
                 if (this.initialized && newFilters !== lastFilters) {
                     lastFilters = newFilters;
-                    this.currentPage(1);
+                    facetsModel.currentPage(1);
                     this.performSearch();
                 }
             });
@@ -52,7 +52,7 @@ define([
                 }
             });
 
-            this.currentPage.subscribe(() => {
+            facetsModel.currentPage.subscribe(() => {
                 if (this.initialized) {
                     this.performSearch();
                 }
@@ -73,6 +73,7 @@ define([
             const sortParams = sortBy ? [`${sortBy}:${sortDirection}`] : undefined;
             const selectedFilters = facetsModel.selectedFacets();
             const activeFacetCodes = Object.keys(selectedFilters);
+            const currentPage = facetsModel.currentPage();
 
             if (activeFacetCodes.length === 0) {
                 const filterParams = queryBuilder().buildFilters({}, this.currentCategoryId, this.categoryRule);
@@ -81,12 +82,12 @@ define([
                     filter: filterParams,
                     facets: this.facets.facetList,
                     sort: sortParams,
-                    page: this.currentPage(),
+                    page: currentPage,
                     hitsPerPage: this.gridPerPage
                 })
-                .then(results => {
-                    this.updateResults(results);
-                });
+                    .then(results => {
+                        this.updateResults(results);
+                    });
                 return;
             }
 
@@ -100,7 +101,7 @@ define([
                 filter: mainFilterParams,
                 facets: this.facets.facetList,
                 sort: sortParams,
-                page: this.currentPage(),
+                page: currentPage,
                 hitsPerPage: this.gridPerPage
             });
 
@@ -116,7 +117,7 @@ define([
                     filter: disjunctiveFilterParams,
                     facets: [facetCode],
                     sort: sortParams,
-                    page: this.currentPage(),
+                    page: currentPage,
                     hitsPerPage: this.gridPerPage
                 });
             });

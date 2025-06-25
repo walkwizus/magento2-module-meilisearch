@@ -1,18 +1,20 @@
 define([
     'uiComponent',
-    'ko'
-], function(Component, ko) {
+    'ko',
+    'Walkwizus_MeilisearchFrontend/js/model/facets-model'
+], function(Component, ko, facetsModel) {
     'use strict';
 
     return Component.extend({
         defaults: {
             totalHits: ko.observable(0),
-            hitsPerPage: ko.observable(12),
-            currentPage: ko.observable(1)
+            hitsPerPage: ko.observable(12)
         },
 
         initialize: function() {
             this._super();
+
+            this.currentPage = facetsModel.currentPage;
 
             this.totalPages = ko.computed(() => {
                 return Math.ceil(this.totalHits() / this.hitsPerPage());
@@ -26,10 +28,6 @@ define([
                 }
 
                 return Array.from({ length: total }, (_, i) => i + 1);
-            });
-
-            this.totalHits.subscribe(() => {
-                this.currentPage(1);
             });
 
             return this;
