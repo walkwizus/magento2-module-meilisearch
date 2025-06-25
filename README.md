@@ -1,6 +1,15 @@
 # <p align="center">Meilisearch / Magento 2 (Adobe Commerce)</p>
 
 <p align="center">
+    <a href="https://walkwizus.github.io/magento2-module-meilisearch-docs/">
+        <img src="https://img.shields.io/badge/docs-available-blue" alt="Documentation">
+    </a>
+    <a href="https://demo-meilisearch.walkwizus.com/">
+        <img src="https://img.shields.io/badge/demo-live-brightgreen" alt="Demo">
+    </a>
+</p>
+
+<p align="center">
     <img src="docs/assets/logo/walkwizus-logo-light.svg?sanitize=true#gh-light-mode-only" height="40">
     <img src="docs/assets/logo/walkwizus-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40">
     &nbsp;&nbsp;&nbsp;&nbsp;
