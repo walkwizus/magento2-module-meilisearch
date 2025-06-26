@@ -98,6 +98,7 @@ class GetFacetList
             'showMore' => (bool)$attribute->getMeilisearchShowMore(),
             'showMoreLimit' => (int)$attribute->getMeilisearchShowMoreLimit(),
             'searchable' => (bool)$attribute->getMeilisearchSearchable(),
+            'sortValuesBy' => $attribute->getMeilisearchSortValuesBy(),
             'label' => $attribute->getStoreLabel(),
             'type' => $frontendInput,
             'renderRegion' => $renderRegion,
