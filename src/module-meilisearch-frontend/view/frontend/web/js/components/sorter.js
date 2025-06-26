@@ -8,7 +8,6 @@ define([
         defaults: {
             sortOptions: [],
             currentSort: ko.observable(''),
-            isDescending: ko.observable(false),
             exports: {
                 currentSort: '${ $.provider }:sortBy',
                 isDescending: '${ $.provider }:isDescending'
@@ -18,7 +17,12 @@ define([
         initialize: function () {
             this._super();
             this.initSortOptions();
-            this.currentSort(this.defaultSortBy);
+
+            this.isDescending = ko.pureComputed({
+                read: () => this.source.isDescending(),
+                write: (value) => this.source.isDescending(value)
+            });
+
             return this;
         },
 
@@ -32,12 +36,14 @@ define([
         },
 
         updateSort: function (data, event) {
-            this.currentSort(event.target.value);
+            if (this.source && typeof this.source.updateSort === 'function') {
+                this.source.updateSort(event.target.value);
+            }
         },
 
         toggleSortDirection: function () {
             this.isDescending(!this.isDescending());
             return false;
-        },
+        }
     });
 });

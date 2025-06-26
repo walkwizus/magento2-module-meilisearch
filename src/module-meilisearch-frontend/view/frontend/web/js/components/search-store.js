@@ -4,7 +4,7 @@ define([
     'Walkwizus_MeilisearchFrontend/js/service/meilisearch-service',
     'Walkwizus_MeilisearchFrontend/js/service/query-builder',
     'Walkwizus_MeilisearchFrontend/js/model/facets-model'
-], function(Component, ko, meilisearchService, queryBuilder, facetsModel) {
+], function (Component, ko, meilisearchService, queryBuilder, facetsModel) {
     'use strict';
 
     return Component.extend({
@@ -16,10 +16,8 @@ define([
             isDescending: ko.observable(false)
         },
 
-        initialize: function() {
+        initialize: function () {
             this._super();
-
-            this.initialized = false;
 
             this.searchService = meilisearchService({
                 host: this.host,
@@ -30,43 +28,51 @@ define([
             facetsModel.searchQuery(new URLSearchParams(window.location.search).get('q') || '');
             facetsModel.currentPage(parseInt(new URLSearchParams(window.location.search).get('page')) || 1);
 
+            this.performSearch();
+
+            this.initSubscriptions();
+
+            facetsModel.isInitializing(false);
+
+            return this;
+        },
+
+        initSubscriptions: function () {
             let lastFilters = JSON.stringify(facetsModel.selectedFacets());
+
             facetsModel.selectedFacets.subscribe((f) => {
                 const newFilters = JSON.stringify(f);
-                if (this.initialized && newFilters !== lastFilters) {
+                if (!facetsModel.isInitializing() && newFilters !== lastFilters) {
                     lastFilters = newFilters;
                     facetsModel.currentPage(1);
                     this.performSearch();
                 }
             });
 
-            this.sortBy.subscribe(() => {
-                if (this.initialized) {
-                    this.performSearch();
-                }
-            });
-
             this.isDescending.subscribe(() => {
-                if (this.initialized) {
+                if (!facetsModel.isInitializing()) {
                     this.performSearch();
                 }
             });
 
             facetsModel.currentPage.subscribe(() => {
-                if (this.initialized) {
+                if (!facetsModel.isInitializing()) {
                     this.performSearch();
                 }
             });
-
-            setTimeout(() => {
-                this.performSearch();
-                this.initialized = true;
-            }, 0);
-
-            return this;
         },
 
-        performSearch: function() {
+        updateSort: function (sortValue) {
+            this.sortBy(sortValue);
+            this.performSearch();
+        },
+
+        toggleSortDirection: function () {
+            this.isDescending(!this.isDescending());
+            this.performSearch();
+        },
+
+        performSearch: function () {
             const searchQuery = facetsModel.searchQuery();
             const sortBy = this.sortBy();
             const sortDirection = this.isDescending() ? 'desc' : 'asc';
@@ -140,7 +146,7 @@ define([
                 });
         },
 
-        updateResults: function(results) {
+        updateResults: function (results) {
             this.totalHits(results.totalHits);
             this.hitsPerPage(results.hitsPerPage);
             this.searchResults(results);

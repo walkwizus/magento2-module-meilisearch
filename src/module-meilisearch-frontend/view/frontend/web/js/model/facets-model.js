@@ -1,11 +1,12 @@
 define([
     'ko'
-], function(ko) {
+], function (ko) {
     'use strict';
 
     const selectedFacets = ko.observable({});
     const currentPage = ko.observable(1);
     const searchQuery = ko.observable('');
+    const isInitializing = ko.observable(true);
 
     function updateFacet(code, values) {
         const current = { ...selectedFacets() };
@@ -29,6 +30,7 @@ define([
         selectedFacets,
         currentPage,
         searchQuery,
+        isInitializing,
         updateFacet,
         resetFacet
     };
