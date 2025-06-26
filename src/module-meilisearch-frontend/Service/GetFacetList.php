@@ -94,10 +94,10 @@ class GetFacetList
 
         $config = [
             'code' => $this->attributeResolver->resolve($attributeCode),
-            'position' => $attribute->getPosition(),
-            'showMore' => $attribute->getMeilisearchShowMore(),
-            'showMoreLimit' => $attribute->getMeilisearchShowMoreLimit(),
-            'searchable' => $attribute->getMeilisearchSearchable(),
+            'position' => (int)$attribute->getPosition(),
+            'showMore' => (bool)$attribute->getMeilisearchShowMore(),
+            'showMoreLimit' => (int)$attribute->getMeilisearchShowMoreLimit(),
+            'searchable' => (bool)$attribute->getMeilisearchSearchable(),
             'label' => $attribute->getStoreLabel(),
             'type' => $frontendInput,
             'renderRegion' => $renderRegion,
