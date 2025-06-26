@@ -31,7 +31,7 @@ define([
             const baseUrl = this.baseUrl;
 
             if (typeof suffix === 'string' && suffix.trim() !== '') {
-                return urlKey + suffix;
+                return baseUrl + urlKey + suffix;
             }
 
             return baseUrl + urlKey;
