@@ -27,7 +27,7 @@ define([
                 indexName: this.indexName
             });
 
-            this.query = new URLSearchParams(window.location.search).get('q') || '';
+            facetsModel.searchQuery(new URLSearchParams(window.location.search).get('q') || '');
             facetsModel.currentPage(parseInt(new URLSearchParams(window.location.search).get('page')) || 1);
 
             let lastFilters = JSON.stringify(facetsModel.selectedFacets());
@@ -67,7 +67,7 @@ define([
         },
 
         performSearch: function() {
-            const searchQuery = this.query;
+            const searchQuery = facetsModel.searchQuery();
             const sortBy = this.sortBy();
             const sortDirection = this.isDescending() ? 'desc' : 'asc';
             const sortParams = sortBy ? [`${sortBy}:${sortDirection}`] : undefined;

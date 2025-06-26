@@ -14,11 +14,15 @@ define([
             this.restoreStateFromUrl();
 
             facetsModel.selectedFacets.subscribe(facets => {
-                this.updateUrl(facets, this.currentPage());
+                this.updateUrl(facets, this.currentPage(), facetsModel.searchQuery());
             });
 
             this.currentPage.subscribe(page => {
-                this.updateUrl(facetsModel.selectedFacets(), page);
+                this.updateUrl(facetsModel.selectedFacets(), page, facetsModel.searchQuery());
+            });
+
+            facetsModel.searchQuery.subscribe(q => {
+                this.updateUrl(facetsModel.selectedFacets(), this.currentPage(), q);
             });
 
             window.addEventListener('popstate', () => {
@@ -28,8 +32,12 @@ define([
             return this;
         },
 
-        updateUrl: function (facets, page) {
-            const params = new URLSearchParams();
+        updateUrl: function (facets, page, q) {
+            const params = new URLSearchParams(window.location.search);
+
+            Object.keys(this.facets.facetConfig).forEach(facetCode => {
+                params.delete(facetCode);
+            });
 
             Object.keys(facets).forEach(facetCode => {
                 const values = facets[facetCode];
@@ -45,6 +53,14 @@ define([
 
             if (page > 1) {
                 params.set('page', page);
+            } else {
+                params.delete('page');
+            }
+
+            if (q && q.trim() !== '') {
+                params.set('q', q);
+            } else {
+                params.delete('q');
             }
 
             const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
@@ -66,6 +82,15 @@ define([
                     if (!isNaN(page) && page > 0) {
                         restoredPage = page;
                     }
+                    return;
+                }
+
+                if (key === 'q') {
+                    facetsModel.searchQuery(value);
+                    return;
+                }
+
+                if (!this.facets.facetConfig.hasOwnProperty(key)) {
                     return;
                 }
 

@@ -5,6 +5,7 @@ define([
 
     const selectedFacets = ko.observable({});
     const currentPage = ko.observable(1);
+    const searchQuery = ko.observable('');
 
     function updateFacet(code, values) {
         const current = { ...selectedFacets() };
@@ -27,6 +28,7 @@ define([
     return {
         selectedFacets,
         currentPage,
+        searchQuery,
         updateFacet,
         resetFacet
     };
