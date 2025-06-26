@@ -132,6 +132,13 @@ define([
                     dataType: 'json',
                     showLoader: true,
                     success: function(r) {
+                        const currentCategoryId = merchandising.currentCategoryId();
+                        const positionField = `position_category_${currentCategoryId}`;
+
+                        r.sort(function(a, b) {
+                            return a[positionField] - b[positionField];
+                        });
+
                         merchandising.docs(r);
                         self.initializePositions(r);
                     }
