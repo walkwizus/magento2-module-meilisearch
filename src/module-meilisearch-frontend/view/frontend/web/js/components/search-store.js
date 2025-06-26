@@ -12,7 +12,7 @@ define([
             searchResults: ko.observable({}),
             totalHits: ko.observable(0),
             hitsPerPage: ko.observable(0),
-            sortBy: ko.observable(''),
+            sortBy: ko.observable(null),
             isDescending: ko.observable(false)
         },
 
@@ -74,7 +74,7 @@ define([
 
         performSearch: function () {
             const searchQuery = facetsModel.searchQuery();
-            const sortBy = this.sortBy();
+            const sortBy = this.sortBy() ?? this.defaultSortBy;
             const sortDirection = this.isDescending() ? 'desc' : 'asc';
             const sortParams = sortBy ? [`${sortBy}:${sortDirection}`] : undefined;
             const selectedFilters = facetsModel.selectedFacets();

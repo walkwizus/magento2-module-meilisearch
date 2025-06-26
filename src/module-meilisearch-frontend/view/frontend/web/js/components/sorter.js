@@ -10,7 +10,8 @@ define([
             currentSort: ko.observable(''),
             exports: {
                 currentSort: '${ $.provider }:sortBy',
-                isDescending: '${ $.provider }:isDescending'
+                isDescending: '${ $.provider }:isDescending',
+                defaultSortBy: '${ $.provider }:defaultSortBy'
             }
         },
 
