@@ -88,7 +88,8 @@ define([
                             return acc;
                         }, []);
 
-                        let sortedOptions = this.sortFacetOptions([...optionsData], cfg.sortValuesBy);
+                        const originalOptions = [...optionsData];
+                        const sortedOptions = this.sortFacetOptions([...optionsData], cfg.sortValuesBy);
                         const options = ko.observableArray(sortedOptions);
                         const showAllOptions = ko.observable(false);
                         const hasSelection = ko.pureComputed(() => Array.isArray(currentFilters[code]) && currentFilters[code].length > 0);
@@ -102,6 +103,7 @@ define([
                         return {
                             ...cfg,
                             code,
+                            originalOptions,
                             sortedOptions,
                             options,
                             visibleOptions,

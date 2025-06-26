@@ -21,11 +21,11 @@ define([
             const searchTerm = inputValue.trim().toLowerCase();
 
             if (!searchTerm) {
-                facet.options(facet.originalOptions.slice());
+                facet.options(facet.sortedOptions.slice());
                 return;
             }
 
-            const filtered = facet.options().filter(opt =>
+            const filtered = facet.originalOptions.filter(opt =>
                 opt.label?.toLowerCase().includes(searchTerm)
             );
 
