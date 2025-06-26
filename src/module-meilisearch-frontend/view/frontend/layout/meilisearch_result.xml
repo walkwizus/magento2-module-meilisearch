@@ -128,6 +128,20 @@
                                             </item>
                                         </item>
                                     </item>
+                                    <item name="counter" xsi:type="array">
+                                        <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/counter</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/counter</item>
+                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
+                                            <item name="imports" xsi:type="array">
+                                                <item name="totalHits" xsi:type="string">${ $.provider }:totalHits</item>
+                                                <item name="hitsPerPage" xsi:type="string">${ $.provider }:hitsPerPage</item>
+                                            </item>
+                                            <item name="deps" xsi:type="array">
+                                                <item name="0" xsi:type="string">meilisearch-frontend-search</item>
+                                            </item>
+                                        </item>
+                                    </item>
                                     <item name="sorter" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/sorter</item>
                                         <item name="config" xsi:type="array">

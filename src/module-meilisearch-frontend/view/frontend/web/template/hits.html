@@ -5,6 +5,9 @@
     <div data-bind="scope: requestChild('viewmode')">
         <!-- ko template: getTemplate() --><!-- /ko -->
     </div>
+    <div data-bind="scope: requestChild('counter')">
+        <!-- ko template: getTemplate() --><!-- /ko -->
+    </div>
 </div>
 <div id="meilisearch-hits" class="products wrapper" data-bind="css: {
     'grid products-grid': currentViewMode() === 'grid',
