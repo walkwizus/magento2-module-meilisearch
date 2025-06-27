@@ -38,6 +38,7 @@
                                     <item name="config" xsi:type="array">
                                         <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/autocomplete/hits</item>
                                         <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
+                                        <item name="displayArea" xsi:type="string">autocomplete-result</item>
                                         <item name="deps" xsi:type="array">
                                             <item name="0" xsi:type="string">meilisearch-frontend-store</item>
                                             <item name="1" xsi:type="string">meilisearch-frontend-autocomplete</item>

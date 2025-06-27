@@ -23,9 +23,9 @@
                             attr: { placeholder: $t('Search entire store here...') }
                         "
                     />
-                    <div data-bind="scope: requestChild('hits')">
+                    <!-- ko foreach: getRegion('autocomplete-result') -->
                         <!-- ko template: getTemplate() --><!-- /ko -->
-                    </div>
+                    <!-- /ko -->
                 </div>
             </div>
             <div class="actions">
