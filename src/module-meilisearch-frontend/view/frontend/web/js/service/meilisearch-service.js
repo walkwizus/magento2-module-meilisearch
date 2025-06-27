@@ -4,7 +4,7 @@ define([
     'use strict';
 
     return function(config) {
-        const client = new meilisearch.MeiliSearch({
+        const client = new meilisearch({
             host: config.host,
             apiKey: config.apiKey
         });
