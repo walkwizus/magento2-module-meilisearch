@@ -7,9 +7,9 @@ namespace Walkwizus\MeilisearchFrontend\Block;
 use Magento\Framework\View\Element\Template;
 use Walkwizus\MeilisearchFrontend\ViewModel\JsConfig;
 
-class Search extends Template
+class Config extends Template
 {
-    const COMPONENT_NAME = 'meilisearch-frontend-store';
+    const COMPONENT_NAME = 'meilisearch-frontend-config';
 
     /**
      * @return string
@@ -20,7 +20,7 @@ class Search extends Template
         $viewModel = $this->getViewModel();
 
         foreach ($viewModel->get(self::COMPONENT_NAME) as $key => $value) {
-            $this->jsLayout['components'][self::COMPONENT_NAME]['config'][$key] = $value;
+            $this->jsLayout['components'][self::COMPONENT_NAME]['config']['meilisearchConfig'][$key] = $value;
         }
 
         return parent::getJsLayout();

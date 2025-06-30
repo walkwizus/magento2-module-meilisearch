@@ -6,6 +6,9 @@
 </div>
 <script type="text/x-magento-init">
     {
+        "*": {
+            "Walkwizus_MeilisearchFrontend/js/components/boot": {}
+        },
         "#meilisearch-frontend-search": {
             "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?: '{}' ?>
         }

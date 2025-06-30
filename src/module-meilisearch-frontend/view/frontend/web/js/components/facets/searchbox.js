@@ -1,21 +1,19 @@
 define([
     'uiElement',
-    'ko'
-], function(Element, ko) {
+    'ko',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/model/facets-state'
+], function(Element, ko, configModel, facetsState) {
     'use strict';
 
     return Element.extend({
-        defaults: {
-            facets: ko.observableArray([])
-        },
-
         initialize: function() {
             this._super();
             return this;
         },
 
-        search: function (facetCode, inputValue) {
-            const facet = this.facets().find(f => f.code === facetCode);
+        search: function(facetCode, inputValue) {
+            const facet = facetsState.computedFacets().find(f => f.code === facetCode);
             if (!facet || !facet.options || !facet.originalOptions) return;
 
             const searchTerm = inputValue.trim().toLowerCase();

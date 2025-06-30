@@ -1,48 +1,41 @@
 define([
     'uiComponent',
-    'ko'
-], function (Component, ko) {
+    'Walkwizus_MeilisearchFrontend/js/service/search',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/model/sorter-state'
+], function(Component, searchService, configModel, sorterState) {
     'use strict';
 
     return Component.extend({
-        defaults: {
-            sortOptions: [],
-            currentSort: ko.observable(''),
-            exports: {
-                currentSort: '${ $.provider }:sortBy',
-                isDescending: '${ $.provider }:isDescending',
-                defaultSortBy: '${ $.provider }:defaultSortBy'
-            }
-        },
-
-        initialize: function () {
+        initialize: function() {
             this._super();
             this.initSortOptions();
 
-            this.isDescending = ko.pureComputed({
-                read: () => this.source.isDescending(),
-                write: (value) => this.source.isDescending(value)
-            });
+            this.isDescending = sorterState.isDescending;
+
+            this.currentSort = configModel.get('defaultSortBy');
 
             return this;
         },
 
-        initSortOptions: function () {
-            if (this.availableSortBy) {
-                this.sortOptions = Object.entries(this.availableSortBy).map(([value, label]) => ({
+        initSortOptions: function() {
+            const availableSortBy = configModel.get('availableSortBy', {});
+
+            if (availableSortBy) {
+                this.sortOptions = Object.entries(availableSortBy).map(([value, label]) => ({
                     value: value,
                     label: label
                 }));
             }
         },
 
-        updateSort: function (data, event) {
-            if (this.source && typeof this.source.updateSort === 'function') {
-                this.source.updateSort(event.target.value);
-            }
+        updateSort: function(data, event) {
+            const sortValue = event.target.value;
+            this.currentSort = sortValue;
+            sorterState.sortBy(sortValue);
         },
 
-        toggleSortDirection: function () {
+        toggleSortDirection: function() {
             this.isDescending(!this.isDescending());
             return false;
         }

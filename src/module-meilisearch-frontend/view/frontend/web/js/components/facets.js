@@ -2,31 +2,25 @@ define([
     'uiComponent',
     'ko',
     'jquery',
-    'Walkwizus_MeilisearchFrontend/js/model/facets-model',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/model/facets-state',
+    'Walkwizus_MeilisearchFrontend/js/model/search-state',
     'Magento_Catalog/js/price-utils',
     'Magento_Swatches/js/swatch-renderer'
-], function(Component, ko, $, facetsModel, priceUtils) {
+], function(Component, ko, $, configModel, facetsState, searchState, priceUtils) {
     'use strict';
 
     return Component.extend({
         defaults: {
             isFilterActive: ko.observable(false),
-            isCurrentFilterExpanded: ko.observable(false),
-            imports: {
-                priceFormat: "${ $.provider }:priceFormat"
-            }
+            isCurrentFilterExpanded: ko.observable(false)
         },
 
         initialize: function() {
             this._super();
-
-            this.observe([
-                'searchResults'
-            ]);
-
             this.computedCurrentFacets = ko.pureComputed(() => {
-                const selected = facetsModel.selectedFacets();
-                const config = this.facets.facetConfig;
+                const selected = facetsState.selectedFacets();
+                const config = configModel.get('facets').facetConfig;
                 const result = [];
 
                 Object.entries(selected).forEach(([code, values]) => {
@@ -50,12 +44,12 @@ define([
             });
 
             this.computedFacets = ko.pureComputed(() => {
-                const results = this.searchResults();
+                const results = searchState.searchResults();
                 const facetDistribution = results.facetDistribution;
                 const facetStats = results.facetStats;
-                const facetConfig = this.facets.facetConfig;
-                const facetList = this.facets.facetList;
-                const currentFilters = facetsModel.selectedFacets();
+                const facetConfig = configModel.get('facets').facetConfig;
+                const facetList = configModel.get('facets').facetList;
+                const currentFilters = facetsState.selectedFacets();
 
                 return facetList
                     .filter(code => {
@@ -115,6 +109,10 @@ define([
                     });
             });
 
+            this.computedFacets.subscribe(facets => {
+                facetsState.computedFacets(facets);
+            });
+
             this.isFilterActive.subscribe(function(isActive) {
                 $('body').toggleClass('filter-active', isActive);
             });
@@ -153,14 +151,14 @@ define([
             const newValues = current[code].filter(v => v !== value);
 
             if (newValues.length === 0) {
-                facetsModel.resetFacet(code);
+                facetsState.resetFacet(code);
             } else {
-                facetsModel.updateFacet(code, newValues);
+                facetsState.updateFacet(code, newValues);
             }
         },
 
         clearAllFacets: function() {
-            facetsModel.selectedFacets({});
+            facetsState.selectedFacets({});
         },
 
         toggleFilter: function() {

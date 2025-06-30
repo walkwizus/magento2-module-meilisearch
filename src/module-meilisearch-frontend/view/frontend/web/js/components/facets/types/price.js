@@ -2,19 +2,19 @@ define([
     'uiElement',
     'ko',
     'jquery',
-    'nouislider',
-    'Walkwizus_MeilisearchFrontend/js/model/facets-model'
-], function(Element, ko, $, noUiSlider, facetsModel) {
+    'noUiSlider',
+    'Walkwizus_MeilisearchFrontend/js/model/facets-state'
+], function(Element, ko, $, noUiSlider, facetsState) {
     'use strict';
 
     return Element.extend({
-        initialize: function () {
+        initialize: function() {
             this._super();
-            this.selectedFacets = facetsModel.selectedFacets;
+            this.selectedFacets = facetsState.selectedFacets;
             return this;
         },
 
-        initSlider: function (element, filter) {
+        initSlider: function(element, filter) {
             this.filter = filter;
             this.sliderElement = element;
 
@@ -26,7 +26,7 @@ define([
             return this;
         },
 
-        createSlider: function () {
+        createSlider: function() {
             const min = this.filter.min();
             const max = this.filter.max();
             const code = this.filter.code;

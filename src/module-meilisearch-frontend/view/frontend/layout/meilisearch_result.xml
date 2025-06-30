@@ -15,38 +15,16 @@
                                 <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/facets</item>
                                 <item name="config" xsi:type="array">
                                     <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/facets</item>
-                                    <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                    <item name="deps" xsi:type="array">
-                                        <item name="0" xsi:type="string">meilisearch-frontend-store</item>
-                                    </item>
-                                    <item name="imports" xsi:type="array">
-                                        <item name="facets" xsi:type="string">${ $.provider }:facets</item>
-                                        <item name="searchResults" xsi:type="string">${ $.provider }:searchResults</item>
-                                    </item>
                                 </item>
                                 <item name="children" xsi:type="array">
                                     <item name="meilisearch-frontend-layers-url" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/facets/url</item>
-                                        <item name="config" xsi:type="array">
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-layers</item>
-                                            </item>
-                                            <item name="imports" xsi:type="array">
-                                                <item name="facets" xsi:type="string">${ $.parentName }:facets</item>
-                                            </item>
-                                        </item>
                                     </item>
                                     <item name="meilisearch-frontend-layers-searchbox" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/facets/searchbox</item>
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/facets/searchbox</item>
                                             <item name="displayArea" xsi:type="string">searchbox</item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-layers</item>
-                                            </item>
-                                            <item name="imports" xsi:type="array">
-                                                <item name="facets" xsi:type="string">${ $.parentName }:computedFacets</item>
-                                            </item>
                                         </item>
                                     </item>
                                     <item name="meilisearch-frontend-layers-checkbox" xsi:type="array">
@@ -54,10 +32,6 @@
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/facets/types/checkbox</item>
                                             <item name="displayArea" xsi:type="string">checkbox</item>
-                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-layers</item>
-                                            </item>
                                         </item>
                                     </item>
                                     <item name="meilisearch-frontend-layers-swatch" xsi:type="array">
@@ -65,10 +39,6 @@
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/facets/types/swatch</item>
                                             <item name="displayArea" xsi:type="string">swatch</item>
-                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-layers</item>
-                                            </item>
                                         </item>
                                     </item>
                                     <item name="meilisearch-frontend-layers-price" xsi:type="array">
@@ -76,13 +46,6 @@
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/facets/types/price</item>
                                             <item name="displayArea" xsi:type="string">price</item>
-                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-layers</item>
-                                            </item>
-                                            <item name="imports" xsi:type="array">
-                                                <item name="priceFormat" xsi:type="string">${ $.provider }:priceFormat</item>
-                                            </item>
                                         </item>
                                     </item>
                                 </item>
@@ -101,76 +64,34 @@
                                 <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/hits</item>
                                 <item name="config" xsi:type="array">
                                     <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/hits</item>
-                                    <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                    <item name="imports" xsi:type="array">
-                                        <item name="searchResults" xsi:type="string">${ $.provider }:searchResults</item>
-                                        <item name="priceFormat" xsi:type="string">${ $.provider }:priceFormat</item>
-                                        <item name="priceAttributeCode" xsi:type="string">${ $.provider }:priceAttributeCode</item>
-                                    </item>
-                                    <item name="deps" xsi:type="array">
-                                        <item name="0" xsi:type="string">meilisearch-frontend-store</item>
-                                    </item>
                                 </item>
                                 <item name="children" xsi:type="array">
                                     <item name="viewmode" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/viewmode</item>
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/viewmode</item>
-                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                            <item name="imports" xsi:type="array">
-                                                <item name="availableViewMode" xsi:type="string">${ $.provider }:availableViewMode</item>
-                                            </item>
-                                            <item name="exports" xsi:type="array">
-                                                <item name="currentViewMode" xsi:type="string">${ $.parentName }:currentViewMode</item>
-                                            </item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-search</item>
-                                            </item>
+                                            <item name="displayArea" xsi:type="string">viewmode</item>
                                         </item>
                                     </item>
                                     <item name="counter" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/counter</item>
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/counter</item>
-                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                            <item name="imports" xsi:type="array">
-                                                <item name="totalHits" xsi:type="string">${ $.provider }:totalHits</item>
-                                                <item name="hitsPerPage" xsi:type="string">${ $.provider }:hitsPerPage</item>
-                                            </item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-search</item>
-                                            </item>
+                                            <item name="displayArea" xsi:type="string">counter</item>
                                         </item>
                                     </item>
                                     <item name="sorter" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/sorter</item>
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/sorter</item>
-                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                            <item name="imports" xsi:type="array">
-                                                <item name="availableSortBy" xsi:type="string">${ $.provider }:availableSortBy</item>
-                                                <item name="defaultSortBy" xsi:type="string">${ $.provider }:defaultSortBy</item>
-                                            </item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-search</item>
-                                            </item>
+                                            <item name="displayArea" xsi:type="string">sorter</item>
                                         </item>
                                     </item>
                                     <item name="pagination" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/pagination</item>
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/pagination</item>
-                                            <item name="provider" xsi:type="string">meilisearch-frontend-store</item>
-                                            <item name="imports" xsi:type="array">
-                                                <item name="totalHits" xsi:type="string">${ $.provider }:totalHits</item>
-                                                <item name="hitsPerPage" xsi:type="string">${ $.provider }:hitsPerPage</item>
-                                            </item>
-                                            <item name="exports" xsi:type="array">
-                                                <item name="currentPage" xsi:type="string">${ $.provider }:currentPage</item>
-                                            </item>
-                                            <item name="deps" xsi:type="array">
-                                                <item name="0" xsi:type="string">meilisearch-frontend-search</item>
-                                            </item>
+                                            <item name="displayArea" xsi:type="string">pagination</item>
                                         </item>
                                     </item>
                                 </item>

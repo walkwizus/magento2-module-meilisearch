@@ -1,13 +1,13 @@
 define([
     'uiElement',
-    'Walkwizus_MeilisearchFrontend/js/model/facets-model'
-], function(Element, facetsModel) {
+    'Walkwizus_MeilisearchFrontend/js/model/facets-state',
+], function(Element, facetsState) {
     'use strict';
 
     return Element.extend({
-        initialize: function () {
+        initialize: function() {
             this._super();
-            this.selectedFacets = facetsModel.selectedFacets;
+            this.selectedFacets = facetsState.selectedFacets;
             return this;
         },
 

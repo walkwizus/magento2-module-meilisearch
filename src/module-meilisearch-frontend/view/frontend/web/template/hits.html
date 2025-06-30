@@ -1,13 +1,13 @@
 <div class="toolbar toolbar-products">
-    <div data-bind="scope: requestChild('sorter')">
+    <!-- ko foreach: getRegion('sorter') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
-    </div>
-    <div data-bind="scope: requestChild('viewmode')">
+    <!-- /ko -->
+    <!-- ko foreach: getRegion('viewmode') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
-    </div>
-    <div data-bind="scope: requestChild('counter')">
+    <!-- /ko -->
+    <!-- ko foreach: getRegion('counter') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
-    </div>
+    <!-- /ko -->
 </div>
 <div id="meilisearch-hits" class="products wrapper" data-bind="css: {
     'grid products-grid': currentViewMode() === 'grid',
@@ -41,6 +41,6 @@
         </li>
     </ol>
 </div>
-<div class="toolbar toolbar-products" data-bind="scope: requestChild('pagination')">
+<!-- ko foreach: getRegion('pagination') -->
     <!-- ko template: getTemplate() --><!-- /ko -->
-</div>
+<!-- /ko -->

@@ -2,8 +2,9 @@ define([
     'uiComponent',
     'ko',
     'Walkwizus_MeilisearchFrontend/js/service/meilisearch-service',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model',
     'mage/url'
-], function(Component, ko, meilisearchService, url) {
+], function(Component, ko, meilisearchService, configModel, url) {
     'use strict';
 
     return Component.extend({
@@ -14,11 +15,10 @@ define([
 
         initialize: function() {
             this._super();
-
             this.searchService = meilisearchService({
-                host: this.host,
-                apiKey: this.apiKey,
-                indexName: this.indexName
+                host: configModel.get('host'),
+                apiKey: configModel.get('apiKey'),
+                indexName: configModel.get('indexName')
             });
 
             this.searchTerm.subscribe((v) => {

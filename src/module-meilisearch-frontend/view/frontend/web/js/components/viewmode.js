@@ -1,22 +1,18 @@
 define([
     'uiElement',
-    'ko'
-], function(Element, ko) {
+    'ko',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/model/viewmode-state'
+], function(Element, ko, configModel, viewModeState) {
     'use strict';
 
     return Element.extend({
-        defaults: {
-            availableViewMode: {},
-            currentViewMode: ko.observable(null),
-            exports: {
-                currentViewMode: '${ $.parentName }:currentViewMode'
-            }
-        },
-
         initialize: function() {
             this._super();
+            this.availableViewMode = configModel.get('availableViewMode');
             const firstMode = Object.keys(this.availableViewMode)[0];
-            this.currentViewMode(firstMode);
+            viewModeState.currentViewMode(firstMode);
+
             return this;
         },
 
@@ -26,11 +22,11 @@ define([
 
         switchViewMode: function(mode, event) {
             event.preventDefault();
-            this.currentViewMode(mode);
+            viewModeState.currentViewMode(mode);
         },
 
         isActive: function(mode) {
-            return this.currentViewMode() === mode;
+            return viewModeState.currentViewMode() === mode;
         }
     });
 });

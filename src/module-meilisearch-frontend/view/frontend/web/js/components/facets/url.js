@@ -1,28 +1,30 @@
 define([
     'uiElement',
     'ko',
-    'Walkwizus_MeilisearchFrontend/js/model/facets-model'
-], function (Element, ko, facetsModel) {
+    'Walkwizus_MeilisearchFrontend/js/model/facets-state',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model'
+], function(Element, ko, facetsState, configModel) {
     'use strict';
 
     return Element.extend({
-        initialize: function () {
+        initialize: function() {
             this._super();
 
-            this.currentPage = facetsModel.currentPage;
+            this.facets = configModel.get('facets');
+            this.currentPage = facetsState.currentPage;
 
             this.restoreStateFromUrl();
 
-            facetsModel.selectedFacets.subscribe(facets => {
-                this.updateUrl(facets, this.currentPage(), facetsModel.searchQuery());
+            facetsState.selectedFacets.subscribe(facets => {
+                this.updateUrl(facets, this.currentPage(), facetsState.searchQuery());
             });
 
             this.currentPage.subscribe(page => {
-                this.updateUrl(facetsModel.selectedFacets(), page, facetsModel.searchQuery());
+                this.updateUrl(facetsState.selectedFacets(), page, facetsState.searchQuery());
             });
 
-            facetsModel.searchQuery.subscribe(q => {
-                this.updateUrl(facetsModel.selectedFacets(), this.currentPage(), q);
+            facetsState.searchQuery.subscribe(q => {
+                this.updateUrl(facetsState.selectedFacets(), this.currentPage(), q);
             });
 
             window.addEventListener('popstate', () => {
@@ -32,7 +34,7 @@ define([
             return this;
         },
 
-        updateUrl: function (facets, page, q) {
+        updateUrl: function(facets, page, q) {
             const params = new URLSearchParams(window.location.search);
 
             Object.keys(this.facets.facetConfig).forEach(facetCode => {
@@ -71,7 +73,7 @@ define([
             }
         },
 
-        restoreStateFromUrl: function () {
+        restoreStateFromUrl: function() {
             const params = new URLSearchParams(window.location.search);
             const restoredFacets = {};
             let restoredPage = 1;
@@ -86,7 +88,7 @@ define([
                 }
 
                 if (key === 'q') {
-                    facetsModel.searchQuery(value);
+                    facetsState.searchQuery(value);
                     return;
                 }
 
@@ -122,8 +124,8 @@ define([
                 }
             });
 
-            facetsModel.selectedFacets({ ...restoredFacets });
-            facetsModel.currentPage(restoredPage);
+            facetsState.selectedFacets({ ...restoredFacets });
+            facetsState.currentPage(restoredPage);
         }
     });
 });

@@ -1,19 +1,18 @@
 define([
     'uiElement',
     'ko',
-    'Walkwizus_MeilisearchFrontend/js/model/facets-model'
-], function(Element, ko, facetModels) {
+    'Walkwizus_MeilisearchFrontend/js/model/facets-state',
+    'Walkwizus_MeilisearchFrontend/js/model/search-state',
+], function(Element, ko, facetsState, searchState) {
     'use strict';
 
     return Element.extend({
         initialize: function() {
             this._super();
-            this.observe([
-                'totalHits',
-                'hitsPerPage'
-            ]);
 
-            this.currentPage = facetModels.currentPage;
+            this.totalHits = searchState.totalHits;
+            this.hitsPerPage = searchState.hitsPerPage;
+            this.currentPage = facetsState.currentPage;
 
             this.from = ko.pureComputed(() => {
                 if (this.totalHits() === 0) {

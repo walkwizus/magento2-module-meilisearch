@@ -1,44 +1,43 @@
 <div class="toolbar-products">
     <div class="pages">
-        <div class="items pages-items" if="totalPages() > 1">
-            <div class="item pages-item-previous" if="showPrevButton()">
-                <a class="action previous" href="#" click="prevPage">
+        <div class="items pages-items" data-bind="if: totalPages() > 1">
+            <div class="item pages-item-previous" data-bind="if: showPrevButton()">
+                <a class="action previous" href="#" data-bind="click: prevPage">
                     <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                     <span><!-- ko i18n: 'Previous' --><!-- /ko --></span>
                 </a>
             </div>
-            <div class="item" if="visiblePages()[0] > 1">
-                <a class="page" href="#" click="function() { goToPage(1) }">
+            <div class="item" data-bind="if: visiblePages()[0] > 1">
+                <a class="page" href="#" data-bind="click: function() { goToPage(1) }">
                     <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                     <span>1</span>
                 </a>
             </div>
-            <div class="item" if="visiblePages()[0] > 2">
+            <div class="item" data-bind="if: visiblePages()[0] > 2">
                 <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                 <span>...</span>
             </div>
             <!-- ko foreach: visiblePages -->
             <div class="item">
                 <a class="page" href="#"
-                   click="function() { $parent.goToPage($data) }"
-                   css="{'current': $parent.isCurrentPage($data)}">
+                   data-bind="click: function() { $parent.goToPage($data) }, css: { 'current': $parent.isCurrentPage($data) }">
                     <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                     <span data-bind="text: $data"></span>
                 </a>
             </div>
             <!-- /ko -->
-            <div class="item" if="visiblePages()[visiblePages().length - 1] < totalPages() - 1">
+            <div class="item" data-bind="if: visiblePages()[visiblePages().length - 1] < totalPages() - 1">
                 <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                 <span>...</span>
             </div>
-            <div class="item" if="visiblePages()[visiblePages().length - 1] < totalPages()">
-                <a class="page" href="#" click="function() { goToPage(totalPages()) }">
+            <div class="item" data-bind="if: visiblePages()[visiblePages().length - 1] < totalPages()">
+                <a class="page" href="#" data-bind="click: function() { goToPage(totalPages()) }">
                     <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                     <span data-bind="text: totalPages"></span>
                 </a>
             </div>
-            <div class="item pages-item-next" if="showNextButton()">
-                <a class="action next" href="#" click="nextPage">
+            <div class="item pages-item-next" data-bind="if: showNextButton()">
+                <a class="action next" href="#" data-bind="click: nextPage">
                     <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                     <span><!-- ko i18n: 'Next' --><!-- /ko --></span>
                 </a>
