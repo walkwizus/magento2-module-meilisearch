@@ -16,18 +16,13 @@ class ConfigProvider
     ) { }
 
     /**
-     * @param string $componentName
      * @return array
      */
-    public function get(string $componentName): array
+    public function get(): array
     {
         $config = [];
 
-        if (!isset($this->providers[$componentName])) {
-            return $config;
-        }
-
-        foreach ($this->providers[$componentName] as $provider) {
+        foreach ($this->providers as $provider) {
             if ($provider instanceof ConfigProviderInterface) {
                 foreach ($provider->get() as $key => $value) {
                     $config[$key] = $value;

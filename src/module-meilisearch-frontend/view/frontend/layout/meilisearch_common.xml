@@ -6,13 +6,6 @@
             <block class="Walkwizus\MeilisearchFrontend\Block\Config" name="meilisearch.frontend.config" template="Walkwizus_MeilisearchFrontend::config.phtml">
                 <arguments>
                     <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\JsConfig</argument>
-                    <argument name="jsLayout" xsi:type="array">
-                        <item name="components" xsi:type="array">
-                            <item name="meilisearch-frontend-config" xsi:type="array">
-                                <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/config</item>
-                            </item>
-                        </item>
-                    </argument>
                 </arguments>
             </block>
         </referenceContainer>

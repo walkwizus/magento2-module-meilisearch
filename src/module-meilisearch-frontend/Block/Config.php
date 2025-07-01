@@ -9,8 +9,6 @@ use Walkwizus\MeilisearchFrontend\ViewModel\JsConfig;
 
 class Config extends Template
 {
-    const COMPONENT_NAME = 'meilisearch-frontend-config';
-
     /**
      * @return string
      */
@@ -19,8 +17,8 @@ class Config extends Template
         /** @var JsConfig $viewModel */
         $viewModel = $this->getViewModel();
 
-        foreach ($viewModel->get(self::COMPONENT_NAME) as $key => $value) {
-            $this->jsLayout['components'][self::COMPONENT_NAME]['config']['meilisearchConfig'][$key] = $value;
+        foreach ($viewModel->get() as $key => $value) {
+            $this->jsLayout[$key] = $value;
         }
 
         return parent::getJsLayout();

@@ -1,18 +1,18 @@
 define([
     'underscore'
-], function(_) {
+], function (_) {
     'use strict';
 
-    let config = {};
+    const config = window.meilisearchFrontendConfig || {};
 
     return {
-        get: function(key, defaultValue = null) {
+        get: function (key, defaultValue = null) {
             return _.has(config, key) ? config[key] : defaultValue;
         },
 
-        set: function(key, value) {
+        set: function (key, value) {
             if (typeof key === 'object') {
-                config = _.extend({}, config, key);
+                _.extend(config, key);
             } else {
                 config[key] = value;
             }

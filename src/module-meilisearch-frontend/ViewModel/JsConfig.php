@@ -17,11 +17,10 @@ class JsConfig implements ArgumentInterface
     ) { }
 
     /**
-     * @param string $componentName
      * @return array
      */
-    public function get(string $componentName): array
+    public function get(): array
     {
-        return $this->configProvider->get($componentName);
+        return $this->configProvider->get();
     }
 }
