@@ -56,7 +56,7 @@
             </block>
         </referenceContainer>
         <referenceContainer name="content">
-            <block name="meilisearch.frontend.search" template="Walkwizus_MeilisearchFrontend::search.phtml">
+            <block name="meilisearch.frontend.search" class="Walkwizus\MeilisearchFrontend\Block\Search" template="Walkwizus_MeilisearchFrontend::search.phtml">
                 <arguments>
                     <argument name="jsLayout" xsi:type="array">
                         <item name="components" xsi:type="array">
