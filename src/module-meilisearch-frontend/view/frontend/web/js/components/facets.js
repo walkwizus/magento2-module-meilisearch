@@ -144,7 +144,7 @@ define([
         },
 
         removeFacet: function(code, value) {
-            const current = { ...facetsModel.selectedFacets() };
+            const current = { ...facetsState.selectedFacets() };
 
             if (!Array.isArray(current[code])) return;
 
