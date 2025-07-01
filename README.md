@@ -27,7 +27,7 @@ Meilisearch is a search engine featuring a blazing fast RESTful search API, typo
 
 This frontend is fully compatible with the [Breeze frontend](https://breezefront.com/) by SwissUp.  
 If you're using Breeze, make sure to install the dedicated compatibility module:  
-👉 [Meilisearch Breeze Compatibility Module](https://github.com/walkwizus/magento2-meilisearch-breeze)
+👉 [Meilisearch Breeze Compatibility Module](https://github.com/walkwizus/magento2-module-breeze-meilisearch)
 
 ## ✨ Main Features
 
