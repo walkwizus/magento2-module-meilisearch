@@ -23,6 +23,12 @@ The Meilisearch extension for Magento 2 enables replacing Magento's default sear
 
 Meilisearch is a search engine featuring a blazing fast RESTful search API, typo tolerance, comprehensive language support, and much more.
 
+## 🧩 Breeze Compatibility
+
+This frontend is fully compatible with the [Breeze frontend](https://breezefront.com/) by SwissUp.  
+If you're using Breeze, make sure to install the dedicated compatibility module:  
+👉 [Meilisearch Breeze Compatibility Module](https://github.com/walkwizus/magento2-meilisearch-breeze)
+
 ## ✨ Main Features
 
 ### 🗂️ Category Merchandising
@@ -64,32 +70,23 @@ Key features include:
 
 This modern frontend ensures a smooth and engaging shopping experience, even on large catalogs.
 
-## Prerequisites
+---
 
-* Magento >= 2.4.4
-* Meilisearch >= v1.9.0
-* PHP >= 8.1
+<p align="center">
+    <b>📚 Documentation &nbsp;&nbsp; | &nbsp;&nbsp; 🚀 Live Demo</b>
+</p>
 
-Magento 2 module install
+<p align="center">
+    <a href="https://walkwizus.github.io/magento2-module-meilisearch-docs/" target="_blank">
+        <img src="https://img.shields.io/badge/documentation-available-blue?style=for-the-badge" alt="Documentation">
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="https://demo-meilisearch.walkwizus.com/" target="_blank">
+        <img src="https://img.shields.io/badge/demo-live-brightgreen?style=for-the-badge" alt="Live Demo">
+    </a>
+</p>
 
-```
-composer require walkwizus/magento2-module-meilisearch
-bin/magento module:enable Walkwizus_MeilisearchBase Walkwizus_MeilisearchCatalog Walkwizus_MeilisearchFrontend Walkwizus_MeilisearchMerchandising
-bin/magento setup:upgrade
-```
-
-## Configuration
-
-```
-bin/magento config:set meilisearch_server/settings/address meilisearch:7700
-bin/magento config:set meilisearch_server/settings/api_key "YOUR_API_KEY"
-bin/magento config:set meilisearch_server/settings/client_address localhost:7700
-bin/magento config:set meilisearch_server/settings/client_api_key "YOUR_CLIENT_API_KEY"
-bin/magento config:set catalog/search/engine meilisearch
-```
-
-## Indexing
-
-```
-bin/magento indexer:reindex catalogsearch_fulltext
-```
+<p align="center">
+    <a href="https://walkwizus.github.io/magento2-module-meilisearch-docs/" target="_blank">View the full documentation</a> &nbsp;&middot;&nbsp; 
+    <a href="https://demo-meilisearch.walkwizus.com/" target="_blank">Try the live demo</a>
+</p>
