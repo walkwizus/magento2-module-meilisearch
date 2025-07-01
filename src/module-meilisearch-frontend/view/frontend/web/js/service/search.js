@@ -71,7 +71,7 @@ define([
         const gridPerPage = configModel.get('gridPerPage');
 
         if (activeFacetCodes.length === 0) {
-            const filterParams = queryBuilder().buildFilters({}, configModel.get('categoryId'), configModel.get('categoryRule'));
+            const filterParams = queryBuilder().buildFilters({}, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
 
             searchService.search(searchQuery, {
                 filter: filterParams,
@@ -85,7 +85,7 @@ define([
         }
 
         const queries = [];
-        const mainFilterParams = queryBuilder().buildFilters(selectedFilters, configModel.get('categoryId'), configModel.get('categoryRule'));
+        const mainFilterParams = queryBuilder().buildFilters(selectedFilters, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
 
         queries.push({
             indexUid: configModel.get('indexName'),
@@ -101,7 +101,7 @@ define([
             const facetExcludedFilters = { ...selectedFilters };
             delete facetExcludedFilters[facetCode];
 
-            const disjunctiveFilterParams = queryBuilder().buildFilters(facetExcludedFilters, configModel.get('categoryId'), configModel.get('categoryRule'));
+            const disjunctiveFilterParams = queryBuilder().buildFilters(facetExcludedFilters, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
 
             queries.push({
                 indexUid: configModel.get('indexName'),
