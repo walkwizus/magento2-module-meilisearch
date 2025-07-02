@@ -4,26 +4,37 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchFrontend\Observer;
 
-use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Search\Model\EngineResolver;
+use Magento\Framework\App\RequestInterface;
+use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Model\Category;
+use Magento\Framework\Event\Observer;
 use Magento\Framework\View\LayoutInterface;
 
 class AddMeilisearchHandle implements ObserverInterface
 {
+    public const CATALOG_CATEGORY_VIEW_ACTION = 'catalog_category_view';
+
+    public const CATALOGSEARCH_RESULT_INDEX_ACTION = 'catalogsearch_result_index';
+
     /**
      * @var array|string[]
      */
     private array $fullActionName = [
-        'catalog_category_view',
-        'catalogsearch_result_index'
+        self::CATALOG_CATEGORY_VIEW_ACTION,
+        self::CATALOGSEARCH_RESULT_INDEX_ACTION
     ];
 
     /**
      * @param EngineResolver $engineResolver
+     * @param RequestInterface $request
+     * @param CategoryRepositoryInterface $categoryRepository
      */
     public function __construct(
-        private readonly EngineResolver $engineResolver
+        private readonly EngineResolver $engineResolver,
+        private readonly RequestInterface $request,
+        private readonly CategoryRepositoryInterface $categoryRepository
     ) { }
 
     /**
@@ -45,7 +56,23 @@ class AddMeilisearchHandle implements ObserverInterface
 
         if (in_array($fullActionName, $this->fullActionName, true)) {
             $layout->getUpdate()->addHandle('remove_category_blocks');
-            $layout->getUpdate()->addHandle('meilisearch_result');
+
+            if ($fullActionName === self::CATALOGSEARCH_RESULT_INDEX_ACTION) {
+                $layout->getUpdate()->addHandle('meilisearch_result');
+                return;
+            }
+
+            $categoryId = $this->request->getParam('id');
+
+            if ($categoryId) {
+                try {
+                    $currentCategory = $this->categoryRepository->get($categoryId);
+
+                    if ($currentCategory->getDisplayMode() !== Category::DM_PAGE) {
+                        $layout->getUpdate()->addHandle('meilisearch_result');
+                    }
+                } catch (\Exception $e) { }
+            }
         }
     }
 }
