@@ -24,19 +24,17 @@
             <!-- ko if: !$parent.isBoolean(type) && !$parent.isPrice(type) -->
             <div class="facet-options">
                 <div class="facet-field">
-                    <label>
-                        <input type="checkbox" data-bind="checked: searchable">
-                        <span data-bind="i18n: 'Enable Search in Values'"></span>
-                    </label>
+                    <label data-bind="i18n: 'Enable Search in Values'"></label>
+                    <input type="checkbox" data-bind="checked: searchable">
                 </div>
-
                 <div class="facet-field">
-                    <label>
-                        <input type="checkbox" data-bind="checked: show_more">
-                        <span data-bind="i18n: 'Enable Show More'"></span>
-                    </label>
+                    <label data-bind="i18n: 'Allow Approximate Search in Facet Options'"></label>
+                    <input type="checkbox" data-bind="checked: searchbox_fuzzy_enabled, enable: searchable">
                 </div>
-
+                <div class="facet-field">
+                    <label data-bind="i18n: 'Enable Show More'"></label>
+                    <input type="checkbox" data-bind="checked: show_more">
+                </div>
                 <div class="facet-field">
                     <label data-bind="i18n: 'Show More Limit'"></label>
                     <input type="number"
@@ -46,7 +44,6 @@
                                     attr: { min: 1 },
                                     valueUpdate: 'afterkeydown'">
                 </div>
-
                 <div class="facet-field">
                     <label data-bind="i18n: 'Sort Values By'"></label>
                     <select class="admin__control-select"

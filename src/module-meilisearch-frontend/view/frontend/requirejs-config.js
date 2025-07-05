@@ -6,6 +6,7 @@ var config = {
         }
     },
     paths: {
-        'meilisearch': 'Walkwizus_MeilisearchFrontend/js/adapter/meilisearch'
+        'meilisearch': 'Walkwizus_MeilisearchFrontend/js/adapter/meilisearch',
+        'fuse': 'Walkwizus_MeilisearchFrontend/js/lib/fuse.min'
     }
 };

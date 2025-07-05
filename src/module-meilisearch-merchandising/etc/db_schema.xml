@@ -15,6 +15,7 @@
         <column xsi:type="boolean" default="0" name="meilisearch_show_more" nullable="false" comment="Show More"/>
         <column xsi:type="int" default="10" name="meilisearch_show_more_limit" padding="11" nullable="false" comment="Show More Limit"/>
         <column xsi:type="boolean" default="0" name="meilisearch_searchable" nullable="false" comment="Searchable"/>
+        <column xsi:type="boolean" default="0" name="meilisearch_searchbox_fuzzy_enabled" nullable="false" comment="Fuzzy Search"/>
         <column xsi:type="varchar" default="magento" name="meilisearch_sort_values_by" nullable="false" comment="Sort Values By"/>
     </table>
 </schema>

@@ -27,6 +27,7 @@ define([
                     show_more: ko.observable(parseInt(attr.show_more) === 1),
                     show_more_limit: ko.observable(attr.show_more_limit || 10),
                     searchable: ko.observable(parseInt(attr.searchable) === 1),
+                    searchbox_fuzzy_enabled: ko.observable(parseInt(attr.searchbox_fuzzy_enabled) === 1),
                     sort_values_by: ko.observable(attr.sort_values_by || 'magento')
                 }))
             );
@@ -68,6 +69,7 @@ define([
                 code: facet.code,
                 position: facet.position(),
                 searchable: facet.searchable(),
+                searchbox_fuzzy_enabled: facet.searchbox_fuzzy_enabled(),
                 show_more: facet.show_more(),
                 show_more_limit: facet.show_more_limit(),
                 sort_values_by: facet.sort_values_by()

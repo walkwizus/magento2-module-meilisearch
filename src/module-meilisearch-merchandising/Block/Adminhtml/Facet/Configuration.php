@@ -89,6 +89,7 @@ class Configuration extends Template
             'show_more' => $attribute->getMeilisearchShowMore(),
             'show_more_limit' => $attribute->getMeilisearchShowMoreLimit(),
             'searchable' => $attribute->getMeilisearchSearchable(),
+            'searchbox_fuzzy_enabled' => $attribute->getMeilisearchSearchboxFuzzyEnabled(),
             'sort_values_by' => $attribute->getMeilisearchSortValuesBy()
         ];
     }

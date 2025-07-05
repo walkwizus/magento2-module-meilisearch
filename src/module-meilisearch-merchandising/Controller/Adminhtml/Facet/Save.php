@@ -49,6 +49,7 @@ class Save extends Action implements HttpPostActionInterface
                     $attribute->setMeilisearchShowMore($facetConfig['show_more']);
                     $attribute->setMeilisearchShowMoreLimit($facetConfig['show_more_limit']);
                     $attribute->setMeilisearchSearchable($facetConfig['searchable']);
+                    $attribute->setMeilisearchSearchboxFuzzyEnabled($facetConfig['searchbox_fuzzy_enabled']);
                     $attribute->setMeilisearchSortValuesBy($facetConfig['sort_values_by']);
 
                     $this->productAttributeRepository->save($attribute);
