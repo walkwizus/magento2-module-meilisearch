@@ -5,8 +5,9 @@ define([
     'Walkwizus_MeilisearchFrontend/js/model/config-model',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
-    'Walkwizus_MeilisearchFrontend/js/model/sorter-state'
-], function (ko, meilisearchService, queryBuilder, configModel, facetsState, searchState, sorterState) {
+    'Walkwizus_MeilisearchFrontend/js/model/sorter-state',
+    'Walkwizus_MeilisearchFrontend/js/model/limiter-state'
+], function (ko, meilisearchService, queryBuilder, configModel, facetsState, searchState, sorterState, limiterState) {
     'use strict';
 
     let searchService;
@@ -57,6 +58,13 @@ define([
                 performSearch();
             }
         });
+
+        limiterState.currentLimit.subscribe(() => {
+            if (!searchState.isInitializing()) {
+                facetsState.currentPage(1);
+                performSearch();
+            }
+        });
     }
 
     function performSearch() {
@@ -68,7 +76,7 @@ define([
         const activeFacetCodes = Object.keys(selectedFilters);
         const currentPage = facetsState.currentPage();
         const facetList = configModel.get('facets', {}).facetList || [];
-        const gridPerPage = configModel.get('gridPerPage');
+        const hitsPerPage = limiterState.currentLimit();
 
         if (activeFacetCodes.length === 0) {
             const filterParams = queryBuilder().buildFilters({}, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
@@ -78,7 +86,7 @@ define([
                 facets: facetList,
                 sort: sortParams,
                 page: currentPage,
-                hitsPerPage: gridPerPage
+                hitsPerPage: hitsPerPage
             }).then(updateResults);
 
             return;
@@ -94,7 +102,7 @@ define([
             facets: facetList,
             sort: sortParams,
             page: currentPage,
-            hitsPerPage: gridPerPage
+            hitsPerPage: hitsPerPage
         });
 
         activeFacetCodes.forEach(facetCode => {
@@ -110,7 +118,7 @@ define([
                 facets: [facetCode],
                 sort: sortParams,
                 page: currentPage,
-                hitsPerPage: gridPerPage
+                hitsPerPage: hitsPerPage
             });
         });
 

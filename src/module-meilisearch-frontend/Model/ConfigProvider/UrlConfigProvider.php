@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 
-use Magento\Framework\Exception\NoSuchEntityException;
 use Walkwizus\MeilisearchFrontend\Api\ConfigProviderInterface;
-use Walkwizus\MeilisearchFrontend\Helper\Data as MeilisearchFrontendHelper;
+use Walkwizus\MeilisearchFrontend\Model\Config\SearchEngineOptimization;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\Product\Media\Config as ProductMediaConfig;
+use Magento\Framework\UrlInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class UrlConfigProvider implements ConfigProviderInterface
 {
     /**
-     * @param MeilisearchFrontendHelper $helper
+     * @param SearchEngineOptimization $searchEngineOptimization
      * @param StoreManagerInterface $storeManager
      * @param ProductMediaConfig $productMediaConfig
      */
     public function __construct(
-        private readonly MeilisearchFrontendHelper $helper,
+        private readonly SearchEngineOptimization $searchEngineOptimization,
         private readonly StoreManagerInterface $storeManager,
         private readonly ProductMediaConfig $productMediaConfig
     ) { }
@@ -30,13 +31,13 @@ class UrlConfigProvider implements ConfigProviderInterface
     public function get(): array
     {
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
-        $mediaBaseUrl = $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+        $mediaBaseUrl = $this->storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_MEDIA);
         $baseMediaPath = $this->productMediaConfig->getBaseMediaPath();
 
         return [
             'baseUrl' => $baseUrl,
-            'productUrlSuffix' => $this->helper->getProductUrlSuffix(),
-            'productUseCategories' => $this->helper->getProductUseCategories(),
+            'productUrlSuffix' => $this->searchEngineOptimization->getProductUrlSuffix(),
+            'productUseCategories' => $this->searchEngineOptimization->getProductUseCategories(),
             'mediaBaseUrl' => $mediaBaseUrl . $baseMediaPath
         ];
     }

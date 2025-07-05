@@ -1,9 +1,11 @@
 define([
     'uiElement',
     'ko',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
-    'Walkwizus_MeilisearchFrontend/js/model/config-model'
-], function(Element, ko, facetsState, configModel) {
+    'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
+    'Walkwizus_MeilisearchFrontend/js/model/limiter-state'
+], function(Element, ko, configModel, facetsState, viewModeState, limiterState) {
     'use strict';
 
     return Element.extend({
@@ -12,19 +14,37 @@ define([
 
             this.facets = configModel.get('facets');
             this.currentPage = facetsState.currentPage;
+            this.currentViewMode = viewModeState.currentViewMode;
+            this.currentLimit = limiterState.currentLimit;
 
             this.restoreStateFromUrl();
 
-            facetsState.selectedFacets.subscribe(facets => {
-                this.updateUrl(facets, this.currentPage(), facetsState.searchQuery());
+            const getCurrentState = () => ({
+                facets: facetsState.selectedFacets(),
+                page: this.currentPage(),
+                q: facetsState.searchQuery(),
+                product_list_mode: this.currentViewMode(),
+                product_list_limit: this.currentLimit()
             });
 
-            this.currentPage.subscribe(page => {
-                this.updateUrl(facetsState.selectedFacets(), page, facetsState.searchQuery());
+            facetsState.selectedFacets.subscribe(() => {
+                this.updateUrl(getCurrentState());
             });
 
-            facetsState.searchQuery.subscribe(q => {
-                this.updateUrl(facetsState.selectedFacets(), this.currentPage(), q);
+            this.currentPage.subscribe(() => {
+                this.updateUrl(getCurrentState());
+            });
+
+            facetsState.searchQuery.subscribe(() => {
+                this.updateUrl(getCurrentState());
+            });
+
+            this.currentViewMode.subscribe(() => {
+                this.updateUrl(getCurrentState());
+            });
+
+            limiterState.currentLimit.subscribe(() => {
+                this.updateUrl(getCurrentState());
             });
 
             window.addEventListener('popstate', () => {
@@ -34,15 +54,15 @@ define([
             return this;
         },
 
-        updateUrl: function(facets, page, q) {
+        updateUrl: function(state) {
             const params = new URLSearchParams(window.location.search);
 
             Object.keys(this.facets.facetConfig).forEach(facetCode => {
                 params.delete(facetCode);
             });
 
-            Object.keys(facets).forEach(facetCode => {
-                const values = facets[facetCode];
+            Object.keys(state.facets || {}).forEach(facetCode => {
+                const values = state.facets[facetCode];
                 if (values.length > 0 && this.facets.facetConfig[facetCode]?.hasOptions) {
                     const labels = values.map(id => this.facets.facetConfig[facetCode].options[id]?.label).filter(Boolean);
                     if (labels.length > 0) {
@@ -53,17 +73,41 @@ define([
                 }
             });
 
-            if (page > 1) {
-                params.set('page', page);
-            } else {
-                params.delete('page');
-            }
+            Object.keys(state).forEach(key => {
+                if (key === 'facets') {
+                    return;
+                }
 
-            if (q && q.trim() !== '') {
-                params.set('q', q);
-            } else {
-                params.delete('q');
-            }
+                const value = state[key];
+
+                if (key === 'product_list_mode') {
+                    const defaultMode = configModel.get('listMode').split('-')[0];
+                    if (value && value !== defaultMode) {
+                        params.set(key, value);
+                    } else {
+                        params.delete(key);
+                    }
+                    return;
+                }
+
+                if (key === 'product_list_limit') {
+                    const mode = state.product_list_mode || configModel.get('listMode').split('-')[0];
+                    const defaultLimit = mode === 'grid' ? configModel.get('gridPerPage') : configModel.get('listPerPage');
+
+                    if (parseInt(value) !== parseInt(defaultLimit)) {
+                        params.set(key, value);
+                    } else {
+                        params.delete(key);
+                    }
+                    return;
+                }
+
+                if (value && value !== '' && !(typeof value === 'number' && value <= 1)) {
+                    params.set(key, value);
+                } else {
+                    params.delete(key);
+                }
+            });
 
             const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
             const currentUrl = window.location.pathname + window.location.search;
@@ -89,6 +133,19 @@ define([
 
                 if (key === 'q') {
                     facetsState.searchQuery(value);
+                    return;
+                }
+
+                if (key === 'product_list_mode') {
+                    viewModeState.currentViewMode(value);
+                    return;
+                }
+
+                if (key === 'product_list_limit') {
+                    const mode = viewModeState.currentViewMode() || configModel.get('listMode').split('-')[0];
+                    const defaultLimit = mode === 'grid' ? configModel.get('gridPerPage') : configModel.get('listPerPage');
+
+                    limiterState.currentLimit(parseInt(value) || defaultLimit);
                     return;
                 }
 

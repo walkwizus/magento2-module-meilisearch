@@ -2,19 +2,35 @@
 
 declare(strict_types=1);
 
-namespace Walkwizus\MeilisearchFrontend\Helper;
+namespace Walkwizus\MeilisearchFrontend\Model\Config;
 
-use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 
-class Data extends AbstractHelper
+class StoreFront
 {
+    public const CATALOG_FRONTEND_LIST_MODE = 'catalog/frontend/list_mode';
     public const CATALOG_FRONTEND_GRID_PER_PAGE_VALUES = 'catalog/frontend/grid_per_page_values';
     public const CATALOG_FRONTEND_GRID_PER_PAGE = 'catalog/frontend/grid_per_page';
     public const CATALOG_FRONTEND_LIST_PER_PAGE_VALUES = 'catalog/frontend/list_per_page_values';
     public const CATALOG_FRONTEND_LIST_PER_PAGE = 'catalog/frontend/list_per_page';
-    public const XML_PATH_PRODUCT_URL_SUFFIX = 'catalog/seo/product_url_suffix';
-    public const XML_PATH_PRODUCT_USE_CATEGORIES = 'catalog/seo/product_use_categories';
+    public const CATALOG_FRONTEND_LIST_ALLOW_ALL = 'catalog/frontend/list_allow_all';
+
+    /**
+     * @param ScopeConfigInterface $scopeConfig
+     */
+    public function __construct(
+        private readonly ScopeConfigInterface $scopeConfig
+    ) { }
+
+    /**
+     * @param $storeId
+     * @return mixed
+     */
+    public function getListMode($storeId): mixed
+    {
+        return $this->scopeConfig->getValue(self::CATALOG_FRONTEND_LIST_MODE, ScopeInterface::SCOPE_STORE, $storeId);
+    }
 
     /**
      * @param $storeId
@@ -56,17 +72,8 @@ class Data extends AbstractHelper
      * @param $storeId
      * @return mixed
      */
-    public function getProductUrlSuffix($storeId = null): mixed
+    public function getListAllowAll($storeId = null): mixed
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_URL_SUFFIX, ScopeInterface::SCOPE_STORE, $storeId);
-    }
-
-    /**
-     * @param $storeId
-     * @return mixed
-     */
-    public function getProductUseCategories($storeId = null): mixed
-    {
-        return $this->scopeConfig->getValue(self::XML_PATH_PRODUCT_USE_CATEGORIES, ScopeInterface::SCOPE_STORE, $storeId);
+        return $this->scopeConfig->getValue(self::CATALOG_FRONTEND_LIST_ALLOW_ALL, ScopeInterface::SCOPE_STORE, $storeId);
     }
 }

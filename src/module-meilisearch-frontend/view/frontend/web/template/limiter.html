@@ -1,0 +1,12 @@
+<div class="field limiter">
+    <label for="limiter" class="label"><span><!-- ko i18n: 'Show' --><!-- /ko --></span></label>
+    <div class="control">
+        <select id="limiter" data-role="limiter" class="limiter-options"
+                data-bind="
+                    options: perPageValues,
+                    value: currentLimit
+        ">
+        </select>
+    </div>
+    <span class="limiter-text"><!-- ko i18n: 'per page' --><!-- /ko --></span>
+</div>

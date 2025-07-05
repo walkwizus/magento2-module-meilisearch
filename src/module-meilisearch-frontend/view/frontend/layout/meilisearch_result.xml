@@ -17,9 +17,6 @@
                                     <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/facets</item>
                                 </item>
                                 <item name="children" xsi:type="array">
-                                    <item name="meilisearch-frontend-layers-url" xsi:type="array">
-                                        <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/facets/url</item>
-                                    </item>
                                     <item name="meilisearch-frontend-layers-searchbox" xsi:type="array">
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/facets/searchbox</item>
                                         <item name="config" xsi:type="array">
@@ -91,10 +88,20 @@
                                         <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/pagination</item>
                                         <item name="config" xsi:type="array">
                                             <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/pagination</item>
-                                            <item name="displayArea" xsi:type="string">pagination</item>
+                                            <item name="displayArea" xsi:type="string">toolbar</item>
+                                        </item>
+                                    </item>
+                                    <item name="limiter" xsi:type="array">
+                                        <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/limiter</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/limiter</item>
+                                            <item name="displayArea" xsi:type="string">toolbar</item>
                                         </item>
                                     </item>
                                 </item>
+                            </item>
+                            <item name="meilisearch-frontend-layers-url" xsi:type="array">
+                                <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/url</item>
                             </item>
                         </item>
                     </argument>

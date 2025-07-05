@@ -10,8 +10,8 @@ define([
         initialize: function() {
             this._super();
             this.availableViewMode = configModel.get('availableViewMode');
-            const firstMode = Object.keys(this.availableViewMode)[0];
-            viewModeState.currentViewMode(firstMode);
+            const defaultMode = Object.keys(this.availableViewMode)[0];
+            viewModeState.currentViewMode(defaultMode);
 
             return this;
         },
