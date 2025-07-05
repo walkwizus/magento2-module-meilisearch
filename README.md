@@ -10,10 +10,11 @@
 </p>
 
 <p align="center">
-    <img src="docs/assets/logo/walkwizus-logo-light.svg?sanitize=true#gh-light-mode-only" height="40"/>
-    <img src="docs/assets/logo/walkwizus-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40"/>
-    <img src="docs/assets/logo/meilisearch-logo-light.svg?sanitize=true#gh-light-mode-only" height="40"/>
-    <img src="docs/assets/logo/meilisearch-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40"/>
+    <img src="docs/assets/logo/walkwizus-logo-light.svg?sanitize=true#gh-light-mode-only" height="40">
+    <img src="docs/assets/logo/walkwizus-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <img src="docs/assets/logo/meilisearch-logo-light.svg?sanitize=true#gh-light-mode-only" height="40">
+    <img src="docs/assets/logo/meilisearch-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40">
 </p>
 
 The Meilisearch extension for Magento 2 enables replacing Magento's default search engine (OpenSearch) with Meilisearch.
