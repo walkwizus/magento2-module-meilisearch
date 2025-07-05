@@ -10,11 +10,10 @@
 </p>
 
 <p align="center">
-    <img src="docs/assets/logo/walkwizus-logo-light.svg?sanitize=true#gh-light-mode-only" height="40">
-    <img src="docs/assets/logo/walkwizus-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40">
-    &nbsp;&nbsp;&nbsp;&nbsp;
-    <img src="docs/assets/logo/meilisearch-logo-light.svg?sanitize=true#gh-light-mode-only" height="40">
-    <img src="docs/assets/logo/meilisearch-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40">
+    <img src="docs/assets/logo/walkwizus-logo-light.svg?sanitize=true#gh-light-mode-only" height="40"/>
+    <img src="docs/assets/logo/walkwizus-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40"/>
+    <img src="docs/assets/logo/meilisearch-logo-light.svg?sanitize=true#gh-light-mode-only" height="40"/>
+    <img src="docs/assets/logo/meilisearch-logo-dark.svg?sanitize=true#gh-dark-mode-only" height="40"/>
 </p>
 
 The Meilisearch extension for Magento 2 enables replacing Magento's default search engine (OpenSearch) with Meilisearch.
@@ -49,6 +48,7 @@ You can:
 
 - 🔃 Reorder facets as needed
 - 🔍 Enable a search field within facet options
+- 🔎 Enable Fuzzy Search within facet options for approximate matching
 - ➕ Limit the number of visible options with a **“Show more”** toggle
 
 Perfect for keeping navigation **clean and user-friendly**, even in **attribute-rich catalogs**.
@@ -66,7 +66,11 @@ Key features include:
 - 🎚️ **Price slider** with real-time filtering
 - ☑️ **Multi-select checkboxes** for flexible attribute filtering
 - 🔍 **Search within facet options** to quickly find relevant values
+- 🔎 **Fuzzy search within facet options** for approximate matching powered by Fuse.js
 - ⚡ Instant UI updates without page reloads
+
+The search within facet options is powered by [Fuse.js](https://fusejs.io/), providing **fast, fuzzy search** among attribute values directly in the frontend.  
+This enhances usability, especially for attributes with a large number of options, by allowing approximate matching and instant filtering.
 
 This modern frontend ensures a smooth and engaging shopping experience, even on large catalogs.
 
