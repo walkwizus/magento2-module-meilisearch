@@ -1,9 +1,9 @@
 <div class="block block-search">
     <div class="block block-title"><strong>Search</strong></div>
     <div class="block block-content">
-        <form class="form minisearch" id="search_mini_form" method="get" data-bind="attr: { action: getSearchUrl() }">
+        <form class="form minisearch" id="search_mini_form" method="get" data-bind="attr: { action: getSearchUrl() }, css: { active: isActive }">
             <div class="field search">
-                <label class="label" for="search" data-role="minisearch-label">
+                <label class="label" for="search" data-role="minisearch-label" data-bind="click: toggleSearch, css: { active: isActive }">
                     <span><!-- ko i18n: 'Search' --><!-- /ko --></span>
                 </label>
                 <div class="control">
