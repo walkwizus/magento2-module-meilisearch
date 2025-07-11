@@ -7,15 +7,21 @@ namespace Walkwizus\MeilisearchBase\Model\Indexer;
 use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
 use Magento\Framework\Search\Request\Dimension;
 use Walkwizus\MeilisearchBase\Model\AttributeProvider;
-use Walkwizus\MeilisearchBase\Model\Adapter\Meilisearch as MeilisearchAdapter;
+use Walkwizus\MeilisearchBase\Model\Adapter\MeilisearchFactory;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Indexer\SaveHandler\Batch;
 use Walkwizus\MeilisearchBase\Model\AttributeMapper;
+use Walkwizus\MeilisearchBase\Model\Adapter\Meilisearch;
 
 class BaseIndexerHandler implements IndexerInterface
 {
     /**
-     * @param MeilisearchAdapter $meilisearchAdapter
+     * @var Meilisearch|null
+     */
+    private ?Meilisearch $meilisearchClient;
+
+    /**
+     * @param MeilisearchFactory $meilisearchFactory
      * @param SearchIndexNameResolver $searchIndexNameResolver
      * @param Batch $batch
      * @param string $indexerId
@@ -25,7 +31,7 @@ class BaseIndexerHandler implements IndexerInterface
      * @param string $indexPrimaryKey
      */
     public function __construct(
-        private readonly MeilisearchAdapter $meilisearchAdapter,
+        readonly MeilisearchFactory $meilisearchFactory,
         private readonly SearchIndexNameResolver $searchIndexNameResolver,
         private readonly Batch $batch,
         private readonly string $indexerId,
@@ -33,7 +39,9 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly AttributeProvider $attributeProvider,
         private readonly int $batchSize = 10000,
         private readonly string $indexPrimaryKey = 'id'
-    ) { }
+    ) {
+        $this->meilisearchClient = $meilisearchFactory->create();
+    }
 
     /**
      * @param Dimension[] $dimensions
@@ -47,7 +55,7 @@ class BaseIndexerHandler implements IndexerInterface
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->meilisearchAdapter->updateSettings($indexName, [
+            $this->meilisearchClient->updateSettings($indexName, [
                 'filterableAttributes' => $this->attributeProvider->getFilterableAttributes($indexerId, 'index'),
                 'sortableAttributes' => $this->attributeProvider->getSortableAttributes($indexerId, 'index'),
                 'searchableAttributes' => $this->attributeProvider->getSearchableAttributes($indexerId, 'index'),
@@ -56,7 +64,7 @@ class BaseIndexerHandler implements IndexerInterface
             foreach ($this->batch->getItems($documents, $this->batchSize) as $batchDocuments) {
                 $batchDocuments = $this->attributeMapper->map($indexerId, $batchDocuments, $storeId);
                 try {
-                    $this->meilisearchAdapter->addDocs($indexName, $batchDocuments, $this->indexPrimaryKey);
+                    $this->meilisearchClient->addDocs($indexName, $batchDocuments, $this->indexPrimaryKey);
                 } catch (\Exception $e) { }
             }
         }
@@ -76,7 +84,7 @@ class BaseIndexerHandler implements IndexerInterface
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->meilisearchAdapter->deleteIndex($indexName);
+            $this->meilisearchClient->deleteIndex($indexName);
         }
     }
 
@@ -91,8 +99,8 @@ class BaseIndexerHandler implements IndexerInterface
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->meilisearchAdapter->deleteIndex($indexName);
-            $this->meilisearchAdapter->createIndex($indexName);
+            $this->meilisearchClient->deleteIndex($indexName);
+            $this->meilisearchClient->createIndex($indexName);
         }
     }
 
@@ -102,7 +110,7 @@ class BaseIndexerHandler implements IndexerInterface
      */
     public function isAvailable($dimensions = []): bool
     {
-        return $this->meilisearchAdapter->isHealthy();
+        return $this->meilisearchClient->isHealthy();
     }
 
     /**

@@ -7,28 +7,35 @@ namespace Walkwizus\MeilisearchMerchandising\Controller\Adminhtml\Category\Ajax;
 use Magento\Backend\App\Action;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Backend\App\Action\Context;
-use Walkwizus\MeilisearchBase\Model\Adapter\Meilisearch;
+use Walkwizus\MeilisearchBase\Model\Adapter\MeilisearchFactory;
 use Walkwizus\MeilisearchMerchandising\Service\QueryBuilderService;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Walkwizus\MeilisearchBase\Model\Adapter\Meilisearch;
 
 class Preview extends Action implements HttpPostActionInterface
 {
     /**
+     * @var Meilisearch|null
+     */
+    private ?Meilisearch $meilisearchClient;
+
+    /**
      * @param Context $context
-     * @param Meilisearch $client
+     * @param MeilisearchFactory $meilisearchFactory
      * @param QueryBuilderService $queryBuilderService
      * @param SearchIndexNameResolver $searchIndexNameResolver
      * @param JsonFactory $jsonFactory
      */
     public function __construct(
         Context $context,
-        private Meilisearch $client,
-        private QueryBuilderService $queryBuilderService,
-        private SearchIndexNameResolver $searchIndexNameResolver,
-        private JsonFactory $jsonFactory
+        readonly MeilisearchFactory $meilisearchFactory,
+        private readonly QueryBuilderService $queryBuilderService,
+        private readonly SearchIndexNameResolver $searchIndexNameResolver,
+        private readonly JsonFactory $jsonFactory
     ) {
+        $this->meilisearchClient = $meilisearchFactory->create();
         parent::__construct($context);
     }
 
@@ -51,7 +58,7 @@ class Preview extends Action implements HttpPostActionInterface
         $filters = $this->queryBuilderService->convertRulesToMeilisearchQuery($rules);
         $indexName = $this->searchIndexNameResolver->getIndexName($storeId, 'catalog_product');
 
-        $result = $this->client->search($indexName, '', [
+        $result = $this->meilisearchClient->search($indexName, '', [
             'filter' => $filters,
             'sort' => ["category_promote.{$categoryId}:asc"],
             'limit' => 10000

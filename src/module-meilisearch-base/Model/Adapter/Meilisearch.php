@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\Model\Adapter;
 
 use Meilisearch\Client;
+use Meilisearch\Contracts\KeysResults;
 use Meilisearch\Search\SearchResult;
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
 
@@ -17,14 +18,25 @@ class Meilisearch
 
     /**
      * @param ConnectionManager $connectionManager
+     * @param bool $master
      */
-    public function __construct(ConnectionManager $connectionManager)
-    {
+    public function __construct(
+        ConnectionManager $connectionManager,
+        bool $master = false
+    ) {
         try {
-            $this->client = $connectionManager->getConnection();
+            $this->client = $connectionManager->getConnection($master);
         } catch (\Exception $e) {
 
         }
+    }
+
+    /**
+     * @return KeysResults
+     */
+    public function getKeys(): KeysResults
+    {
+        return $this->client->getKeys();
     }
 
     /**

@@ -1,6 +1,14 @@
 <?xml version="1.0"?>
 
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="meilisearch_generate_master_key" xsi:type="object">Walkwizus\MeilisearchBase\Console\Command\MasterKey</item>
+                <item name="meilisearch_show_keys" xsi:type="object">Walkwizus\MeilisearchBase\Console\Command\ApiKey</item>
+            </argument>
+        </arguments>
+    </type>
     <type name="Magento\Search\Model\Adminhtml\System\Config\Source\Engine">
         <arguments>
             <argument name="engines" xsi:type="array">

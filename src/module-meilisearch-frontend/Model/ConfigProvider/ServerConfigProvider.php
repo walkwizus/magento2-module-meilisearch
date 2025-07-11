@@ -6,7 +6,7 @@ namespace Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 
 use Walkwizus\MeilisearchFrontend\Api\ConfigProviderInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Walkwizus\MeilisearchBase\Helper\ServerSettings;
+use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Exception\NoSuchEntityException;
 

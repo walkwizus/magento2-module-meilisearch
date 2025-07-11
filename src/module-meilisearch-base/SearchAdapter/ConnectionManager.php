@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\SearchAdapter;
 
 use Psr\Log\LoggerInterface;
-use Walkwizus\MeilisearchBase\Helper\ServerSettings;
-use GuzzleHttp\Client as HttpClient;
+use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 use GuzzleHttp\Psr7\HttpFactory;
+use GuzzleHttp\Client as HttpClient;
 use Meilisearch\Client;
 
 class ConnectionManager
@@ -20,40 +20,47 @@ class ConnectionManager
     /**
      * @param LoggerInterface $logger
      * @param ServerSettings $serverSettings
+     * @param HttpFactory $httpFactory
      * @param HttpClient $httpClient
      */
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly ServerSettings $serverSettings,
+        private readonly HttpFactory $httpFactory,
         private readonly HttpClient $httpClient
     ) { }
 
     /**
+     * @param bool $master
      * @return Client|null
+     * @throws \Exception
      */
-    public function getConnection(): ?Client
+    public function getConnection(bool $master = false): ?Client
     {
         if (!$this->client) {
-            $this->connect();
+            $this->connect($master);
         }
 
         return $this->client;
     }
 
     /**
+     * @param bool $master
      * @return void
+     * @throws \Exception
      */
-    private function connect(): void
+    private function connect(bool $master): void
     {
+        $apiKey = $master ? $this->serverSettings->getMasterKey() : $this->serverSettings->getServerSettingsApiKey();
+
         try {
-            $httpFactory = new HttpFactory();
             $this->client = new Client(
                 $this->serverSettings->getServerSettingsAddress(),
-                $this->serverSettings->getServerSettingsApiKey(),
+                $apiKey,
                 $this->httpClient,
-                $httpFactory,
+                $this->httpFactory,
                 [],
-                $httpFactory
+                $this->httpFactory
             );
         } catch (\Exception $e) {
             $this->logger->critical($e);

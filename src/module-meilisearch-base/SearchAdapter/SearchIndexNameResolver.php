@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\SearchAdapter;
 
 use Magento\CatalogSearch\Model\Indexer\Fulltext;
-use Walkwizus\MeilisearchBase\Helper\ServerSettings;
+use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 
 class SearchIndexNameResolver
 {

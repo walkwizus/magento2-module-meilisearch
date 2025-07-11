@@ -7,7 +7,7 @@
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
-                            <resource id="Walkwizus_Meilisearch::config" title="Meilisearch Configuration"/>
+                            <resource id="Walkwizus_MeilisearchBase::config" title="Meilisearch Configuration"/>
                         </resource>
                     </resource>
                 </resource>
