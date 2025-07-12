@@ -3,13 +3,15 @@ define([
     'ko',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
-], function(Component, ko, facetsState, searchState) {
+    'Walkwizus_MeilisearchFrontend/js/model/config-model'
+], function(Component, ko, facetsState, searchState, configModel) {
     'use strict';
 
     return Component.extend({
         initialize: function() {
             this._super();
 
+            this.currentCategoryUrl = configModel.get('currentCategoryUrl');
             this.currentPage = facetsState.currentPage;
             this.totalHits = searchState.totalHits;
             this.hitsPerPage = searchState.hitsPerPage;

@@ -1,42 +1,91 @@
 <div class="pages">
     <div class="items pages-items" data-bind="if: totalPages() > 1">
         <div class="item pages-item-previous" data-bind="if: showPrevButton()">
-            <a class="action previous" href="#" data-bind="click: prevPage">
+            <a class="action previous" data-bind="
+                attr: {
+                    href: (currentPage() - 1) === 1
+                        ? currentCategoryUrl
+                        : currentCategoryUrl + '?page=' + (currentPage() - 1)
+                },
+                click: function(_, e) {
+                    e.preventDefault();
+                    prevPage();
+                }
+            ">
                 <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                 <span><!-- ko i18n: 'Previous' --><!-- /ko --></span>
             </a>
         </div>
+
         <div class="item" data-bind="if: visiblePages()[0] > 1">
-            <a class="page" href="#" data-bind="click: function() { goToPage(1) }">
+            <a class="page" data-bind="
+                attr: {
+                    href: currentCategoryUrl
+                },
+                click: function(_, e) {
+                    e.preventDefault();
+                    goToPage(1);
+                }
+            ">
                 <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                 <span>1</span>
             </a>
         </div>
+
         <div class="item" data-bind="if: visiblePages()[0] > 2">
             <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
             <span>...</span>
         </div>
+
         <!-- ko foreach: visiblePages -->
         <div class="item">
-            <a class="page" href="#"
-               data-bind="click: function() { $parent.goToPage($data) }, css: { 'current': $parent.isCurrentPage($data) }">
+            <a class="page" data-bind="
+                attr: {
+                    href: $data === 1 ? $parent.currentCategoryUrl : $parent.currentCategoryUrl + '?page=' + $data
+                },
+                click: function(_, e) {
+                    e.preventDefault();
+                    $parent.goToPage($data);
+                },
+                css: {
+                    'current': $parent.isCurrentPage($data)
+                }
+            ">
                 <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                 <span data-bind="text: $data"></span>
             </a>
         </div>
         <!-- /ko -->
+
         <div class="item" data-bind="if: visiblePages()[visiblePages().length - 1] < totalPages() - 1">
             <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
             <span>...</span>
         </div>
+
         <div class="item" data-bind="if: visiblePages()[visiblePages().length - 1] < totalPages()">
-            <a class="page" href="#" data-bind="click: function() { goToPage(totalPages()) }">
+            <a class="page" data-bind="
+                attr: {
+                    href: currentCategoryUrl + '?page=' + totalPages()
+                },
+                click: function(_, e) {
+                    e.preventDefault();
+                    goToPage(totalPages());
+                }
+            ">
                 <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                 <span data-bind="text: totalPages"></span>
             </a>
         </div>
+
         <div class="item pages-item-next" data-bind="if: showNextButton()">
-            <a class="action next" href="#" data-bind="click: nextPage">
+            <a class="action next" data-bind="
+                attr: {
+                    href: currentCategoryUrl + '?page=' + (currentPage() + 1)
+                },
+                click: function(_, e) {
+                    e.preventDefault(); nextPage();
+                }
+            ">
                 <span class="label"><!-- ko i18n: 'Page' --><!-- /ko --></span>
                 <span><!-- ko i18n: 'Next' --><!-- /ko --></span>
             </a>
