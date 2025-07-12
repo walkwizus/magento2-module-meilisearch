@@ -12,6 +12,7 @@ define([
         initialize: function() {
             this._super();
             this.currentViewMode = viewModeState.currentViewMode;
+            this.isLoading = searchState.isLoading;
             this.searchResults = searchState.searchResults;
             this.totalHits = searchState.totalHits;
             this.hitsPerPage = searchState.hitsPerPage;

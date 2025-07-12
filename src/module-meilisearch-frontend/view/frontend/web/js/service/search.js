@@ -81,13 +81,18 @@ define([
         if (activeFacetCodes.length === 0) {
             const filterParams = queryBuilder().buildFilters({}, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
 
-            searchService.search(searchQuery, {
-                filter: filterParams,
-                facets: facetList,
-                sort: sortParams,
-                page: currentPage,
-                hitsPerPage: hitsPerPage
-            }).then(updateResults);
+            searchService
+                .search(searchQuery, {
+                    filter: filterParams,
+                    facets: facetList,
+                    sort: sortParams,
+                    page: currentPage,
+                    hitsPerPage: hitsPerPage
+                })
+                .then(updateResults)
+                .finally(() => {
+                    searchState.isLoading(false);
+                });
 
             return;
         }
@@ -136,6 +141,8 @@ define([
                 combinedResults.facetDistribution = facetDistributions;
 
                 updateResults(combinedResults);
+            }).finally(() => {
+                searchState.isLoading(false);
             });
     }
 

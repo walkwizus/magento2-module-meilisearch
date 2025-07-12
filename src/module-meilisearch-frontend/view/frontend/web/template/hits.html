@@ -1,3 +1,9 @@
+<!-- ko if: !isLoading() && totalHits() === 0 -->
+<div class="message info empty">
+    <div><!-- ko i18n: 'We can't find products matching the selection.' --><!-- /ko --></div>
+</div>
+<!-- /ko -->
+<!-- ko if: totalHits() > 0 -->
 <div class="toolbar toolbar-products">
     <!-- ko foreach: getRegion('viewmode') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
@@ -46,3 +52,4 @@
         <!-- ko template: getTemplate() --><!-- /ko -->
     <!-- /ko -->
 </div>
+<!-- /ko -->
