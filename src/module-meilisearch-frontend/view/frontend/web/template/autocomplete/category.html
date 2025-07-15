@@ -1,10 +1,12 @@
 <!-- ko if: $parent.results()[indexName] && $parent.results()[indexName].length -->
-<span class="autocomplete-results-title"><!-- ko i18n: 'Categories' --><!-- /ko --></span>
-<ul data-bind="foreach: $parent.results()[indexName]">
-    <li>
-        <a data-bind="attr: { href: $parents[1].baseUrl + url_key }">
-            <span data-bind="text: path + ' (' + product_count + ')'"></span>
-        </a>
-    </li>
-</ul>
+<div class="autocomplete-section">
+    <span class="autocomplete-results-title"><!-- ko i18n: 'Categories' --><!-- /ko --></span>
+    <ul data-bind="foreach: $parent.results()[indexName]">
+        <li role="option">
+            <a data-bind="attr: { href: $parents[1].baseUrl + url_key }">
+                <span data-bind="html: $parents[1].highlightMatch(path) + ' (' + product_count + ')'"></span>
+            </a>
+        </li>
+    </ul>
+</div>
 <!-- /ko -->

@@ -66,6 +66,12 @@ define([
             });
         },
 
+        highlightMatch: function (text) {
+            const query = this.searchTerm().toLowerCase();
+            if (!query) return text;
+            return text.replace(new RegExp(`(${query})`, 'gi'), '<strong>$1</strong>');
+        },
+
         getSearchUrl: function() {
             return url.build('catalogsearch/result');
         },

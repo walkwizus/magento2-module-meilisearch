@@ -23,7 +23,7 @@
                             attr: { placeholder: $t('Search entire store here...') }
                         "
                     />
-                    <ul id="search_autocomplete" class="autocomplete-results" data-bind="visible: hasResults">
+                    <ul id="search_autocomplete" class="autocomplete-results" data-bind="css: { active: hasResults }, visible: hasResults" role="listbox">
                         <!-- ko foreach: getRegion('autocomplete-result') -->
                             <!-- ko template: getTemplate() --><!-- /ko -->
                         <!-- /ko -->

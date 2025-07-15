@@ -5,8 +5,11 @@
         .autocomplete-results {
             position: absolute;
             top: 100%;
-            left: 0;
             right: 0;
+            left: auto;
+            width: 600px;
+            max-width: 100vw;
+            box-sizing: border-box;
             z-index: 100;
             background: @color-white;
             border: 1px solid @color-gray80;
@@ -14,6 +17,13 @@
             max-height: 300px;
             overflow-y: auto;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            opacity: 0;
+            transform: translateY(5px);
+
+            &.active {
+                opacity: 1;
+            }
 
             li {
                 padding: 10px;
@@ -26,9 +36,11 @@
                     gap: 10px;
                     text-decoration: none;
                     color: @text__color;
+                    transition: background 0.2s ease;
 
                     &:hover {
                         background: @color-gray94;
+                        border-radius: 4px;
                     }
 
                     img {
@@ -44,6 +56,46 @@
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
+                    }
+
+                    strong {
+                        font-weight: 700;
+                        background: #fff8c5;
+                    }
+                }
+            }
+
+            &.empty li {
+                padding: 12px;
+                text-align: center;
+                font-style: italic;
+                color: @color-gray60;
+            }
+        }
+
+        .autocomplete-section {
+            padding: 8px 12px;
+
+            .autocomplete-results-title {
+                display: block;
+                margin-bottom: 6px;
+                font-weight: 600;
+                font-size: 13px;
+                color: @primary__color;
+                text-transform: uppercase;
+            }
+
+            ul {
+                margin: 0;
+                padding: 0;
+
+                li {
+                    padding: 8px 0;
+                    border-bottom: none;
+
+                    a:hover {
+                        background: @color-gray94;
+                        border-radius: 4px;
                     }
                 }
             }
