@@ -22,22 +22,22 @@
     <ol class="products list items product-items" data-bind="foreach: searchResults().hits">
         <li class="item product product-item">
             <div class="product-item-info">
-                <a data-bind="attr: { href: $parent.getProductUrl(url_key) }" class="product photo product-item-photo">
+                <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }" class="product photo product-item-photo">
                     <span class="product-image-container" style="width: 240px;">
                         <span class="product-image-wrapper" style="padding-bottom: 125%;">
-                            <img class="product-image-photo" data-bind="attr: { src: $parent.getProductImage(image), alt: name }" loading="lazy" width="240" height="300" />
+                            <img class="product-image-photo" data-bind="attr: { src: $parent.productModel.getProductImage(image), alt: name }" loading="lazy" width="240" height="300" />
                         </span>
                     </span>
                 </a>
                 <div class="product details product-item-details">
                     <strong class="product name product-item-name">
-                        <a data-bind="attr: { href: $parent.getProductUrl(url_key) }, text: name" class="product-item-link"></a>
+                        <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }, text: name" class="product-item-link"></a>
                     </strong>
                     <div class="price-box price-final_price">
                         <span class="normal-price">
                             <span class="price-container price-final_price tax weee">
                                 <span class="price-wrapper">
-                                    <span class="price" data-bind="text: $parent.formatPrice($parent.getProductPrice($data))"></span>
+                                    <span class="price" data-bind="text: $parent.productModel.formatPrice($parent.productModel.getProductPrice($data))"></span>
                                 </span>
                             </span>
                         </span>

@@ -1,0 +1,9 @@
+<!-- ko if: $parent.results()[indexName] && $parent.results()[indexName].length -->
+<span class="autocomplete-results-title"><!-- ko i18n: 'products' --><!-- /ko --></span>
+<li data-bind="foreach: $parent.results()[indexName]">
+    <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }">
+        <img data-bind="attr: { src: $parent.productModel.getProductImage(image), alt: name }" />
+        <span data-bind="text: name"></span>
+    </a>
+</li>
+<!-- /ko -->

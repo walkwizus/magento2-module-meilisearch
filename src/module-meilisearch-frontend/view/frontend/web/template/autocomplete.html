@@ -23,9 +23,11 @@
                             attr: { placeholder: $t('Search entire store here...') }
                         "
                     />
-                    <!-- ko foreach: getRegion('autocomplete-result') -->
-                        <!-- ko template: getTemplate() --><!-- /ko -->
-                    <!-- /ko -->
+                    <ul id="search_autocomplete" class="autocomplete-results" data-bind="visible: hasResults">
+                        <!-- ko foreach: getRegion('autocomplete-result') -->
+                            <!-- ko template: getTemplate() --><!-- /ko -->
+                        <!-- /ko -->
+                    </ul>
                 </div>
             </div>
             <div class="actions">

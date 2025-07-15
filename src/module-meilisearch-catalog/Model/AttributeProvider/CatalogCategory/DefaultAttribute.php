@@ -21,7 +21,7 @@ class DefaultAttribute implements AttributeProviderInterface
      */
     public function getSearchableAttributes(): array
     {
-        return ['name'];
+        return ['name', 'path'];
     }
 
     /**

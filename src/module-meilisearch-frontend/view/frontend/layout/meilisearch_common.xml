@@ -23,11 +23,20 @@
                                 <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/autocomplete</item>
                             </item>
                             <item name="children" xsi:type="array">
-                                <item name="hits" xsi:type="array">
-                                    <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/hits</item>
+                                <item name="products" xsi:type="array">
+                                    <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/autocomplete/product</item>
                                     <item name="config" xsi:type="array">
-                                        <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/autocomplete/hits</item>
+                                        <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/autocomplete/product</item>
                                         <item name="displayArea" xsi:type="string">autocomplete-result</item>
+                                        <item name="indexName" xsi:type="string">catalog_product</item>
+                                    </item>
+                                </item>
+                                <item name="categories" xsi:type="array">
+                                    <item name="component" xsi:type="string">uiElement</item>
+                                    <item name="config" xsi:type="array">
+                                        <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/autocomplete/category</item>
+                                        <item name="displayArea" xsi:type="string">autocomplete-result</item>
+                                        <item name="indexName" xsi:type="string">catalog_category</item>
                                     </item>
                                 </item>
                             </item>

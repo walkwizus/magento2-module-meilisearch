@@ -29,6 +29,15 @@
                 <item name="facet_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\FacetConfigProvider</item>
                 <item name="price_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\PriceConfigProvider</item>
                 <item name="server_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\ServerConfigProvider</item>
+                <item name="source_autocomplete_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\IndexAutocompleteConfigProvider</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchFrontend\Model\SourceAutocompleteConfigProvider">
+        <arguments>
+            <argument name="sources" xsi:type="array">
+                <item name="catalog_product" xsi:type="string">catalog_product</item>
+                <item name="catalog_category" xsi:type="string">catalog_category</item>
             </argument>
         </arguments>
     </type>

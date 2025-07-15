@@ -11,20 +11,27 @@ define([
     return Component.extend({
         defaults: {
             searchTerm: ko.observable(''),
-            results: ko.observable({}),
+            results: ko.observableArray(),
             isActive: ko.observable(false)
         },
 
         initialize: function() {
             this._super();
+
+            this.baseUrl = configModel.get('baseUrl');
+
             this.searchService = meilisearchService({
                 host: configModel.get('host'),
-                apiKey: configModel.get('apiKey'),
-                indexName: configModel.get('indexName')
+                apiKey: configModel.get('apiKey')
             });
 
             this.searchTerm.subscribe((v) => {
                 this.performSearch(v);
+            });
+
+            this.hasResults = ko.pureComputed(() => {
+                const resultData = this.results();
+                return Object.values(resultData).some(list => Array.isArray(list) && list.length > 0);
             });
 
             this._bindClickOutside();
@@ -34,13 +41,29 @@ define([
 
         performSearch: function(terms) {
             if (!terms) {
-                this.results([]);
+                this.results({});
                 return;
             }
-            this.searchService.search(terms)
-                .then((res) => {
-                    this.results(res.hits);
+
+            const indexMap = configModel.get('autocompleteIndex');
+            const queries = Object.entries(indexMap).map(([_, indexUid]) => ({
+                indexUid,
+                q: terms,
+                limit: 5
+            }));
+
+            this.searchService.multiSearch(queries).then((res) => {
+                const mappedResults = {};
+
+                res.results.forEach(result => {
+                    const alias = Object.keys(indexMap).find(key => indexMap[key] === result.indexUid);
+                    if (alias) {
+                        mappedResults[alias] = result.hits;
+                    }
                 });
+
+                this.results(mappedResults);
+            });
         },
 
         getSearchUrl: function() {
