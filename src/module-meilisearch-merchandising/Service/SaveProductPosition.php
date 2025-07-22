@@ -4,33 +4,26 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchMerchandising\Service;
 
-use Walkwizus\MeilisearchBase\Model\Adapter\MeilisearchFactory;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
-use Walkwizus\MeilisearchBase\Model\Adapter\Meilisearch;
+use Walkwizus\MeilisearchBase\Service\DocumentsManager;
 
 class SaveProductPosition
 {
     /**
-     * @var Meilisearch|null
-     */
-    private ?Meilisearch $meilisearchClient;
-
-    /**
-     * @param MeilisearchFactory $meilisearchFactory
      * @param SearchIndexNameResolver $searchIndexNameResolver
+     * @param DocumentsManager $documentsManager
      */
     public function __construct(
-        readonly MeilisearchFactory $meilisearchFactory,
-        private readonly SearchIndexNameResolver $searchIndexNameResolver
-    ) {
-        $this->meilisearchClient = $meilisearchFactory->create();
-    }
+        private readonly SearchIndexNameResolver $searchIndexNameResolver,
+        private readonly DocumentsManager $documentsManager
+    ) { }
 
     /**
      * @param array $positions
      * @param $categoryId
      * @param $storeId
      * @return void
+     * @throws \Exception
      */
     public function execute(array $positions, $categoryId, $storeId): void
     {
@@ -42,6 +35,6 @@ class SaveProductPosition
             ];
         }, $positions);
 
-        $this->meilisearchClient->updateDocuments($indexName, $updateDocuments);
+        $this->documentsManager->updateDocuments($indexName, $updateDocuments);
     }
 }

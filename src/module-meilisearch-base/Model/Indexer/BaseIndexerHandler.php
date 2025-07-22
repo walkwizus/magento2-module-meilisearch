@@ -5,23 +5,23 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\Model\Indexer;
 
 use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
-use Magento\Framework\Search\Request\Dimension;
-use Walkwizus\MeilisearchBase\Model\AttributeProvider;
-use Walkwizus\MeilisearchBase\Model\Adapter\MeilisearchFactory;
+use Walkwizus\MeilisearchBase\Service\SettingsManager;
+use Walkwizus\MeilisearchBase\Service\DocumentsManager;
+use Walkwizus\MeilisearchBase\Service\IndexesManager;
+use Walkwizus\MeilisearchBase\Service\HealthManager;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Indexer\SaveHandler\Batch;
 use Walkwizus\MeilisearchBase\Model\AttributeMapper;
-use Walkwizus\MeilisearchBase\Model\Adapter\Meilisearch;
+use Walkwizus\MeilisearchBase\Model\AttributeProvider;
+use Magento\Framework\Search\Request\Dimension;
 
 class BaseIndexerHandler implements IndexerInterface
 {
     /**
-     * @var Meilisearch|null
-     */
-    private ?Meilisearch $meilisearchClient;
-
-    /**
-     * @param MeilisearchFactory $meilisearchFactory
+     * @param SettingsManager $settingsManager
+     * @param DocumentsManager $documentsManager
+     * @param IndexesManager $indexesManager
+     * @param HealthManager $healthManager
      * @param SearchIndexNameResolver $searchIndexNameResolver
      * @param Batch $batch
      * @param string $indexerId
@@ -31,7 +31,10 @@ class BaseIndexerHandler implements IndexerInterface
      * @param string $indexPrimaryKey
      */
     public function __construct(
-        readonly MeilisearchFactory $meilisearchFactory,
+        private readonly SettingsManager $settingsManager,
+        private readonly DocumentsManager $documentsManager,
+        private readonly IndexesManager $indexesManager,
+        private readonly HealthManager $healthManager,
         private readonly SearchIndexNameResolver $searchIndexNameResolver,
         private readonly Batch $batch,
         private readonly string $indexerId,
@@ -39,14 +42,13 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly AttributeProvider $attributeProvider,
         private readonly int $batchSize = 10000,
         private readonly string $indexPrimaryKey = 'id'
-    ) {
-        $this->meilisearchClient = $meilisearchFactory->create();
-    }
+    ) { }
 
     /**
      * @param Dimension[] $dimensions
      * @param \Traversable $documents
      * @return IndexerInterface
+     * @throws \Exception
      */
     public function saveIndex($dimensions, \Traversable $documents): IndexerInterface
     {
@@ -55,16 +57,14 @@ class BaseIndexerHandler implements IndexerInterface
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->meilisearchClient->updateSettings($indexName, [
-                'filterableAttributes' => $this->attributeProvider->getFilterableAttributes($indexerId, 'index'),
-                'sortableAttributes' => $this->attributeProvider->getSortableAttributes($indexerId, 'index'),
-                'searchableAttributes' => $this->attributeProvider->getSearchableAttributes($indexerId, 'index'),
-            ]);
+            $this->settingsManager->updateFilterableAttributes($indexName, $this->attributeProvider->getFilterableAttributes($indexerId, 'index'));
+            $this->settingsManager->updateSortableAttributes($indexName, $this->attributeProvider->getSortableAttributes($indexerId, 'index'));
+            $this->settingsManager->updateSearchableAttributes($indexName, $this->attributeProvider->getSearchableAttributes($indexerId, 'index'));
 
             foreach ($this->batch->getItems($documents, $this->batchSize) as $batchDocuments) {
                 $batchDocuments = $this->attributeMapper->map($indexerId, $batchDocuments, $storeId);
                 try {
-                    $this->meilisearchClient->addDocs($indexName, $batchDocuments, $this->indexPrimaryKey);
+                    $this->documentsManager->addDocumentsInBatches($indexName, $batchDocuments, $this->indexPrimaryKey);
                 } catch (\Exception $e) { }
             }
         }
@@ -76,6 +76,7 @@ class BaseIndexerHandler implements IndexerInterface
      * @param $dimensions
      * @param \Traversable $documents
      * @return void
+     * @throws \Exception
      */
     public function deleteIndex($dimensions, \Traversable $documents): void
     {
@@ -84,13 +85,14 @@ class BaseIndexerHandler implements IndexerInterface
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->meilisearchClient->deleteIndex($indexName);
+            $this->indexesManager->deleteIndex($indexName);
         }
     }
 
     /**
      * @param $dimensions
      * @return void
+     * @throws \Exception
      */
     public function cleanIndex($dimensions): void
     {
@@ -99,18 +101,19 @@ class BaseIndexerHandler implements IndexerInterface
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->meilisearchClient->deleteIndex($indexName);
-            $this->meilisearchClient->createIndex($indexName);
+            $this->indexesManager->deleteIndex($indexName);
+            $this->indexesManager->createIndex($indexName, $this->indexPrimaryKey);
         }
     }
 
     /**
      * @param Dimension[] $dimensions
      * @return bool
+     * @throws \Exception
      */
     public function isAvailable($dimensions = []): bool
     {
-        return $this->meilisearchClient->isHealthy();
+        return $this->healthManager->isHealthy();
     }
 
     /**
