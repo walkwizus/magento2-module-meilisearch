@@ -20,7 +20,7 @@ class SettingsManager
      * @return array
      * @throws \Exception
      */
-    public function getSettings($indexName)
+    public function getSettings($indexName): array
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->getSettings();
@@ -108,5 +108,17 @@ class SettingsManager
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateSynonyms($synonyms);
+    }
+
+    /**
+     * @param $indexName
+     * @param array $typoTolerance
+     * @return array
+     * @throws \Exception
+     */
+    public function updateTypoTolerance($indexName, array $typoTolerance): array
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->index($indexName)->updateTypoTolerance($typoTolerance);
     }
 }
