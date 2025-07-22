@@ -22,7 +22,7 @@ class SettingsManager
      */
     public function getSettings($indexName)
     {
-        $client = $this->connectionManager->getConnection($indexName);
+        $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->getSettings();
     }
 
