@@ -83,13 +83,17 @@ class Eav implements AttributeProviderInterface
 
         $attributes = $this->attributeCollectionFactory->create()
             ->addIsSearchableFilter()
+            ->addFieldToSelect('backend_type')
             ->addFieldToSelect('attribute_code');
 
         $attributes->getSelect()->order('search_weight DESC');
 
         foreach ($attributes as $attribute) {
-            $searchableAttributes[] = $attribute->getAttributeCode();
-            $searchableAttributes[] = $attribute->getAttributeCode() . '_value';
+            if ($attribute->usesSource() || $attribute->getBackendType() === 'int') {
+                $searchableAttributes[] = $attribute->getAttributeCode() . '_value';
+            } else {
+                $searchableAttributes[] = $attribute->getAttributeCode();
+            }
         }
 
         return array_merge($this->additionalSearchableAttributes, $searchableAttributes);
