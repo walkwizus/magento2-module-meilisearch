@@ -13,9 +13,9 @@ use Magento\Framework\Exception\NoSuchEntityException;
 class IndicesListing extends AbstractDataProvider
 {
     /**
-     * @param $name
-     * @param $primaryFieldName
-     * @param $requestFieldName
+     * @param string $name
+     * @param string $primaryFieldName
+     * @param string $requestFieldName
      * @param IndexesManager $indexesManager
      * @param StoreManagerInterface $storeManager
      * @param IndexStoreResolver $indexStoreResolver
