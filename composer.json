@@ -26,6 +26,7 @@
         "walkwizus/module-meilisearch-base": "self.version",
         "walkwizus/module-meilisearch-catalog": "self.version",
         "walkwizus/module-meilisearch-frontend": "self.version",
+        "walkwizus/module-meilisearch-indices": "self.version",
         "walkwizus/module-meilisearch-merchandising": "self.version"
     },
     "autoload": {
@@ -33,12 +34,14 @@
             "src/module-meilisearch-base/registration.php",
             "src/module-meilisearch-catalog/registration.php",
             "src/module-meilisearch-frontend/registration.php",
+            "src/module-meilisearch-indices/registration.php",
             "src/module-meilisearch-merchandising/registration.php"
         ],
         "psr-4": {
             "Walkwizus\\MeilisearchBase\\": "src/module-meilisearch-base",
             "Walkwizus\\MeilisearchCatalog\\": "src/module-meilisearch-catalog",
             "Walkwizus\\MeilisearchFrontend\\": "src/module-meilisearch-frontend",
+            "Walkwizus\\MeilisearchIndices\\": "src/module-meilisearch-indices",
             "Walkwizus\\MeilisearchMerchandising\\": "src/module-meilisearch-merchandising"
         }
     },

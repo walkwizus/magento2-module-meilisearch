@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add
+            id="Walkwizus_MeilisearchIndices::indices"
+            title="Meilisearch"
+            translate="title"
+            module="Walkwizus_MeilisearchIndices"
+            resource="Walkwizus_MeilisearchIndices::indices"
+            parent="Magento_Backend::system"
+            sortOrder="900"
+        />
+        <add
+            id="Walkwizus_MeilisearchIndices::indices_settings"
+            title="Index Settings"
+            translate="title"
+            module="Walkwizus_MeilisearchIndices"
+            resource="Walkwizus_MeilisearchIndices::indices_settings"
+            parent="Walkwizus_MeilisearchIndices::indices"
+            action="meilisearch_indices/indices"
+        />
+    </menu>
+</config>

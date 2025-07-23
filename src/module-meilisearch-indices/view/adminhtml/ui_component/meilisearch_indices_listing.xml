@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">meilisearch_indices_listing.meilisearch_indices_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <deps>
+            <dep>meilisearch_indices_listing.meilisearch_indices_listing_data_source</dep>
+        </deps>
+        <spinner>meilisearch_indices_columns</spinner>
+    </settings>
+    <dataSource name="meilisearch_indices_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <updateUrl path="mui/index/render"/>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">id</param>
+            </storageConfig>
+        </settings>
+        <aclResource>Walkwizus_MeilisearchIndices::indices</aclResource>
+        <dataProvider name="meilisearch_indices_listing_data_source" class="Walkwizus\MeilisearchIndices\Ui\DataProvider\IndicesListing">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <columns name="meilisearch_indices_columns">
+        <column name="id">
+            <settings>
+                <label translate="true">ID</label>
+                <filter>textRange</filter>
+                <sortable>false</sortable>
+                <draggable>false</draggable>
+            </settings>
+        </column>
+        <column name="store">
+            <settings>
+                <label translate="true">Store</label>
+                <filter>textRange</filter>
+                <sortable>false</sortable>
+                <draggable>false</draggable>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Walkwizus\MeilisearchIndices\Ui\Component\Listing\Indices\Column\Actions"/>
+    </columns>
+</listing>
