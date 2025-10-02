@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Mview/etc/mview.xsd">
-    <view id="meilisearch_categories_fulltext" class="Walkwizus\MeilisearchCatalog\Model\Indexer\Category\Indexer" group="indexer">
+    <view id="meilisearch_categories_fulltext" class="Walkwizus\MeilisearchCatalog\Model\Indexer\Category" group="indexer">
         <subscriptions>
             <table name="catalog_category_entity" entity_column="entity_id" />
             <table name="catalog_category_entity_datetime" entity_column="entity_id" />
