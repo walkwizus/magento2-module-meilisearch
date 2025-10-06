@@ -5,16 +5,16 @@ define([
 ], function ($, urlBuilder, _) {
     'use strict';
 
-    function fetchPricesBySkus(skus) {
+    function fetchSwatchesBySkus(skus) {
         return $.ajax({
-            url: urlBuilder.build('meilisearch/ajax/prices'),
+            url: urlBuilder.build('meilisearch/ajax/swatches'),
             method: 'POST',
             data: { skus: skus }
         });
     }
 
-    function injectPrices() {
-        const $hosts = $('.price-box-host');
+    function injectSwatches() {
+        const $hosts = $('.swatch-host');
         if (!$hosts.length) return;
 
         const skus = $hosts.map(function() {
@@ -23,12 +23,12 @@ define([
 
         if (!skus.length) return;
 
-        fetchPricesBySkus(skus).done(function (res) {
-            if (!res || !res.prices) return;
+        fetchSwatchesBySkus(skus).done(function (res) {
+            if (!res || !res.swatches) return;
 
             $hosts.each(function() {
                 const sku = this.dataset.sku;
-                const html = res.prices[sku] || '';
+                const html = res.swatches[sku] || '';
                 if (!html) return;
 
                 $(this).html(html).trigger('contentUpdated');
@@ -36,7 +36,7 @@ define([
         });
     }
 
-    const scheduleInject = _.debounce(injectPrices, 100);
+    const scheduleInject = _.debounce(injectSwatches, 100);
 
     return {
         scheduleInject: scheduleInject

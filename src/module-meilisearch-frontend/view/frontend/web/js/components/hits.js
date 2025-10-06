@@ -3,8 +3,9 @@ define([
     'Walkwizus_MeilisearchFrontend/js/model/product-model',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
-    'Walkwizus_MeilisearchFrontend/js/prices'
-], function(Component, productModel, viewModeState, searchState, Prices) {
+    'Walkwizus_MeilisearchFrontend/js/prices',
+    'Walkwizus_MeilisearchFrontend/js/swatches'
+], function(Component, productModel, viewModeState, searchState, Prices, Swatches) {
     'use strict';
 
     return Component.extend({
@@ -25,6 +26,7 @@ define([
 
         afterRenderHit: function() {
             Prices.scheduleInject();
+            Swatches.scheduleInject();
         }
     });
 });
