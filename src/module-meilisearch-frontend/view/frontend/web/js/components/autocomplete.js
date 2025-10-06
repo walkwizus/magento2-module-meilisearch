@@ -83,13 +83,10 @@ define([
             }
         },
 
-        _bindClickOutside: function() {
+        _bindClickOutside: function () {
             const self = this;
-            $(document).on('click.miniSearch', (e) => {
-                const $target = $(e.target);
-                const $container = $('.block-search');
-
-                if (!$container.is($target) && $container.has($target).length === 0) {
+            $(document).on('click.miniSearch', function (e) {
+                if ($(e.target).closest('.block-search').length === 0) {
                     self.isActive(false);
                     self.results([]);
                 }
