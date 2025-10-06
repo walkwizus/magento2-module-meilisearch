@@ -20,14 +20,6 @@ define([
             return baseUrl + urlKey;
         },
 
-        getProductPrice: function(item) {
-            if (item[configModel.get('priceAttributeCode')]) {
-                return item[configModel.get('priceAttributeCode')];
-            }
-
-            return item[price_0];
-        },
-
         formatPrice: function(price) {
             return priceUtils.formatPriceLocale(price, configModel.get('priceFormat'), false);
         }

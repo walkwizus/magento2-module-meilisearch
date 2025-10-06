@@ -2,8 +2,9 @@ define([
     'uiComponent',
     'Walkwizus_MeilisearchFrontend/js/model/product-model',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
-    'Walkwizus_MeilisearchFrontend/js/model/search-state'
-], function(Component, productModel, viewModeState, searchState) {
+    'Walkwizus_MeilisearchFrontend/js/model/search-state',
+    'Walkwizus_MeilisearchFrontend/js/prices'
+], function(Component, productModel, viewModeState, searchState, Prices) {
     'use strict';
 
     return Component.extend({
@@ -20,6 +21,10 @@ define([
             this.productModel = productModel;
 
             return this;
+        },
+
+        afterRenderHit: function() {
+            Prices.scheduleInject();
         }
     });
 });
