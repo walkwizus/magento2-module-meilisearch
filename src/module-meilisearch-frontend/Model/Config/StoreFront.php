@@ -15,6 +15,7 @@ class StoreFront
     public const CATALOG_FRONTEND_LIST_PER_PAGE_VALUES = 'catalog/frontend/list_per_page_values';
     public const CATALOG_FRONTEND_LIST_PER_PAGE = 'catalog/frontend/list_per_page';
     public const CATALOG_FRONTEND_LIST_ALLOW_ALL = 'catalog/frontend/list_allow_all';
+    public const CATALOG_FRONT_SHOW_SWATCHES_IN_PRODUCT_LIST = 'catalog/frontend/show_swatches_in_product_list';
 
     /**
      * @param ScopeConfigInterface $scopeConfig
@@ -75,5 +76,14 @@ class StoreFront
     public function getListAllowAll($storeId = null): mixed
     {
         return $this->scopeConfig->getValue(self::CATALOG_FRONTEND_LIST_ALLOW_ALL, ScopeInterface::SCOPE_STORE, $storeId);
+    }
+
+    /**
+     * @param $storeId
+     * @return mixed
+     */
+    public function getShowSwatchesInProductList($storeId): mixed
+    {
+        return $this->scopeConfig->getValue(self::CATALOG_FRONT_SHOW_SWATCHES_IN_PRODUCT_LIST, ScopeInterface::SCOPE_STORE, $storeId);
     }
 }

@@ -3,9 +3,10 @@ define([
     'Walkwizus_MeilisearchFrontend/js/model/product-model',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
+    'Walkwizus_MeilisearchFrontend/js/model/config-model',
     'Walkwizus_MeilisearchFrontend/js/prices',
     'Walkwizus_MeilisearchFrontend/js/swatches'
-], function(Component, productModel, viewModeState, searchState, Prices, Swatches) {
+], function(Component, productModel, viewModeState, searchState, config, Prices, Swatches) {
     'use strict';
 
     return Component.extend({
@@ -20,13 +21,16 @@ define([
             this.currentPage = searchState.currentPage;
             this.searchQuery = searchState.searchQuery;
             this.productModel = productModel;
+            this.showSwatchesInProductList = config.get('showSwatchesInProductList');
+
+            this.afterRenderHit = () => {
+                Prices.scheduleInject();
+                if (this.showSwatchesInProductList) {
+                    Swatches.scheduleInject();
+                }
+            };
 
             return this;
-        },
-
-        afterRenderHit: function() {
-            Prices.scheduleInject();
-            Swatches.scheduleInject();
         }
     });
 });

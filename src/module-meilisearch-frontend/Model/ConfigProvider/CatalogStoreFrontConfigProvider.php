@@ -30,6 +30,7 @@ class CatalogStoreFrontConfigProvider implements ConfigProviderInterface
             'listPerPageValues' => array_map('intval', explode(',', $this->storeFront->getListPerPageValues($storeId))),
             'listPerPage' => (int)$this->storeFront->getListPerPage($storeId),
             'listAllowAll' => (bool)$this->storeFront->getListAllowAll($storeId),
+            'showSwatchesInProductList' => (bool)$this->storeFront->getShowSwatchesInProductList($storeId)
         ];
     }
 }

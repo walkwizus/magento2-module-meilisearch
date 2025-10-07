@@ -33,8 +33,11 @@
                     <strong class="product name product-item-name">
                         <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }, text: name" class="product-item-link"></a>
                     </strong>
+
                     <div class="price-box-host" data-bind="attr:{'data-sku': sku}"></div>
+                    <!-- ko if: $parent.showSwatchesInProductList -->
                     <div class="swatch-host" data-bind="attr:{'data-sku': sku}"></div>
+                    <!-- /ko -->
                 </div>
             </div>
         </li>
