@@ -34,9 +34,8 @@
                         <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }, text: name" class="product-item-link"></a>
                     </strong>
 
-                    <div class="price-box-host" data-bind="attr:{'data-sku': sku}"></div>
-                    <!-- ko if: $parent.showSwatchesInProductList -->
-                    <div class="swatch-host" data-bind="attr:{'data-sku': sku}"></div>
+                    <!-- ko foreach: $parent.fragments -->
+                    <div data-bind="attr: {'data-fragment': $data, 'data-sku': $parent.sku}"></div>
                     <!-- /ko -->
                 </div>
             </div>
