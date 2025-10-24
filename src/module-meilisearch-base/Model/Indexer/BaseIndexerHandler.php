@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\Model\Indexer;
 
 use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
+use Magento\Search\Model\EngineResolver;
 use Walkwizus\MeilisearchBase\Service\SettingsManager;
 use Walkwizus\MeilisearchBase\Service\DocumentsManager;
 use Walkwizus\MeilisearchBase\Service\IndexesManager;
@@ -14,10 +15,12 @@ use Magento\Framework\Indexer\SaveHandler\Batch;
 use Walkwizus\MeilisearchBase\Model\AttributeMapper;
 use Walkwizus\MeilisearchBase\Model\AttributeProvider;
 use Magento\Framework\Search\Request\Dimension;
+use Walkwizus\MeilisearchBase\Model\ResourceModel\Engine;
 
 class BaseIndexerHandler implements IndexerInterface
 {
     /**
+     * @param EngineResolver $engineResolver
      * @param SettingsManager $settingsManager
      * @param DocumentsManager $documentsManager
      * @param IndexesManager $indexesManager
@@ -31,6 +34,7 @@ class BaseIndexerHandler implements IndexerInterface
      * @param string $indexPrimaryKey
      */
     public function __construct(
+        private readonly EngineResolver $engineResolver,
         private readonly SettingsManager $settingsManager,
         private readonly DocumentsManager $documentsManager,
         private readonly IndexesManager $indexesManager,
@@ -57,15 +61,21 @@ class BaseIndexerHandler implements IndexerInterface
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->settingsManager->updateFilterableAttributes($indexName, $this->attributeProvider->getFilterableAttributes($indexerId, 'index'));
-            $this->settingsManager->updateSortableAttributes($indexName, $this->attributeProvider->getSortableAttributes($indexerId, 'index'));
-            $this->settingsManager->updateSearchableAttributes($indexName, $this->attributeProvider->getSearchableAttributes($indexerId, 'index'));
+            try {
+                $this->settingsManager->updateFilterableAttributes($indexName, $this->attributeProvider->getFilterableAttributes($indexerId, 'index'));
+                $this->settingsManager->updateSortableAttributes($indexName, $this->attributeProvider->getSortableAttributes($indexerId, 'index'));
+                $this->settingsManager->updateSearchableAttributes($indexName, $this->attributeProvider->getSearchableAttributes($indexerId, 'index'));
+            } catch (\Exception $exception) {
+                return $this;
+            }
 
             foreach ($this->batch->getItems($documents, $this->batchSize) as $batchDocuments) {
                 $batchDocuments = $this->attributeMapper->map($indexerId, $batchDocuments, $storeId);
                 try {
                     $this->documentsManager->addDocumentsInBatches($indexName, $batchDocuments, $this->indexPrimaryKey);
-                } catch (\Exception $e) { }
+                } catch (\Exception $e) {
+                    return $this;
+                }
             }
         }
 
@@ -75,35 +85,47 @@ class BaseIndexerHandler implements IndexerInterface
     /**
      * @param $dimensions
      * @param \Traversable $documents
-     * @return void
+     * @return IndexerInterface
      * @throws \Exception
      */
-    public function deleteIndex($dimensions, \Traversable $documents): void
+    public function deleteIndex($dimensions, \Traversable $documents): IndexerInterface
     {
         foreach ($dimensions as $dimension) {
             $storeId = $dimension->getValue();
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->indexesManager->deleteIndex($indexName);
+            try {
+                $this->indexesManager->deleteIndex($indexName);
+            } catch (\Exception $exception) {
+                return $this;
+            }
         }
+
+        return $this;
     }
 
     /**
      * @param $dimensions
-     * @return void
+     * @return IndexerInterface
      * @throws \Exception
      */
-    public function cleanIndex($dimensions): void
+    public function cleanIndex($dimensions): IndexerInterface
     {
         foreach ($dimensions as $dimension) {
             $storeId = $dimension->getValue();
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
 
-            $this->indexesManager->deleteIndex($indexName);
-            $this->indexesManager->createIndex($indexName, $this->indexPrimaryKey);
+            try {
+                $this->indexesManager->deleteIndex($indexName);
+                $this->indexesManager->createIndex($indexName, $this->indexPrimaryKey);
+            } catch (\Exception $exception) {
+                return $this;
+            }
         }
+
+        return $this;
     }
 
     /**
@@ -113,7 +135,15 @@ class BaseIndexerHandler implements IndexerInterface
      */
     public function isAvailable($dimensions = []): bool
     {
-        return $this->healthManager->isHealthy();
+        if ($this->engineResolver->getCurrentSearchEngine() !== Engine::SEARCH_ENGINE) {
+            return false;
+        }
+
+        try {
+            return $this->healthManager->isHealthy();
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**

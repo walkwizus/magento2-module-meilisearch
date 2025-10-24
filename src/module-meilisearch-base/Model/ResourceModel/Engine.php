@@ -9,6 +9,8 @@ use Magento\Catalog\Model\Product\Visibility;
 
 class Engine implements EngineInterface
 {
+    public const SEARCH_ENGINE = 'meilisearch';
+
     /**
      * @param Visibility $catalogProductVisibility
      */

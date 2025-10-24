@@ -11,6 +11,7 @@ use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Category;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\View\LayoutInterface;
+use Walkwizus\MeilisearchBase\Model\ResourceModel\Engine;
 
 class AddMeilisearchHandle implements ObserverInterface
 {
@@ -43,7 +44,7 @@ class AddMeilisearchHandle implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        if ($this->engineResolver->getCurrentSearchEngine() !== 'meilisearch') {
+        if ($this->engineResolver->getCurrentSearchEngine() !== Engine::SEARCH_ENGINE) {
             return;
         }
 

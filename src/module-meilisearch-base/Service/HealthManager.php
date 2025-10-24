@@ -21,7 +21,12 @@ class HealthManager
      */
     public function isHealthy(): bool
     {
-        $client = $this->connectionManager->getConnection();
+        try {
+            $client = $this->connectionManager->getConnection();
+        } catch (\Exception $e) {
+            return false;
+        }
+
         return $client->isHealthy();
     }
 }
