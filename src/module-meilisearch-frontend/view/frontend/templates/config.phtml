@@ -1,6 +1,10 @@
 <?php
-/** @var \Walkwizus\MeilisearchFrontend\Block\Config $block */
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Walkwizus\MeilisearchFrontend\ViewModel\JsConfig $viewModel
+ */
+$viewModel = $block->getViewModel();
 ?>
 <script>
-    window.meilisearchFrontendConfig = <?= /* @noEscape */ $block->getJsLayout() ?>;
+    window.meilisearchFrontendConfig = <?= /* @noEscape */ $viewModel->getJsConfig() ?>;
 </script>

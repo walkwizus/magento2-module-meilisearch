@@ -54,7 +54,13 @@
         </referenceContainer>
         <referenceContainer name="content">
             <block name="meilisearch.frontend.search" class="Walkwizus\MeilisearchFrontend\Block\Search" template="Walkwizus_MeilisearchFrontend::search.phtml">
+                <block name="meilisearch.frontend.search.pagination" template="Walkwizus_MeilisearchFrontend::ssr/pagination.phtml">
+                    <arguments>
+                        <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr\Pagination</argument>
+                    </arguments>
+                </block>
                 <arguments>
+                    <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr</argument>
                     <argument name="jsLayout" xsi:type="array">
                         <item name="components" xsi:type="array">
                             <item name="meilisearch-frontend-search" xsi:type="array">

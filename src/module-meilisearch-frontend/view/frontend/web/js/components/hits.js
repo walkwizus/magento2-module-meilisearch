@@ -27,6 +27,11 @@ define([
                 fragments.scheduleInject();
             };
 
+            let ssrEl = document.getElementById('meilisearch-frontend-search-ssr');
+            if (ssrEl && ssrEl.parentNode) {
+                ssrEl.parentNode.removeChild(ssrEl);
+            }
+
             return this;
         }
     });

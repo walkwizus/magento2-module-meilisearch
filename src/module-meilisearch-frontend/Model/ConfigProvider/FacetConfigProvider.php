@@ -48,7 +48,7 @@ class FacetConfigProvider implements ConfigProviderInterface
     public function get(): array
     {
         $attributes = $this->attributeProvider->getFilterableAttributes(SearchIndexNameResolver::DEFAULT_INDEX, 'frontend');
-        $processedFacets = $this->processFacetList($attributes);
+        $processedFacets = $this->getFacetList($attributes);
 
         return [
             'facets' => [
@@ -63,7 +63,7 @@ class FacetConfigProvider implements ConfigProviderInterface
      * @return array
      * @throws LocalizedException
      */
-    private function processFacetList(array $attributes): array
+    public function getFacetList(array $attributes): array
     {
         $processedFacets = [];
 

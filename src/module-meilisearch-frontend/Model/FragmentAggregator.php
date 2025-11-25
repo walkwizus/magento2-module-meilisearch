@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchFrontend\Model;
 
 use Magento\Framework\View\LayoutFactory;
+use Magento\Framework\View\LayoutInterface;
 use Walkwizus\MeilisearchFrontend\Api\FragmentRendererInterface;
 
 class FragmentAggregator
 {
+    /**
+     * @var LayoutInterface|null
+     */
+    private ?LayoutInterface $layout = null;
+
     /**
      * @param array $renderers
      * @param LayoutFactory $layoutFactory
@@ -39,12 +45,12 @@ class FragmentAggregator
     }
 
     /**
-     * @param array $products
+     * @param $products
      * @return array
      */
-    public function build(array $products): array
+    public function build($products): array
     {
-        $layout = $this->layoutFactory->create();
+        $layout = $this->getLayout();
         $output = [];
 
         /** @var FragmentRendererInterface $renderer */
@@ -74,5 +80,17 @@ class FragmentAggregator
         }
 
         return $output;
+    }
+
+    /**
+     * @return LayoutInterface
+     */
+    private function getLayout(): LayoutInterface
+    {
+        if ($this->layout === null) {
+            $this->layout = $this->layoutFactory->create();
+        }
+
+        return $this->layout;
     }
 }

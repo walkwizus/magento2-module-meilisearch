@@ -6,29 +6,29 @@ namespace Walkwizus\MeilisearchFrontend\Controller\Ajax;
 
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Controller\Result\Json;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\RequestInterface;
 use Walkwizus\MeilisearchFrontend\Model\FragmentAggregator;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\Framework\Controller\Result\Json;
 
 class Fragment implements HttpPostActionInterface
 {
     /**
      * @param JsonFactory $jsonFactory
-     * @param ProductRepositoryInterface $productRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
      * @param RequestInterface $request
      * @param FragmentAggregator $aggregator
+     * @param CollectionFactory $collectionFactory
      */
     public function __construct(
         private readonly JsonFactory $jsonFactory,
-        private readonly ProductRepositoryInterface $productRepository,
-        private readonly SearchCriteriaBuilder $searchCriteriaBuilder,
         private readonly RequestInterface $request,
-        private readonly FragmentAggregator $aggregator
+        private readonly FragmentAggregator $aggregator,
+        private readonly CollectionFactory $collectionFactory
     ) { }
 
+    /**
+     * @return Json
+     */
     public function execute(): Json
     {
         $result = $this->jsonFactory->create();
@@ -36,11 +36,11 @@ class Fragment implements HttpPostActionInterface
         $skus = (array)($this->request->getParam('skus') ?? []);
         $skus = array_values(array_unique(array_filter($skus)));
 
-        $criteria = $this->searchCriteriaBuilder
-            ->addFilter('sku', $skus, 'in')
-            ->create();
+        $products = $this->collectionFactory
+            ->create()
+            ->addAttributeToSelect('entity_id')
+            ->addAttributeToFilter('sku', ['in' => $skus]);
 
-        $products = $this->productRepository->getList($criteria)->getItems();
         $payload = $this->aggregator->build($products);
 
         return $result->setData($payload);

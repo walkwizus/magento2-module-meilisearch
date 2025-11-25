@@ -64,7 +64,7 @@ define([
         });
     }
 
-    const scheduleInject = _.debounce(injectFragments, 50);
+    const scheduleInject = _.debounce(injectFragments, 5);
 
     return {
         scheduleInject: scheduleInject

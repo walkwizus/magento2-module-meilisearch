@@ -57,7 +57,8 @@ class CategoryConfigProvider implements ConfigProviderInterface
             'currentCategoryUrl' => $category->getUrl(),
             'availableSortBy' => $resolvedSortBy,
             'defaultSortBy' => $this->attributeResolver->resolve($category->getDefaultSortBy()),
-            'availableViewMode' => $this->productList->getAvailableViewMode()
+            'availableViewMode' => $this->productList->getAvailableViewMode(),
+            'defaultViewMode' => $this->productList->getDefaultViewMode(),
         ];
 
         try {

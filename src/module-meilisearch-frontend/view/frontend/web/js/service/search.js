@@ -2,28 +2,36 @@ define([
     'ko',
     'Walkwizus_MeilisearchFrontend/js/service/meilisearch-service',
     'Walkwizus_MeilisearchFrontend/js/service/query-builder',
+    'Walkwizus_MeilisearchFrontend/js/service/disjunctive-search',
     'Walkwizus_MeilisearchFrontend/js/model/config-model',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
     'Walkwizus_MeilisearchFrontend/js/model/sorter-state',
     'Walkwizus_MeilisearchFrontend/js/model/limiter-state'
-], function (ko, meilisearchService, queryBuilder, configModel, facetsState, searchState, sorterState, limiterState) {
+], function (
+    ko,
+    meilisearchService,
+    queryBuilderFactory,
+    disjunctiveSearch,
+    configModel,
+    facetsState,
+    searchState,
+    sorterState,
+    limiterState
+) {
     'use strict';
 
     let searchService;
+    const queryBuilder = queryBuilderFactory();
 
-    function init() {
+    function init(initialState) {
         searchService = meilisearchService({
             host: configModel.get('host'),
             apiKey: configModel.get('apiKey'),
             indexName: configModel.get('indexName')
         });
 
-        facetsState.searchQuery(new URLSearchParams(window.location.search).get('q') || '');
-        facetsState.currentPage(parseInt(new URLSearchParams(window.location.search).get('page')) || 1);
-
-        performSearch();
-
+        updateResults(initialState);
         initSubscription();
 
         searchState.isInitializing(false);
@@ -79,7 +87,7 @@ define([
         const hitsPerPage = limiterState.currentLimit();
 
         if (activeFacetCodes.length === 0) {
-            const filterParams = queryBuilder().buildFilters({}, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
+            const filterParams = queryBuilder.buildFilters({}, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
 
             searchService
                 .search(searchQuery, {
@@ -97,51 +105,37 @@ define([
             return;
         }
 
-        const queries = [];
-        const mainFilterParams = queryBuilder().buildFilters(selectedFilters, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
-
-        queries.push({
-            indexUid: configModel.get('indexName'),
-            q: searchQuery,
-            filter: mainFilterParams,
-            facets: facetList,
-            sort: sortParams,
+        const queries = disjunctiveSearch.buildDisjunctiveQueries({
+            indexName: configModel.get('indexName'),
+            query: searchQuery,
+            selectedFacets: selectedFilters,
+            facetList: facetList,
+            buildFilters: function (sel) {
+                return queryBuilder.buildFilters(
+                    sel,
+                    configModel.get('currentCategoryId'),
+                    configModel.get('categoryRule')
+                );
+            },
             page: currentPage,
-            hitsPerPage: hitsPerPage
-        });
-
-        activeFacetCodes.forEach(facetCode => {
-            const facetExcludedFilters = { ...selectedFilters };
-            delete facetExcludedFilters[facetCode];
-
-            const disjunctiveFilterParams = queryBuilder().buildFilters(facetExcludedFilters, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
-
-            queries.push({
-                indexUid: configModel.get('indexName'),
-                q: searchQuery,
-                filter: disjunctiveFilterParams,
-                facets: [facetCode],
-                sort: sortParams,
-                page: currentPage,
-                hitsPerPage: hitsPerPage
-            });
+            hitsPerPage: hitsPerPage,
+            sort: sortParams
         });
 
         searchService.multiSearch(queries)
-            .then(response => {
-                const mainResults = response.results[0];
-                let facetDistributions = { ...mainResults.facetDistribution };
+            .then(function (response) {
+                const merged = disjunctiveSearch.mergeDisjunctiveResults(
+                    response.results,
+                    activeFacetCodes
+                );
 
-                activeFacetCodes.forEach((facetCode, index) => {
-                    const disjunctiveResult = response.results[index + 1];
-                    facetDistributions[facetCode] = disjunctiveResult.facetDistribution[facetCode];
+                const combinedResults = Object.assign({}, merged.mainResults, {
+                    facetDistribution: merged.facetDistribution
                 });
 
-                const combinedResults = { ...mainResults };
-                combinedResults.facetDistribution = facetDistributions;
-
                 updateResults(combinedResults);
-            }).finally(() => {
+            })
+            .finally(function () {
                 searchState.isLoading(false);
             });
     }

@@ -1,7 +1,13 @@
-define([], function() {
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else {
+        root.meilisearchQueryBuilder = factory();
+    }
+}(this, function() {
     'use strict';
 
-    return function() {
+    function createQueryBuilder() {
         return {
             buildFilters: function(filters, categoryId, categoryRule) {
                 const filterExpressions = [];
@@ -40,5 +46,7 @@ define([], function() {
                 return filterExpressions;
             }
         };
-    };
-});
+    }
+
+    return createQueryBuilder;
+}));

@@ -9,6 +9,11 @@ use Walkwizus\MeilisearchFrontend\Api\ConfigProviderInterface;
 class ConfigProvider
 {
     /**
+     * @var array|null
+     */
+    private ?array $configCache = null;
+
+    /**
      * @param ConfigProviderInterface[] $providers
      */
     public function __construct(
@@ -20,16 +25,20 @@ class ConfigProvider
      */
     public function get(): array
     {
-        $config = [];
+        if ($this->configCache === null) {
+            $config = [];
 
-        foreach ($this->providers as $provider) {
-            if ($provider instanceof ConfigProviderInterface) {
-                foreach ($provider->get() as $key => $value) {
-                    $config[$key] = $value;
+            foreach ($this->providers as $provider) {
+                if ($provider instanceof ConfigProviderInterface) {
+                    foreach ($provider->get() as $key => $value) {
+                        $config[$key] = $value;
+                    }
                 }
             }
+
+            $this->configCache = $config;
         }
 
-        return $config;
+        return $this->configCache;
     }
 }

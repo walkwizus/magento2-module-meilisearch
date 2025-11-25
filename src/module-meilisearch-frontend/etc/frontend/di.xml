@@ -9,4 +9,13 @@
             </argument>
         </arguments>
     </type>
+    <type name="Walkwizus\MeilisearchFrontend\Observer\AddMeilisearchHandle">
+        <arguments>
+            <argument name="handles" xsi:type="array">
+                <item name="meilisearch_common" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\LayoutHandle\AddMeilisearchCommonHandle</item>
+                <item name="meilisearch_result" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\LayoutHandle\AddMeilisearchResultHandle</item>
+                <item name="remove_category_blocks" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\LayoutHandle\AddRemoveCategoryBlocksHandle</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

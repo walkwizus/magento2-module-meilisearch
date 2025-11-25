@@ -6,36 +6,20 @@ namespace Walkwizus\MeilisearchFrontend\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Search\Model\EngineResolver;
-use Magento\Framework\App\RequestInterface;
-use Magento\Catalog\Api\CategoryRepositoryInterface;
-use Magento\Catalog\Model\Category;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\View\LayoutInterface;
 use Walkwizus\MeilisearchBase\Model\ResourceModel\Engine;
+use Walkwizus\MeilisearchFrontend\Api\LayoutHandleInterface;
 
 class AddMeilisearchHandle implements ObserverInterface
 {
-    public const CATALOG_CATEGORY_VIEW_ACTION = 'catalog_category_view';
-
-    public const CATALOGSEARCH_RESULT_INDEX_ACTION = 'catalogsearch_result_index';
-
-    /**
-     * @var array|string[]
-     */
-    private array $fullActionName = [
-        self::CATALOG_CATEGORY_VIEW_ACTION,
-        self::CATALOGSEARCH_RESULT_INDEX_ACTION
-    ];
-
     /**
      * @param EngineResolver $engineResolver
-     * @param RequestInterface $request
-     * @param CategoryRepositoryInterface $categoryRepository
+     * @param array $handles
      */
     public function __construct(
         private readonly EngineResolver $engineResolver,
-        private readonly RequestInterface $request,
-        private readonly CategoryRepositoryInterface $categoryRepository
+        private readonly array $handles = []
     ) { }
 
     /**
@@ -48,31 +32,14 @@ class AddMeilisearchHandle implements ObserverInterface
             return;
         }
 
-        $fullActionName = $observer->getData('full_action_name');
-
         /** @var LayoutInterface $layout */
         $layout = $observer->getData('layout');
+        $fullActionName = $observer->getData('full_action_name');
 
-        $layout->getUpdate()->addHandle('meilisearch_common');
-
-        if (in_array($fullActionName, $this->fullActionName, true)) {
-            $layout->getUpdate()->addHandle('remove_category_blocks');
-
-            if ($fullActionName === self::CATALOGSEARCH_RESULT_INDEX_ACTION) {
-                $layout->getUpdate()->addHandle('meilisearch_result');
-                return;
-            }
-
-            $categoryId = $this->request->getParam('id');
-
-            if ($categoryId) {
-                try {
-                    $currentCategory = $this->categoryRepository->get($categoryId);
-
-                    if ($currentCategory->getDisplayMode() !== Category::DM_PAGE) {
-                        $layout->getUpdate()->addHandle('meilisearch_result');
-                    }
-                } catch (\Exception $e) { }
+        /** @var LayoutHandleInterface $handle */
+        foreach ($this->handles as $handleName => $handle) {
+            if ($handle->isApplicable($layout, $fullActionName)) {
+                $layout->getUpdate()->addHandle($handleName);
             }
         }
     }

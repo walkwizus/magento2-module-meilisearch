@@ -7,7 +7,9 @@ define([
     return Component.extend({
         initialize: function() {
             this._super();
-            searchService.init();
+
+            let initialState = this.initialState || null;
+            searchService.init(initialState);
             return this;
         }
     });
