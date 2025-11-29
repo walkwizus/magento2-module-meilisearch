@@ -20,7 +20,7 @@
     ],
     "require": {
         "magento/framework": ">=103.0.4",
-        "meilisearch/meilisearch-php": ">=v1.13.0"
+        "meilisearch/meilisearch-php": "^1.16"
     },
     "replace": {
         "walkwizus/module-meilisearch-base": "self.version",
