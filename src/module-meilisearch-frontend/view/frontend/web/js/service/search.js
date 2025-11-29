@@ -3,7 +3,7 @@ define([
     'Walkwizus_MeilisearchFrontend/js/service/meilisearch-service',
     'Walkwizus_MeilisearchFrontend/js/service/query-builder',
     'Walkwizus_MeilisearchFrontend/js/service/disjunctive-search',
-    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
     'Walkwizus_MeilisearchFrontend/js/model/sorter-state',
@@ -13,7 +13,7 @@ define([
     meilisearchService,
     queryBuilderFactory,
     disjunctiveSearch,
-    configModel,
+    configManager,
     facetsState,
     searchState,
     sorterState,
@@ -26,9 +26,9 @@ define([
 
     function init(initialState) {
         searchService = meilisearchService({
-            host: configModel.get('host'),
-            apiKey: configModel.get('apiKey'),
-            indexName: configModel.get('indexName')
+            host: configManager.get('host'),
+            apiKey: configManager.get('apiKey'),
+            indexName: configManager.get('indexName')
         });
 
         updateResults(initialState);
@@ -77,17 +77,17 @@ define([
 
     function performSearch() {
         const searchQuery = facetsState.searchQuery();
-        const sortField = sorterState.sortBy() ?? configModel.get('defaultSortBy');
+        const sortField = sorterState.sortBy() ?? configManager.get('defaultSortBy');
         const sortDirection = sorterState.isDescending() ? 'desc' : 'asc';
         const sortParams = sortField ? [`${sortField}:${sortDirection}`] : undefined;
         const selectedFilters = facetsState.selectedFacets();
         const activeFacetCodes = Object.keys(selectedFilters);
         const currentPage = facetsState.currentPage();
-        const facetList = configModel.get('facets', {}).facetList || [];
+        const facetList = configManager.get('facets', {}).facetList || [];
         const hitsPerPage = limiterState.currentLimit();
 
         if (activeFacetCodes.length === 0) {
-            const filterParams = queryBuilder.buildFilters({}, configModel.get('currentCategoryId'), configModel.get('categoryRule'));
+            const filterParams = queryBuilder.buildFilters({}, configManager.get('currentCategoryId'), configManager.get('categoryRule'));
 
             searchService
                 .search(searchQuery, {
@@ -106,15 +106,15 @@ define([
         }
 
         const queries = disjunctiveSearch.buildDisjunctiveQueries({
-            indexName: configModel.get('indexName'),
+            indexName: configManager.get('indexName'),
             query: searchQuery,
             selectedFacets: selectedFilters,
             facetList: facetList,
             buildFilters: function (sel) {
                 return queryBuilder.buildFilters(
                     sel,
-                    configModel.get('currentCategoryId'),
-                    configModel.get('categoryRule')
+                    configManager.get('currentCategoryId'),
+                    configManager.get('categoryRule')
                 );
             },
             page: currentPage,

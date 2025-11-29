@@ -3,9 +3,9 @@ define([
     'Walkwizus_MeilisearchFrontend/js/model/product-model',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
-    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/fragments'
-], function(Component, productModel, viewModeState, searchState, config, fragments) {
+], function(Component, productModel, viewModeState, searchState, configManager, fragments) {
     'use strict';
 
     return Component.extend({
@@ -20,8 +20,8 @@ define([
             this.currentPage = searchState.currentPage;
             this.searchQuery = searchState.searchQuery;
             this.productModel = productModel;
-            this.fragments = config.get('fragments', []);
-            this.showSwatchesInProductList = config.get('showSwatchesInProductList');
+            this.fragments = configManager.get('fragments', []);
+            this.showSwatchesInProductList = configManager.get('showSwatchesInProductList');
 
             this.afterRenderHit = () => {
                 fragments.scheduleInject();

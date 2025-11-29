@@ -3,9 +3,9 @@ define([
     'ko',
     'jquery',
     'Walkwizus_MeilisearchFrontend/js/service/meilisearch-service',
-    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'mage/url'
-], function(Component, ko, $, meilisearchService, configModel, url) {
+], function(Component, ko, $, meilisearchService, configManager, url) {
     'use strict';
 
     return Component.extend({
@@ -18,11 +18,11 @@ define([
         initialize: function() {
             this._super();
 
-            this.baseUrl = configModel.get('baseUrl');
+            this.baseUrl = configManager.get('baseUrl');
 
             this.searchService = meilisearchService({
-                host: configModel.get('host'),
-                apiKey: configModel.get('apiKey')
+                host: configManager.get('host'),
+                apiKey: configManager.get('apiKey')
             });
 
             this.searchTerm.subscribe((v) => {
@@ -45,7 +45,7 @@ define([
                 return;
             }
 
-            const indexMap = configModel.get('autocompleteIndex');
+            const indexMap = configManager.get('autocompleteIndex');
             const queries = Object.entries(indexMap).map(([_, indexUid]) => ({
                 indexUid,
                 q: terms,

@@ -1,17 +1,17 @@
 define([
-    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Magento_Catalog/js/price-utils'
-], function(configModel, priceUtils) {
+], function(configManager, priceUtils) {
     'use strict';
 
     return {
         getProductImage: function(image) {
-            return configModel.get('mediaBaseUrl') + image;
+            return configManager.get('mediaBaseUrl') + image;
         },
 
         getProductUrl: function(urlKey) {
-            const suffix = configModel.get('productUrlSuffix');
-            const baseUrl = configModel.get('baseUrl');
+            const suffix = configManager.get('productUrlSuffix');
+            const baseUrl = configManager.get('baseUrl');
 
             if (typeof suffix === 'string' && suffix.trim() !== '') {
                 return baseUrl + urlKey + suffix;
@@ -21,7 +21,7 @@ define([
         },
 
         formatPrice: function(price) {
-            return priceUtils.formatPriceLocale(price, configModel.get('priceFormat'), false);
+            return priceUtils.formatPriceLocale(price, configManager.get('priceFormat'), false);
         }
     };
 });

@@ -1,9 +1,9 @@
 define([
     'uiComponent',
     'Walkwizus_MeilisearchFrontend/js/service/search',
-    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/sorter-state'
-], function(Component, searchService, configModel, sorterState) {
+], function(Component, searchService, configManager, sorterState) {
     'use strict';
 
     return Component.extend({
@@ -13,13 +13,13 @@ define([
 
             this.isDescending = sorterState.isDescending;
 
-            this.currentSort = configModel.get('defaultSortBy');
+            this.currentSort = configManager.get('defaultSortBy');
 
             return this;
         },
 
         initSortOptions: function() {
-            const availableSortBy = configModel.get('availableSortBy', {});
+            const availableSortBy = configManager.get('availableSortBy', {});
 
             if (availableSortBy) {
                 this.sortOptions = Object.entries(availableSortBy).map(([value, label]) => ({

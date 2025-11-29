@@ -52,6 +52,6 @@ class AddMeilisearchResultHandle implements LayoutHandleInterface
             return false;
         }
 
-        return $category->getId() !== Category::DM_PAGE;
+        return $category->getDisplayMode() !== Category::DM_PAGE;
     }
 }

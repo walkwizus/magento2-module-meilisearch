@@ -1,4 +1,4 @@
-(function (root, factory) {
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         define([], factory);
     } else {
@@ -7,7 +7,7 @@
 }(this, function() {
     'use strict';
 
-    function createQueryBuilder() {
+    return function createQueryBuilder() {
         return {
             buildFilters: function(filters, categoryId, categoryRule) {
                 const filterExpressions = [];
@@ -46,7 +46,5 @@
                 return filterExpressions;
             }
         };
-    }
-
-    return createQueryBuilder;
+    };
 }));

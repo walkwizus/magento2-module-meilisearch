@@ -1,18 +1,18 @@
 define([
     'uiElement',
     'ko',
-    'Walkwizus_MeilisearchFrontend/js/model/config-model',
+    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
     'Walkwizus_MeilisearchFrontend/js/model/limiter-state'
-], function(Element, ko, configModel, facetsState, viewModeState, limiterState) {
+], function(Element, ko, configManager, facetsState, viewModeState, limiterState) {
     'use strict';
 
     return Element.extend({
         initialize: function() {
             this._super();
 
-            this.facets = configModel.get('facets');
+            this.facets = configManager.get('facets');
             this.currentPage = facetsState.currentPage;
             this.currentViewMode = viewModeState.currentViewMode;
             this.currentLimit = limiterState.currentLimit;
@@ -81,7 +81,7 @@ define([
                 const value = state[key];
 
                 if (key === 'product_list_mode') {
-                    const defaultMode = configModel.get('listMode').split('-')[0];
+                    const defaultMode = configManager.get('listMode').split('-')[0];
                     if (value && value !== defaultMode) {
                         params.set(key, value);
                     } else {
@@ -91,8 +91,8 @@ define([
                 }
 
                 if (key === 'product_list_limit') {
-                    const mode = state.product_list_mode || configModel.get('listMode').split('-')[0];
-                    const defaultLimit = mode === 'grid' ? configModel.get('gridPerPage') : configModel.get('listPerPage');
+                    const mode = state.product_list_mode || configManager.get('listMode').split('-')[0];
+                    const defaultLimit = mode === 'grid' ? configManager.get('gridPerPage') : configManager.get('listPerPage');
 
                     if (parseInt(value) !== parseInt(defaultLimit)) {
                         params.set(key, value);
@@ -142,8 +142,8 @@ define([
                 }
 
                 if (key === 'product_list_limit') {
-                    const mode = viewModeState.currentViewMode() || configModel.get('listMode').split('-')[0];
-                    const defaultLimit = mode === 'grid' ? configModel.get('gridPerPage') : configModel.get('listPerPage');
+                    const mode = viewModeState.currentViewMode() || configManager.get('listMode').split('-')[0];
+                    const defaultLimit = mode === 'grid' ? configManager.get('gridPerPage') : configManager.get('listPerPage');
 
                     limiterState.currentLimit(parseInt(value) || defaultLimit);
                     return;
