@@ -2,15 +2,16 @@ define([
     'uiElement',
     'ko',
     'fuse',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state'
-], function (Element, ko, Fuse, configManager, facetsState) {
+], function (Element, ko, Fuse, facetsState) {
     'use strict';
+
+    const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return Element.extend({
         initialize: function () {
             this._super();
-            this.facetConfig = configManager.get('facets').facetConfig;
+            this.facetConfig = meilisearchConfig.facets.facetConfig;
             this.fuseInstances = {};
             this.observeFacetChanges();
             return this;

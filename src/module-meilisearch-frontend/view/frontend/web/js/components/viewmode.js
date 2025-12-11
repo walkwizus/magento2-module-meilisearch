@@ -1,16 +1,17 @@
 define([
     'uiElement',
     'ko',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state'
-], function(Element, ko, configManager, viewModeState) {
+], function(Element, ko, viewModeState) {
     'use strict';
+
+    const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return Element.extend({
         initialize: function() {
             this._super();
-            this.availableViewMode = configManager.get('availableViewMode');
-            viewModeState.currentViewMode(configManager.get('defaultViewMode'));
+            this.availableViewMode = meilisearchConfig.availableViewMode;
+            viewModeState.currentViewMode(meilisearchConfig.defaultViewMode);
 
             return this;
         },

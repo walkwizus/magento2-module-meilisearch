@@ -3,7 +3,6 @@ define([
     'Walkwizus_MeilisearchFrontend/js/service/meilisearch-service',
     'Walkwizus_MeilisearchFrontend/js/service/query-builder',
     'Walkwizus_MeilisearchFrontend/js/service/disjunctive-search',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
     'Walkwizus_MeilisearchFrontend/js/model/sorter-state',
@@ -11,9 +10,8 @@ define([
 ], function (
     ko,
     meilisearchService,
-    queryBuilderFactory,
+    queryBuilder,
     disjunctiveSearch,
-    configManager,
     facetsState,
     searchState,
     sorterState,
@@ -21,14 +19,14 @@ define([
 ) {
     'use strict';
 
+    const meilisearchConfig = window.meilisearchFrontendConfig;
     let searchService;
-    const queryBuilder = queryBuilderFactory();
 
     function init(initialState) {
         searchService = meilisearchService({
-            host: configManager.get('host'),
-            apiKey: configManager.get('apiKey'),
-            indexName: configManager.get('indexName')
+            host: meilisearchConfig.host,
+            apiKey: meilisearchConfig.apiKey,
+            indexName: meilisearchConfig.indexName
         });
 
         updateResults(initialState);
@@ -77,17 +75,17 @@ define([
 
     function performSearch() {
         const searchQuery = facetsState.searchQuery();
-        const sortField = sorterState.sortBy() ?? configManager.get('defaultSortBy');
+        const sortField = sorterState.sortBy() ?? meilisearchConfig.defaultSortBy;
         const sortDirection = sorterState.isDescending() ? 'desc' : 'asc';
         const sortParams = sortField ? [`${sortField}:${sortDirection}`] : undefined;
         const selectedFilters = facetsState.selectedFacets();
         const activeFacetCodes = Object.keys(selectedFilters);
         const currentPage = facetsState.currentPage();
-        const facetList = configManager.get('facets', {}).facetList || [];
+        const facetList = meilisearchConfig.facets.facetList;
         const hitsPerPage = limiterState.currentLimit();
 
         if (activeFacetCodes.length === 0) {
-            const filterParams = queryBuilder.buildFilters({}, configManager.get('currentCategoryId'), configManager.get('categoryRule'));
+            const filterParams = queryBuilder.buildFilters({}, meilisearchConfig.currentCategoryId, meilisearchConfig.categoryRule);
 
             searchService
                 .search(searchQuery, {
@@ -106,15 +104,15 @@ define([
         }
 
         const queries = disjunctiveSearch.buildDisjunctiveQueries({
-            indexName: configManager.get('indexName'),
+            indexName: meilisearchConfig.indexName,
             query: searchQuery,
             selectedFacets: selectedFilters,
             facetList: facetList,
             buildFilters: function (sel) {
                 return queryBuilder.buildFilters(
                     sel,
-                    configManager.get('currentCategoryId'),
-                    configManager.get('categoryRule')
+                    meilisearchConfig.currentCategoryId,
+                    meilisearchConfig.categoryRule
                 );
             },
             page: currentPage,

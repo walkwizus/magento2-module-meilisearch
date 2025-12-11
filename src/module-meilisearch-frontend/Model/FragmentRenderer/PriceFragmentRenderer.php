@@ -46,7 +46,7 @@ class PriceFragmentRenderer implements FragmentRendererInterface
 
         $this->block = $layout->createBlock(
             PriceRender::class,
-            null,
+            'product.price.render.default',
             ['data' => ['price_render_handle' => 'catalog_product_prices']]
         );
     }

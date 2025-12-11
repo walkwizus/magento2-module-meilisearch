@@ -6,10 +6,10 @@ namespace Walkwizus\MeilisearchFrontend\ViewModel;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\App\RequestInterface;
+use Meilisearch\Contracts\SearchQueryFactory;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
-use Meilisearch\Search\SearchResult;
 
 class Ssr implements ArgumentInterface
 {
@@ -20,12 +20,14 @@ class Ssr implements ArgumentInterface
 
     /**
      * @param RequestInterface $request
+     * @param SearchQueryFactory $searchQueryFactory
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
      * @param PriceCurrencyInterface $priceCurrency
      */
     public function __construct(
         private readonly RequestInterface $request,
+        private readonly SearchQueryFactory $searchQueryFactory,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
         private readonly PriceCurrencyInterface $priceCurrency
@@ -34,34 +36,111 @@ class Ssr implements ArgumentInterface
     }
 
     /**
-     * @return array|SearchResult
+     * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    public function getSearchResult(): array|SearchResult
+    public function getSearchResult(): array
     {
         $query = $this->request->getParam('q', '');
-        $currentPage = (int)$this->request->getParam('page', 1);
+        $currentPageParam = (int)$this->request->getParam('page', 1);
+        $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
 
         $defaultSortBy = $this->config['defaultSortBy'];
         $indexName = $this->config['indexName'];
         $facets = $this->config['facets']['facetList'];
 
-        $filters = $this->buildFilters();
+        $hitsPerPage = $this->getHitsPerPage();
+        $selectedFacets = $this->getSelectedFacets();
+        $activeCodes = array_keys($selectedFacets);
 
-        return $this->searchManager->search($indexName, $query, [
-            'filter' => $filters,
-            'facets' => $facets,
-            'sort' => [$defaultSortBy . ':asc'],
-            'page' => $currentPage,
-            'hitsPerPage' => $this->getHitsPerPage()
-        ]);
+        $queries = [];
+
+        $mainFilters = $this->buildFilters($selectedFacets);
+
+        $mainQuery = $this->searchQueryFactory->create()
+            ->setIndexUid($indexName)
+            ->setQuery($query)
+            ->setFacets($facets)
+            ->setPage($currentPage)
+            ->setHitsPerPage($hitsPerPage);
+
+        if (!empty($mainFilters)) {
+            $mainQuery->setFilter($mainFilters);
+        }
+
+        if (!empty($defaultSortBy)) {
+            $mainQuery->setSort([$defaultSortBy . ':asc']);
+        }
+
+        $queries[] = $mainQuery;
+
+        foreach ($activeCodes as $code) {
+            $excludeFilters = $selectedFacets;
+            unset($excludeFilters[$code]);
+
+            $filters = $this->buildFilters($excludeFilters);
+
+            $disjunctiveFilters = $this->searchQueryFactory->create()
+                ->setIndexUid($indexName)
+                ->setQuery($query)
+                ->setFacets([$code])
+                ->setPage($currentPage)
+                ->setHitsPerPage($hitsPerPage);
+
+            if (!empty($filters)) {
+                $disjunctiveFilters->setFilter($filters);
+            }
+
+            $queries[] = $disjunctiveFilters;
+        }
+
+        $results = $this->searchManager->multisearch($queries);
+
+        return $this->mergeDisjunctiveResults($results, $activeCodes);
     }
 
     /**
+     * @param array $multiResults
+     * @param array $activeCodes
      * @return array
      */
-    public function buildFilters(): array
+    private function mergeDisjunctiveResults(array $multiResults, array $activeCodes): array
+    {
+        if (!isset($multiResults['results'][0]) || !is_array($multiResults['results'][0])) {
+            return [
+                'hits' => [],
+                'facetDistribution' => [],
+                'totalHits' => 0,
+                'totalPages' => 0,
+            ];
+        }
+
+        $mainResults = $multiResults['results'][0];
+
+        $finalDistribution = $mainResults['facetDistribution'] ?? [];
+
+        foreach ($activeCodes as $index => $code) {
+            $disjunctiveIndex = $index + 1;
+
+            if (empty($multiResults['results'][$disjunctiveIndex]['facetDistribution'][$code])) {
+                continue;
+            }
+
+            $facetValues = $multiResults['results'][$disjunctiveIndex]['facetDistribution'][$code];
+            $finalDistribution[$code] = $facetValues;
+        }
+
+        $mainResults['facetDistribution'] = $finalDistribution;
+
+        return $mainResults;
+    }
+
+    /**
+     * @param array|null $selectedFacets
+     * @return array
+     */
+    public function buildFilters(?array $selectedFacets = null): array
     {
         $filters = [];
 
@@ -70,7 +149,7 @@ class Ssr implements ArgumentInterface
             $filters[] = ['category_ids = ' . $categoryId];
         }
 
-        $selectedFacets = $this->getSelectedFacets();
+        $selectedFacets = $selectedFacets ?? $this->getSelectedFacets();
 
         foreach ($selectedFacets as $name => $values) {
             $orGroup = [];

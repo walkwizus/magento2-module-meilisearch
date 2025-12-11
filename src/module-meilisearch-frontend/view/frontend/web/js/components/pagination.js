@@ -2,16 +2,17 @@ define([
     'uiComponent',
     'ko',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
-    'Walkwizus_MeilisearchFrontend/js/model/search-state',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager'
-], function(Component, ko, facetsState, searchState, configManager) {
+    'Walkwizus_MeilisearchFrontend/js/model/search-state'
+], function(Component, ko, facetsState, searchState) {
     'use strict';
+
+    const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return Component.extend({
         initialize: function() {
             this._super();
 
-            this.currentCategoryUrl = configManager.get('currentCategoryUrl');
+            this.currentCategoryUrl = meilisearchConfig.currentCategoryUrl;
             this.currentPage = facetsState.currentPage;
             this.totalHits = searchState.totalHits;
             this.hitsPerPage = searchState.hitsPerPage;

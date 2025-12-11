@@ -6,6 +6,7 @@ namespace Walkwizus\MeilisearchBase\Service;
 
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
 use Meilisearch\Search\SearchResult;
+use Meilisearch\Contracts\MultiSearchFederation;
 
 class SearchManager
 {
@@ -27,5 +28,16 @@ class SearchManager
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($index)->search($query, $params);
+    }
+
+    /**
+     * @param array $queries
+     * @param MultiSearchFederation|null $federation
+     * @throws \Exception
+     */
+    public function multisearch(array $queries = [], ?MultiSearchFederation $federation = null)
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->multisearch($queries);
     }
 }

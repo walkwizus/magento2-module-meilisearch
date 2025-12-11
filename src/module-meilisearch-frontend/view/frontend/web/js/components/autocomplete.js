@@ -3,10 +3,11 @@ define([
     'ko',
     'jquery',
     'Walkwizus_MeilisearchFrontend/js/service/meilisearch-service',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'mage/url'
-], function(Component, ko, $, meilisearchService, configManager, url) {
+], function(Component, ko, $, meilisearchService, url) {
     'use strict';
+
+    const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return Component.extend({
         defaults: {
@@ -18,11 +19,11 @@ define([
         initialize: function() {
             this._super();
 
-            this.baseUrl = configManager.get('baseUrl');
+            this.baseUrl = meilisearchConfig.baseUrl;
 
             this.searchService = meilisearchService({
-                host: configManager.get('host'),
-                apiKey: configManager.get('apiKey')
+                host: meilisearchConfig.host,
+                apiKey: meilisearchConfig.apiKey
             });
 
             this.searchTerm.subscribe((v) => {
@@ -45,7 +46,7 @@ define([
                 return;
             }
 
-            const indexMap = configManager.get('autocompleteIndex');
+            const indexMap = meilisearchConfig.autocompleteIndex;
             const queries = Object.entries(indexMap).map(([_, indexUid]) => ({
                 indexUid,
                 q: terms,

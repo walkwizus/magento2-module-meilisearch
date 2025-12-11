@@ -2,7 +2,7 @@
     if (typeof define === 'function' && define.amd) {
         define([], factory);
     } else {
-        root.meilisearchDisjunctiveSearch = factory();
+        root.MeilisearchDisjunctiveSearch = factory();
     }
 }(this, function() {
     'use strict';

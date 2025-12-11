@@ -14,6 +14,21 @@ use Magento\Framework\Controller\Result\Json;
 class Fragment implements HttpPostActionInterface
 {
     /**
+     * @var array|string[]
+     */
+    private array $attributesToSelect = [
+        'entity_id',
+        'type_id',
+        'price',
+        'special_price',
+        'special_from_date',
+        'special_to_date',
+        'tax_class_id',
+        'status',
+        'visibility'
+    ];
+
+    /**
      * @param JsonFactory $jsonFactory
      * @param RequestInterface $request
      * @param FragmentAggregator $aggregator
@@ -38,7 +53,7 @@ class Fragment implements HttpPostActionInterface
 
         $products = $this->collectionFactory
             ->create()
-            ->addAttributeToSelect('entity_id')
+            ->addAttributeToSelect($this->attributesToSelect)
             ->addAttributeToFilter('sku', ['in' => $skus]);
 
         $payload = $this->aggregator->build($products);

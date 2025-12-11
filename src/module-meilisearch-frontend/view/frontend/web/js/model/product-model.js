@@ -1,17 +1,18 @@
 define([
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Magento_Catalog/js/price-utils'
-], function(configManager, priceUtils) {
+], function(priceUtils) {
     'use strict';
+
+    const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return {
         getProductImage: function(image) {
-            return configManager.get('mediaBaseUrl') + image;
+            return meilisearchConfig.mediaBaseUrl + image;
         },
 
         getProductUrl: function(urlKey) {
-            const suffix = configManager.get('productUrlSuffix');
-            const baseUrl = configManager.get('baseUrl');
+            const suffix = meilisearchConfig.productUrlSuffix;
+            const baseUrl = meilisearchConfig.baseUrl;
 
             if (typeof suffix === 'string' && suffix.trim() !== '') {
                 return baseUrl + urlKey + suffix;
@@ -21,7 +22,7 @@ define([
         },
 
         formatPrice: function(price) {
-            return priceUtils.formatPriceLocale(price, configManager.get('priceFormat'), false);
+            return priceUtils.formatPriceLocale(price, meilisearchConfig.priceFormat, false);
         }
     };
 });

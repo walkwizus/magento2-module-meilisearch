@@ -2,13 +2,14 @@ define([
     'uiComponent',
     'ko',
     'jquery',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
     'Magento_Catalog/js/price-utils',
     'Magento_Swatches/js/swatch-renderer'
-], function(Component, ko, $, configManager, facetsState, searchState, priceUtils) {
+], function(Component, ko, $, facetsState, searchState, priceUtils) {
     'use strict';
+
+    const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return Component.extend({
         defaults: {
@@ -20,7 +21,7 @@ define([
             this._super();
             this.computedCurrentFacets = ko.pureComputed(() => {
                 const selected = facetsState.selectedFacets();
-                const config = configManager.get('facets').facetConfig;
+                const config = meilisearchConfig.facets.facetConfig;
                 const result = [];
 
                 Object.entries(selected).forEach(([code, values]) => {
@@ -47,8 +48,8 @@ define([
                 const results = searchState.searchResults();
                 const facetDistribution = results.facetDistribution;
                 const facetStats = results.facetStats;
-                const facetConfig = configManager.get('facets').facetConfig;
-                const facetList = configManager.get('facets').facetList;
+                const facetConfig = meilisearchConfig.facets.facetConfig;
+                const facetList = meilisearchConfig.facets.facetList;
                 const currentFilters = facetsState.selectedFacets();
 
                 return facetList

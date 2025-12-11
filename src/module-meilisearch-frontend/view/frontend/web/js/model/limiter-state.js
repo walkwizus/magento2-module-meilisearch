@@ -1,23 +1,23 @@
 define([
     'ko',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state'
-], function(ko, configManager, viewModeState) {
+], function(ko, viewModeState) {
     'use strict';
 
-    const defaultGridLimit = configManager.get('gridPerPage');
-    const defaultListLimit = configManager.get('listPerPage');
+    const meilisearchConfig = window.meilisearchFrontendConfig;
+    const defaultGridLimit = meilisearchConfig.gridPerPage;
+    const defaultListLimit = meilisearchConfig.listPerPage;
 
     const state = {
         currentLimit: ko.observable(defaultGridLimit),
-        availableLimits: ko.observableArray(configManager.get('gridPerPageValues')),
+        availableLimits: ko.observableArray(meilisearchConfig.gridPerPageValues),
 
         resetLimitForMode: function(mode) {
             if (mode === 'grid') {
-                state.availableLimits(configManager.get('gridPerPageValues'));
+                state.availableLimits(meilisearchConfig.gridPerPageValues);
                 state.currentLimit(defaultGridLimit);
             } else {
-                state.availableLimits(configManager.get('listPerPageValues'));
+                state.availableLimits(meilisearchConfig.listPerPageValues);
                 state.currentLimit(defaultListLimit);
             }
         }

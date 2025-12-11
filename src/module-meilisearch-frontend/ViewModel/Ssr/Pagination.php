@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchFrontend\ViewModel\Ssr;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
-use Meilisearch\Search\SearchResult;
 
 class Pagination implements ArgumentInterface
 {
@@ -17,37 +16,37 @@ class Pagination implements ArgumentInterface
     ) { }
 
     /**
-     * @param SearchResult $result
+     * @param array $result
      * @return bool
      */
-    public function hasPagination(SearchResult $result): bool
+    public function hasPagination(array $result): bool
     {
         return $this->getLastPageNum($result) > 1;
     }
 
     /**
-     * @param SearchResult $result
+     * @param array $result
      * @return int
      */
-    public function getCurrentPage(SearchResult $result): int
+    public function getCurrentPage(array $result): int
     {
-        return $result->getPage() ?? 1;
+        return $result['page'] ?? 1;
     }
 
     /**
-     * @param SearchResult $result
+     * @param array $result
      * @return int
      */
-    public function getLastPageNum(SearchResult $result): int
+    public function getLastPageNum(array $result): int
     {
-        return $result->getTotalPages() ?? 1;
+        return $result['totalPages'] ?? 1;
     }
 
     /**
-     * @param SearchResult $result
+     * @param array $result
      * @return array
      */
-    public function getFramePages(SearchResult $result): array
+    public function getFramePages(array $result): array
     {
         $currentPage = $this->getCurrentPage($result);
         $lastPageNum = $this->getLastPageNum($result);
@@ -64,19 +63,19 @@ class Pagination implements ArgumentInterface
     }
 
     /**
-     * @param SearchResult $result
+     * @param array $result
      * @return bool
      */
-    public function isFirstPage(SearchResult $result): bool
+    public function isFirstPage(array $result): bool
     {
         return $this->getCurrentPage($result) <= 1;
     }
 
     /**
-     * @param SearchResult $result
+     * @param array $result
      * @return bool
      */
-    public function isLastPage(SearchResult $result): bool
+    public function isLastPage(array $result): bool
     {
         return $this->getCurrentPage($result) >= $this->getLastPageNum($result);
     }

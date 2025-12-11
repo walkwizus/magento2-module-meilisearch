@@ -7,7 +7,7 @@
 $viewModel = $block->getViewModel();
 $config = $viewModel->getConfig();
 $searchResult = $viewModel->getSearchResult();
-$totalHits = $searchResult->getTotalHits();
+$totalHits = (int)($searchResult['totalHits'] ?? 0);
 $productListMode = $viewModel->getProductListMode();
 ?>
 <?php if ($totalHits === 0): ?>
@@ -20,7 +20,7 @@ $productListMode = $viewModel->getProductListMode();
     <div id="meilisearch-frontend-search-ssr">
         <div class="products wrapper <?= $productListMode ?> products-<?= $productListMode ?>">
             <ol class="products list items product-items">
-                <?php foreach ($searchResult->getHits() as $hit): ?>
+                <?php foreach ($searchResult['hits'] as $hit): ?>
                 <li class="item product product-item">
                     <div class="product-item-info">
                         <a href="<?= $viewModel->getProductUrl($hit['url_key']) ?>" class="product photo product-item-photo">
@@ -61,7 +61,7 @@ $productListMode = $viewModel->getProductListMode();
     {
         "*": {
             "Walkwizus_MeilisearchFrontend/js/components/boot": {
-                    "initialState": <?= /* @noEscape */ $searchResult->toJSON() ?>
+                    "initialState": <?= /* @noEscape */ json_encode($searchResult) ?>
                 }
             },
             "#meilisearch-frontend-search": {

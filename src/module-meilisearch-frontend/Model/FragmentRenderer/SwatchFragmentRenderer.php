@@ -11,6 +11,7 @@ use Walkwizus\MeilisearchFrontend\Model\Config\StoreFront;
 use Magento\Swatches\ViewModel\Product\Renderer\Configurable as ConfigurableViewModel;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\View\LayoutInterface;
+use Magento\Framework\View\Element\Template as TemplateBlock;
 
 class SwatchFragmentRenderer implements FragmentRendererInterface
 {
@@ -58,9 +59,23 @@ class SwatchFragmentRenderer implements FragmentRendererInterface
             return;
         }
 
+        if (!$layout->getBlock('product.swatch.item')) {
+            $layout->createBlock(
+                TemplateBlock::class,
+                'product.swatch.item'
+            )->setTemplate('Magento_Swatches::product/swatch-item.phtml');
+        }
+
+        if (!$layout->getBlock('product.swatch.tooltip')) {
+            $layout->createBlock(
+                TemplateBlock::class,
+                'product.swatch.tooltip'
+            )->setTemplate('Magento_Swatches::product/tooltip.phtml');
+        }
+
         $this->block = $layout->createBlock(
             Configurable::class,
-            null,
+            'meilisearch.swatch.listing.renderer',
             ['data' => ['configurable_view_model' => $this->configurableViewModel]]
         )->setTemplate('Magento_Swatches::product/listing/renderer.phtml');
     }
@@ -71,6 +86,10 @@ class SwatchFragmentRenderer implements FragmentRendererInterface
      */
     public function render(ProductInterface $product): ?string
     {
+        if ($this->block === null) {
+            return null;
+        }
+
         $this->block->setProduct($product);
 
         return $this->block->toHtml() ?: '';

@@ -1,23 +1,31 @@
 define([
     'uiElement',
     'ko',
-    'Walkwizus_MeilisearchFrontend/js/service/config-manager',
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
-    'Walkwizus_MeilisearchFrontend/js/model/limiter-state'
-], function(Element, ko, configManager, facetsState, viewModeState, limiterState) {
+    'Walkwizus_MeilisearchFrontend/js/model/limiter-state',
+    'Walkwizus_MeilisearchFrontend/js/service/url-manager'
+], function(Element, ko, facetsState, viewModeState, limiterState, urlManager) {
     'use strict';
+
+    const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return Element.extend({
         initialize: function() {
             this._super();
 
-            this.facets = configManager.get('facets');
+            this.facets = meilisearchConfig.facets;
             this.currentPage = facetsState.currentPage;
             this.currentViewMode = viewModeState.currentViewMode;
             this.currentLimit = limiterState.currentLimit;
 
-            this.restoreStateFromUrl();
+            const restored = urlManager.getStateFromUrl();
+
+            facetsState.selectedFacets(restored.facets);
+            facetsState.currentPage(restored.page);
+            facetsState.searchQuery(restored.q);
+            viewModeState.currentViewMode(restored.product_list_mode);
+            limiterState.currentLimit(restored.product_list_limit);
 
             const getCurrentState = () => ({
                 facets: facetsState.selectedFacets(),
@@ -27,162 +35,28 @@ define([
                 product_list_limit: this.currentLimit()
             });
 
-            facetsState.selectedFacets.subscribe(() => {
-                this.updateUrl(getCurrentState());
-            });
+            const syncUrl = () => {
+                const state = getCurrentState();
+                urlManager.updateUrl(state);
+            };
 
-            this.currentPage.subscribe(() => {
-                this.updateUrl(getCurrentState());
-            });
-
-            facetsState.searchQuery.subscribe(() => {
-                this.updateUrl(getCurrentState());
-            });
-
-            this.currentViewMode.subscribe(() => {
-                this.updateUrl(getCurrentState());
-            });
-
-            limiterState.currentLimit.subscribe(() => {
-                this.updateUrl(getCurrentState());
-            });
+            facetsState.selectedFacets.subscribe(syncUrl);
+            this.currentPage.subscribe(syncUrl);
+            facetsState.searchQuery.subscribe(syncUrl);
+            this.currentViewMode.subscribe(syncUrl);
+            this.currentLimit.subscribe(syncUrl);
 
             window.addEventListener('popstate', () => {
-                this.restoreStateFromUrl();
+                const s = urlManager.getStateFromUrl();
+
+                facetsState.selectedFacets(s.facets);
+                facetsState.currentPage(s.page);
+                facetsState.searchQuery(s.q);
+                viewModeState.currentViewMode(s.product_list_mode);
+                limiterState.currentLimit(s.product_list_limit);
             });
 
             return this;
-        },
-
-        updateUrl: function(state) {
-            const params = new URLSearchParams(window.location.search);
-
-            Object.keys(this.facets.facetConfig).forEach(facetCode => {
-                params.delete(facetCode);
-            });
-
-            Object.keys(state.facets || {}).forEach(facetCode => {
-                const values = state.facets[facetCode];
-                if (values.length > 0 && this.facets.facetConfig[facetCode]?.hasOptions) {
-                    const labels = values.map(id => this.facets.facetConfig[facetCode].options[id]?.label).filter(Boolean);
-                    if (labels.length > 0) {
-                        params.set(facetCode, labels.join(','));
-                    }
-                } else if (values.length > 0) {
-                    params.set(facetCode, values.join(','));
-                }
-            });
-
-            Object.keys(state).forEach(key => {
-                if (key === 'facets') {
-                    return;
-                }
-
-                const value = state[key];
-
-                if (key === 'product_list_mode') {
-                    const defaultMode = configManager.get('listMode').split('-')[0];
-                    if (value && value !== defaultMode) {
-                        params.set(key, value);
-                    } else {
-                        params.delete(key);
-                    }
-                    return;
-                }
-
-                if (key === 'product_list_limit') {
-                    const mode = state.product_list_mode || configManager.get('listMode').split('-')[0];
-                    const defaultLimit = mode === 'grid' ? configManager.get('gridPerPage') : configManager.get('listPerPage');
-
-                    if (parseInt(value) !== parseInt(defaultLimit)) {
-                        params.set(key, value);
-                    } else {
-                        params.delete(key);
-                    }
-                    return;
-                }
-
-                if (value && value !== '' && !(typeof value === 'number' && value <= 1)) {
-                    params.set(key, value);
-                } else {
-                    params.delete(key);
-                }
-            });
-
-            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-            const currentUrl = window.location.pathname + window.location.search;
-
-            if (newUrl !== currentUrl) {
-                window.history.pushState(null, '', newUrl);
-            }
-        },
-
-        restoreStateFromUrl: function() {
-            const params = new URLSearchParams(window.location.search);
-            const restoredFacets = {};
-            let restoredPage = 1;
-
-            params.forEach((value, key) => {
-                if (key === 'page') {
-                    const page = parseInt(value);
-                    if (!isNaN(page) && page > 0) {
-                        restoredPage = page;
-                    }
-                    return;
-                }
-
-                if (key === 'q') {
-                    facetsState.searchQuery(value);
-                    return;
-                }
-
-                if (key === 'product_list_mode') {
-                    viewModeState.currentViewMode(value);
-                    return;
-                }
-
-                if (key === 'product_list_limit') {
-                    const mode = viewModeState.currentViewMode() || configManager.get('listMode').split('-')[0];
-                    const defaultLimit = mode === 'grid' ? configManager.get('gridPerPage') : configManager.get('listPerPage');
-
-                    limiterState.currentLimit(parseInt(value) || defaultLimit);
-                    return;
-                }
-
-                if (!this.facets.facetConfig.hasOwnProperty(key)) {
-                    return;
-                }
-
-                if (!value) {
-                    return;
-                }
-
-                const labels = value.split(',').map(v => v.trim());
-                const idList = [];
-
-                if (this.facets.facetConfig[key]?.hasOptions) {
-                    labels.forEach(label => {
-                        const option = Object.values(this.facets.facetConfig[key].options)
-                            .find(opt => opt.label.toLowerCase() === label.toLowerCase());
-                        if (option) {
-                            idList.push(option.value);
-                        }
-                    });
-                } else {
-                    labels.forEach(val => {
-                        if (val) {
-                            idList.push(val);
-                        }
-                    });
-                }
-
-                if (idList.length > 0) {
-                    restoredFacets[key] = idList;
-                }
-            });
-
-            facetsState.selectedFacets({ ...restoredFacets });
-            facetsState.currentPage(restoredPage);
         }
     });
 });
