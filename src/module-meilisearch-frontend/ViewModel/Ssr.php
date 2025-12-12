@@ -260,6 +260,35 @@ class Ssr implements ArgumentInterface
     }
 
     /**
+     * @return string
+     */
+    public function getSortBy(): string
+    {
+        $available = $this->config['availableSortBy'] ?? [];
+
+        $sort = (string) $this->request->getParam('product_list_order', '');
+        if ($sort && isset($available[$sort])) {
+            return $sort;
+        }
+
+        $default = (string) ($this->config['defaultSortBy'] ?? '');
+        if ($default && isset($available[$default])) {
+            return $default;
+        }
+
+        return (string) array_key_first($available);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDescending(): bool
+    {
+        $dir = strtolower((string) $this->request->getParam('product_list_dir', 'asc'));
+        return $dir === 'desc';
+    }
+
+    /**
      * @param $urlKey
      * @return string
      */
