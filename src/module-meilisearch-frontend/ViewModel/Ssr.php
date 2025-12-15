@@ -19,6 +19,11 @@ class Ssr implements ArgumentInterface
     private array $config;
 
     /**
+     * @var array|null
+     */
+    private ?array $searchResultCache = null;
+
+    /**
      * @param RequestInterface $request
      * @param SearchQueryFactory $searchQueryFactory
      * @param SearchManager $searchManager
@@ -42,6 +47,10 @@ class Ssr implements ArgumentInterface
      */
     public function getSearchResult(): array
     {
+        if ($this->searchResultCache !== null) {
+            return $this->searchResultCache;
+        }
+
         $query = $this->request->getParam('q', '');
         $currentPageParam = (int)$this->request->getParam('page', 1);
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
@@ -164,6 +173,31 @@ class Ssr implements ArgumentInterface
         }
 
         return $filters;
+    }
+
+    /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    public function getFacets(): array
+    {
+        $searchResult = $this->getSearchResult();
+        $facetDistribution = (array)($searchResult['facetDistribution'] ?? []);
+        $facetConfig = (array)($this->config['facets']['facetConfig'] ?? []);
+
+        $facets = array_filter(
+            $facetConfig,
+            static fn(array $cfg, string $code): bool => isset($facetDistribution[$cfg['code'] ?? $code]),
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        uasort(
+            $facets,
+            static fn(array $a, array $b): int => (int)($a['position'] ?? 0) <=> (int)($b['position'] ?? 0)
+        );
+
+        return array_values($facets);
     }
 
     /**
