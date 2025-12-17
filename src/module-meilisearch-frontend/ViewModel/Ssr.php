@@ -155,7 +155,12 @@ class Ssr implements ArgumentInterface
 
         $categoryId = (int)($this->config['currentCategoryId'] ?? 0);
         if ($categoryId > 0) {
-            $filters[] = ['category_ids = ' . $categoryId];
+            $filters[] = 'category_ids = ' . $categoryId;
+        } else {
+            $categoryRule = (string)($this->config['categoryRule'] ?? '');
+            if ($categoryRule !== '') {
+                $filters[] = $categoryRule;
+            }
         }
 
         $selectedFacets = $selectedFacets ?? $this->getSelectedFacets();
