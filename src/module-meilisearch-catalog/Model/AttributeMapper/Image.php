@@ -15,10 +15,16 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 class Image implements AttributeMapperInterface
 {
     const XML_PATH_CATALOG_PLACEHOLDER_IMAGE_PLACEHOLDER = 'catalog/placeholder/image_placeholder';
+    const IMAGE_PATH_PLACEHOLDER = '/placeholder';
 
-    const IMAGE_ATTRIBUTE = 'image';
-
-    const IMAGE_PATH_PLACEHOLDER = '/catalog/product/placeholder';
+    /**
+     * @var string[]
+     */
+    private array $imagesAttributes = [
+        'image',
+        'small_image',
+        'thumbnail',
+    ];
 
     /**
      * @param ScopeConfigInterface $scopeConfig
@@ -33,62 +39,98 @@ class Image implements AttributeMapperInterface
 
     /**
      * @param array $documentData
-     * @param $storeId
+     * @param int|string $storeId
      * @return array
      * @throws LocalizedException
      */
     public function map(array $documentData, $storeId): array
     {
         $documents = [];
+        $storeId = (int) $storeId;
+
         foreach ($documentData as $id => $indexData) {
-            $documents[$id]['image'] = $this->getProductImage($id, $storeId);
+            $images = $this->getProductImagesByCode((int) $id);
+
+            foreach ($this->imagesAttributes as $code) {
+                $value = $images[$code] ?? null;
+                $documents[$id][$code] = $this->normalizeImageValue($value, $storeId);
+            }
         }
 
         return $documents;
     }
 
     /**
-     * @param $productId
-     * @param $storeId
-     * @return string
+     * @param int $productId
+     * @return array
      * @throws LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
-    protected function getProductImage($productId, $storeId): string
+    protected function getProductImagesByCode(int $productId): array
     {
         $connection = $this->resourceConnection->getConnection();
 
-        $entityTypeId = $this->eavConfig
+        $entityTypeId = (int) $this->eavConfig
             ->getEntityType(ProductAttributeInterface::ENTITY_TYPE_CODE)
             ->getEntityTypeId();
 
-        $select = $connection
-            ->select()
-            ->from(['main_table' => $connection->getTableName('catalog_product_entity_varchar')], ['main_table.value'])
-            ->join(
-                ['eav_attribute' => $connection->getTableName('eav_attribute')],
-                'main_table.attribute_id = eav_attribute.attribute_id',
-                []
+        $select = $connection->select()
+            ->from(
+                ['cpev' => $connection->getTableName('catalog_product_entity_varchar')],
+                ['value' => 'cpev.value']
             )
-            ->where('main_table.entity_id = ?', $productId)
-            ->where('main_table.store_id = ?', 0)
-            ->where('eav_attribute.entity_type_id = ?', $entityTypeId)
-            ->where('eav_attribute.attribute_code = "' . self::IMAGE_ATTRIBUTE . '"');
+            ->join(
+                ['ea' => $connection->getTableName('eav_attribute')],
+                'cpev.attribute_id = ea.attribute_id',
+                ['attribute_code' => 'ea.attribute_code']
+            )
+            ->where('cpev.entity_id = ?', $productId)
+            ->where('cpev.store_id = ?', 0)
+            ->where('ea.entity_type_id = ?', $entityTypeId)
+            ->where('ea.attribute_code IN (?)', $this->imagesAttributes);
 
-        $image = $connection->fetchOne($select);
+        $rows = $connection->fetchAll($select);
 
-        return !is_null($image) && $image != 'no_selection' && $image != '' ? $image : $this->getPlaceholder($storeId);
+        $result = [];
+        foreach ($rows as $row) {
+            $code = (string) ($row['attribute_code'] ?? '');
+            $val = (string) ($row['value'] ?? '');
+            if ($code !== '') {
+                $result[$code] = $val;
+            }
+        }
+
+        return $result;
     }
 
     /**
-     * @param $storeId
+     * @param string|null $value
+     * @param int $storeId
      * @return string
      */
-    protected function getPlaceholder($storeId): string
+    private function normalizeImageValue(?string $value, int $storeId): string
     {
-        $placeholder = $this->scopeConfig->getValue(self::XML_PATH_CATALOG_PLACEHOLDER_IMAGE_PLACEHOLDER, ScopeInterface::SCOPE_STORE, $storeId);
+        $value = (string) $value;
 
-        if (!$placeholder) {
+        if ($value === '' || $value === 'no_selection') {
+            return $this->getPlaceholder($storeId);
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param int $storeId
+     * @return string
+     */
+    protected function getPlaceholder(int $storeId): string
+    {
+        $placeholder = (string) $this->scopeConfig->getValue(
+            self::XML_PATH_CATALOG_PLACEHOLDER_IMAGE_PLACEHOLDER,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
+
+        if ($placeholder === '') {
             $placeholder = 'image.jpg';
         }
 
