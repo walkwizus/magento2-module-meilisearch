@@ -9,6 +9,9 @@ $config = $viewModel->getConfig();
 $searchResult = $viewModel->getSearchResult();
 $totalHits = (int)($searchResult['totalHits'] ?? 0);
 $productListMode = $viewModel->getProductListMode();
+$imageAttribute = $config['images']['category_page_' . $productListMode]['type'];
+$imageWidth = $config['images']['category_page_' . $productListMode]['width'];
+$imageHeight = $config['images']['category_page_' . $productListMode]['height'];
 ?>
 <?php if ($totalHits === 0): ?>
     <div id="meilisearch-frontend-search-ssr">
@@ -26,7 +29,7 @@ $productListMode = $viewModel->getProductListMode();
                         <a href="<?= $viewModel->getProductUrl($hit['url_key']) ?>" class="product photo product-item-photo">
                             <span class="product-image-container" style="width: 240px;">
                                 <span class="product-image-wrapper" style="padding-bottom: 125%;">
-                                    <img src="<?= $viewModel->getProductImage($hit['image']) ?>" alt="<?= $hit['name'] ?>" class="product-image-photo" loading="lazy" width="240" height="300" />
+                                    <img src="<?= $viewModel->getProductImage($hit[$imageAttribute]) ?>" alt="<?= $hit['name'] ?>" class="product-image-photo" loading="lazy" width="<?= $imageWidth ?>>" height="<?= $imageHeight ?>" />
                                 </span>
                             </span>
                         </a>

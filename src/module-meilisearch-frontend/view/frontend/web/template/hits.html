@@ -25,7 +25,14 @@
                 <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }" class="product photo product-item-photo">
                     <span class="product-image-container" style="width: 240px;">
                         <span class="product-image-wrapper" style="padding-bottom: 125%;">
-                            <img class="product-image-photo" data-bind="attr: { src: $parent.productModel.getProductImage(image), alt: name }" loading="lazy" width="240" height="300" />
+                            <img class="product-image-photo"
+                                 data-bind="attr: {
+                                    src: $parent.productModel.getProductImageByContext($data),
+                                    alt: name,
+                                    width: $parent.productModel.getImageConfig().width,
+                                    height: $parent.productModel.getImageConfig().height
+                                 }"
+                                 loading="lazy" />
                         </span>
                     </span>
                 </a>

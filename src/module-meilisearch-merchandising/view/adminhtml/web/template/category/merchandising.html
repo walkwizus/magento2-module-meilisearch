@@ -19,7 +19,7 @@
     <div id="category-merchandising-preview">
         <div class="product-grid" data-bind="foreach: merchandising.docs()">
             <div class="product-card" data-bind="attr: {'data-product-id': id}">
-                <img data-bind="attr: { src: $parent.productMediaUrl + image, alt: name }" class="product-image">
+                <img data-bind="attr: { src: $parent.productMediaUrl + small_image, alt: name }" class="product-image">
                 <div class="product-name" data-bind="text: name"></div>
                 <div class="product-sku">
                     <span data-bind="text: 'SKU: ' + sku"></span>

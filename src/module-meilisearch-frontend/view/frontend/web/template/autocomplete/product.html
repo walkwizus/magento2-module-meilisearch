@@ -3,7 +3,7 @@
     <span class="autocomplete-results-title"><!-- ko i18n: 'products' --><!-- /ko --></span>
     <li data-bind="foreach: $parent.results()[indexName]" role="option">
         <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }">
-            <img data-bind="attr: { src: $parent.productModel.getProductImage(image), alt: name }" />
+            <img data-bind="attr: { src: $parent.productModel.getProductImage(thumbnail), alt: name }" />
             <span data-bind="html: $parents[1].highlightMatch(name)"></span>
         </a>
     </li>
