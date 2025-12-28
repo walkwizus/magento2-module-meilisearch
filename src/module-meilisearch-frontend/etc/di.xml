@@ -25,11 +25,11 @@
             <argument name="providers" xsi:type="array">
                 <item name="catalog_store_front" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\CatalogStoreFrontConfigProvider</item>
                 <item name="category_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\CategoryConfigProvider</item>
-                <item name="url_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\UrlConfigProvider</item>
                 <item name="facet_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\FacetConfigProvider</item>
+                <item name="source_autocomplete_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\IndexAutocompleteConfigProvider</item>
                 <item name="price_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\PriceConfigProvider</item>
                 <item name="server_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\ServerConfigProvider</item>
-                <item name="source_autocomplete_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\IndexAutocompleteConfigProvider</item>
+                <item name="url_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\UrlConfigProvider</item>
             </argument>
         </arguments>
     </type>

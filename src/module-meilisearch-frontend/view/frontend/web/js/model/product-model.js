@@ -1,7 +1,7 @@
 define([
     'Magento_Catalog/js/price-utils',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state'
-], function(priceUtils, viewMode) {
+], function (priceUtils, viewMode) {
     'use strict';
 
     const meilisearchConfig = window.meilisearchFrontendConfig;
@@ -13,13 +13,28 @@ define([
         return b + '/' + p;
     }
 
+    function buildCachedImageUrl(imagePath, cfg) {
+        const path = String(imagePath || '').replace(/^\/+/, '');
+        if (!path) return '';
+
+        const mediaBase = String(meilisearchConfig.mediaBaseUrl || '').replace(/\/+$/, '');
+        const hash = cfg && cfg.hash;
+
+        if (hash) {
+            return mediaBase + '/cache/' + hash + '/' + path;
+        }
+
+        return mediaBase + '/' + path;
+    }
+
     return {
         getImageConfig() {
             return meilisearchConfig.images['category_page_' + viewMode.currentViewMode()];
         },
 
         getProductImage: function(imagePath) {
-            return joinUrl(meilisearchConfig.mediaBaseUrl, imagePath);
+            const cfg = this.getImageConfig() || {};
+            return buildCachedImageUrl(imagePath, cfg);
         },
 
         getProductImageByContext: function(hit) {
@@ -31,7 +46,7 @@ define([
                 return '';
             }
 
-            return this.getProductImage(path);
+            return buildCachedImageUrl(path, cfg);
         },
 
         getProductUrl: function(urlKey) {
