@@ -90,18 +90,6 @@ class BaseIndexerHandler implements IndexerInterface
      */
     public function deleteIndex($dimensions, \Traversable $documents): IndexerInterface
     {
-        foreach ($dimensions as $dimension) {
-            $storeId = $dimension->getValue();
-            $indexerId = $this->getIndexerId();
-            $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
-
-            try {
-                $this->indexesManager->deleteIndex($indexName);
-            } catch (\Exception $exception) {
-                return $this;
-            }
-        }
-
         return $this;
     }
 
@@ -112,19 +100,6 @@ class BaseIndexerHandler implements IndexerInterface
      */
     public function cleanIndex($dimensions): IndexerInterface
     {
-        foreach ($dimensions as $dimension) {
-            $storeId = $dimension->getValue();
-            $indexerId = $this->getIndexerId();
-            $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
-
-            try {
-                $this->indexesManager->deleteIndex($indexName);
-                $this->indexesManager->createIndex($indexName, $this->indexPrimaryKey);
-            } catch (\Exception $exception) {
-                return $this;
-            }
-        }
-
         return $this;
     }
 
