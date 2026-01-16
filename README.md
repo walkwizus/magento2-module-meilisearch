@@ -23,6 +23,18 @@ The Meilisearch extension for Magento 2 enables replacing Magento's default sear
 
 Meilisearch is a search engine featuring a blazing fast RESTful search API, typo tolerance, comprehensive language support, and much more.
 
+## ⚙️ Installation & Requirements
+
+> [!IMPORTANT]
+> **Meilisearch PHP SDK Dependency** > This module **no longer includes the Meilisearch PHP SDK automatically**. You must install it manually in your project.  
+> The module requires **Meilisearch PHP SDK version `>= 2.0.0-beta.3`**.
+
+## 🧩 Hyvä Compatibility
+
+This frontend is fully compatible with the [Hyvä Frontend](https://www.hyva.io/).  
+If you're using Hyvä, make sure to install the dedicated compatibility module:  
+👉 [Meilisearch Hyvä Compatibility Module](https://github.com/walkwizus/magento2-hyva-meilisearch)
+
 ## 🧩 Breeze Compatibility
 
 This frontend is fully compatible with the [Breeze frontend](https://breezefront.com/) by SwissUp.  
