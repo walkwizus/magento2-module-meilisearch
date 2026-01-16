@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\Service;
 
 use Meilisearch\Contracts\IndexesResults;
+use Meilisearch\Contracts\Task;
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
 
 class IndexesManager
@@ -29,10 +30,10 @@ class IndexesManager
     /**
      * @param $indexName
      * @param $primaryKey
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function createIndex($indexName, $primaryKey): array
+    public function createIndex($indexName, $primaryKey): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->createIndex($indexName, ['primaryKey' => $primaryKey]);
@@ -41,10 +42,10 @@ class IndexesManager
     /**
      * @param $indexName
      * @param $primaryKey
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateIndex($indexName, $primaryKey): array
+    public function updateIndex($indexName, $primaryKey): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->updateIndex($indexName, ['primaryKey' => $primaryKey]);
@@ -52,10 +53,10 @@ class IndexesManager
 
     /**
      * @param $indexName
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function deleteIndex($indexName): array
+    public function deleteIndex($indexName): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->deleteIndex($indexName);

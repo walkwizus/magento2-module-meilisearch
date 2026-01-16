@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchBase\Service;
 
+use Meilisearch\Contracts\Task;
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
 
 class SettingsManager
@@ -29,10 +30,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $settings
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateSettings($indexName, array $settings): array
+    public function updateSettings($indexName, array $settings): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateSettings($settings);
@@ -41,10 +42,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $attributes
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateFilterableAttributes($indexName, array $attributes): array
+    public function updateFilterableAttributes($indexName, array $attributes): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateFilterableAttributes($attributes);
@@ -53,10 +54,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $attributes
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateSearchableAttributes($indexName, array $attributes): array
+    public function updateSearchableAttributes($indexName, array $attributes): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateSearchableAttributes($attributes);
@@ -65,10 +66,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $attributes
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateSortableAttributes($indexName, array $attributes): array
+    public function updateSortableAttributes($indexName, array $attributes): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateSortableAttributes($attributes);
@@ -77,10 +78,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $rules
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateRankingRules($indexName, array $rules): array
+    public function updateRankingRules($indexName, array $rules): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateRankingRules($rules);
@@ -89,10 +90,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $stopWords
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateStopWords($indexName, array $stopWords): array
+    public function updateStopWords($indexName, array $stopWords): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateStopWords($stopWords);
@@ -101,10 +102,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $synonyms
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateSynonyms($indexName, array $synonyms): array
+    public function updateSynonyms($indexName, array $synonyms): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateSynonyms($synonyms);
@@ -113,10 +114,10 @@ class SettingsManager
     /**
      * @param $indexName
      * @param array $typoTolerance
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateTypoTolerance($indexName, array $typoTolerance): array
+    public function updateTypoTolerance($indexName, array $typoTolerance): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateTypoTolerance($typoTolerance);

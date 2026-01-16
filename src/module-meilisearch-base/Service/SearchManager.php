@@ -33,9 +33,10 @@ class SearchManager
     /**
      * @param array $queries
      * @param MultiSearchFederation|null $federation
+     * @return mixed
      * @throws \Exception
      */
-    public function multisearch(array $queries = [], ?MultiSearchFederation $federation = null)
+    public function multisearch(array $queries = [], ?MultiSearchFederation $federation = null): mixed
     {
         $client = $this->connectionManager->getConnection();
         return $client->multisearch($queries);

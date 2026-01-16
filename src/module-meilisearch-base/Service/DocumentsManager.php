@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\Service;
 
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
+use Meilisearch\Contracts\Task;
 
 class DocumentsManager
 {
@@ -19,7 +20,7 @@ class DocumentsManager
      * @param $indexName
      * @param array $documents
      * @param string $primaryKey
-     * @return array
+     * @return Task[]
      * @throws \Exception
      */
     public function addDocumentsInBatches($indexName, array $documents, string $primaryKey): array
@@ -32,10 +33,10 @@ class DocumentsManager
      * @param $indexName
      * @param array $documents
      * @param string $primaryKey
-     * @return mixed
+     * @return Task
      * @throws \Exception
      */
-    public function addDocuments($indexName, array $documents, string $primaryKey): mixed
+    public function addDocuments($indexName, array $documents, string $primaryKey): Task
     {
         $client =  $this->connectionManager->getConnection();
         return $client->index($indexName)->addDocuments($documents);
@@ -44,10 +45,10 @@ class DocumentsManager
     /**
      * @param $indexName
      * @param array $documents
-     * @return array
+     * @return Task
      * @throws \Exception
      */
-    public function updateDocuments($indexName, array $documents): array
+    public function updateDocuments($indexName, array $documents): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateDocuments($documents);
