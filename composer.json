@@ -21,6 +21,11 @@
     "require": {
         "magento/framework": ">=103.0.4"
     },
+    "suggest": {
+        "meilisearch/meilisearch-php": "Required to interact with Meilisearch API from PHP.",
+        "walkwizus/magento2-module-meilisearch-breeze": "Provides optimized frontend support for Breeze-based themes.",
+        "walkwizus/magento2-hyva-meilisearch": "Required for compatibility with Hyvä Themes frontend."
+    },
     "replace": {
         "walkwizus/module-meilisearch-base": "self.version",
         "walkwizus/module-meilisearch-catalog": "self.version",
