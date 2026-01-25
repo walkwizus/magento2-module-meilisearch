@@ -68,7 +68,6 @@ class Eav implements AttributeProviderInterface
 
         foreach ($attributes as $attribute) {
             $filterableAttributes[] = $attribute->getAttributeCode();
-            $filterableAttributes[] = $attribute->getAttributeCode() . '_value';
         }
 
         return array_merge($this->additionalFilterableAttributes, $filterableAttributes);
@@ -89,11 +88,7 @@ class Eav implements AttributeProviderInterface
         $attributes->getSelect()->order('search_weight DESC');
 
         foreach ($attributes as $attribute) {
-            if ($attribute->usesSource() || $attribute->getBackendType() === 'int') {
-                $searchableAttributes[] = $attribute->getAttributeCode() . '_value';
-            } else {
-                $searchableAttributes[] = $attribute->getAttributeCode();
-            }
+            $searchableAttributes[] = $attribute->getAttributeCode();
         }
 
         return array_merge($this->additionalSearchableAttributes, $searchableAttributes);

@@ -8,7 +8,6 @@ use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
 use Magento\Search\Model\EngineResolver;
 use Walkwizus\MeilisearchBase\Service\SettingsManager;
 use Walkwizus\MeilisearchBase\Service\DocumentsManager;
-use Walkwizus\MeilisearchBase\Service\IndexesManager;
 use Walkwizus\MeilisearchBase\Service\HealthManager;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Indexer\SaveHandler\Batch;
@@ -23,7 +22,6 @@ class BaseIndexerHandler implements IndexerInterface
      * @param EngineResolver $engineResolver
      * @param SettingsManager $settingsManager
      * @param DocumentsManager $documentsManager
-     * @param IndexesManager $indexesManager
      * @param HealthManager $healthManager
      * @param SearchIndexNameResolver $searchIndexNameResolver
      * @param Batch $batch
@@ -37,7 +35,6 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly EngineResolver $engineResolver,
         private readonly SettingsManager $settingsManager,
         private readonly DocumentsManager $documentsManager,
-        private readonly IndexesManager $indexesManager,
         private readonly HealthManager $healthManager,
         private readonly SearchIndexNameResolver $searchIndexNameResolver,
         private readonly Batch $batch,
