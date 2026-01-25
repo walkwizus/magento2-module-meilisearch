@@ -35,7 +35,6 @@ define([
                             code: code,
                             label: facetCfg.label,
                             value: value,
-                            // On utilise formatFacetValue pour nettoyer le label (ex: Rouge|1|#ff -> Rouge)
                             valueLabel: this.formatFacetValue(value, facetCfg)
                         });
                     });
