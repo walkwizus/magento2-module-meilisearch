@@ -8,6 +8,7 @@ use Walkwizus\MeilisearchBase\Api\AttributeMapperInterface;
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
 use Magento\Eav\Model\Entity\Attribute;
 use Magento\Eav\Api\Data\AttributeOptionInterface;
+use Magento\Swatches\Helper\Data as SwatchHelper;
 
 class Eav implements AttributeMapperInterface
 {
@@ -19,7 +20,6 @@ class Eav implements AttributeMapperInterface
         'media_gallery',
         'tier_price',
         'quantity_and_stock_status',
-        'media_gallery',
         'giftcard_amounts',
     ];
 
@@ -35,15 +35,6 @@ class Eav implements AttributeMapperInterface
     /**
      * @var array|string[]
      */
-    private array $filterableAttributeTypes = [
-        'boolean',
-        'multiselect',
-        'select',
-    ];
-
-    /**
-     * @var array|string[]
-     */
     private array $attributeParentProduct = [
         'name',
         'url_key',
@@ -52,7 +43,7 @@ class Eav implements AttributeMapperInterface
     /**
      * @var AttributeOptionInterface[]
      */
-    private array $attributeOptionsCache;
+    private array $attributeOptionsCache = [];
 
     /**
      * @var array|string[]
@@ -61,10 +52,12 @@ class Eav implements AttributeMapperInterface
 
     /**
      * @param DataProvider $dataProvider
+     * @param SwatchHelper $swatchHelper
      * @param array $excludedAttributes
      */
     public function __construct(
         private readonly DataProvider $dataProvider,
+        private readonly SwatchHelper $swatchHelper,
         array $excludedAttributes = [],
     ) {
         $this->excludedAttributes = array_merge($this->defaultExcludedAttributes, $excludedAttributes);
@@ -72,7 +65,7 @@ class Eav implements AttributeMapperInterface
 
     /**
      * @param array $documentData
-     * @param $storeId
+     * @param int|string $storeId
      * @return array
      */
     public function map(array $documentData, $storeId): array
@@ -80,13 +73,10 @@ class Eav implements AttributeMapperInterface
         $documents = [];
 
         foreach ($documentData as $productId => $indexData) {
-            $productIndexData = $this->convertToProductData($productId, $indexData, $storeId);
+            $productIndexData = $this->convertToProductData((int)$productId, $indexData, $storeId);
+
+            $documents[$productId] = ['id' => $productId];
             foreach ($productIndexData as $attributeCode => $value) {
-                $documents[$productId]['id'] = $productId;
-                if (str_contains($attributeCode, '_value')) {
-                    $documents[$productId][$attributeCode] = $value;
-                    continue;
-                }
                 $documents[$productId][$attributeCode] = $value;
             }
         }
@@ -97,7 +87,7 @@ class Eav implements AttributeMapperInterface
     /**
      * @param int $productId
      * @param array $indexData
-     * @param $storeId
+     * @param int|string $storeId
      * @return array
      */
     private function convertToProductData(int $productId, array $indexData, $storeId): array
@@ -108,12 +98,15 @@ class Eav implements AttributeMapperInterface
         foreach ($indexData as $attributeId => $attributeValues) {
             if (isset($searchableAttributes[$attributeId])) {
                 $attribute = $searchableAttributes[$attributeId];
+
                 if (in_array($attribute->getAttributeCode(), $this->excludedAttributes, true)) {
                     continue;
                 }
+
                 if (!is_array($attributeValues)) {
                     $attributeValues = [$productId => $attributeValues];
                 }
+
                 $attributeValues = $this->prepareAttributeValues($productId, $attribute, $attributeValues);
                 $productAttributes += $this->convertAttribute($attribute, $attributeValues, $storeId);
             }
@@ -126,7 +119,7 @@ class Eav implements AttributeMapperInterface
      * @param int $productId
      * @param Attribute $attribute
      * @param array $attributeValues
-     * @return array|int[]
+     * @return array
      */
     private function prepareAttributeValues(int $productId, Attribute $attribute, array $attributeValues): array
     {
@@ -140,17 +133,8 @@ class Eav implements AttributeMapperInterface
             $attributeValues = $this->prepareMultiselectValues($attributeValues);
         }
 
-        if (in_array($attribute->getFrontendInput(), $this->filterableAttributeTypes)) {
-            $attributeValues = array_map(
-                function (string $valueId) {
-                    return (int)$valueId;
-                },
-                $attributeValues
-            );
-        }
-
         if (in_array($attribute->getAttributeCode(), $this->attributeParentProduct) && count($attributeValues) > 1) {
-            $attributeValues = [$attributeValues[$productId]];
+            $attributeValues = [$attributeValues[$productId] ?? array_shift($attributeValues)];
         }
 
         return $attributeValues;
@@ -159,22 +143,47 @@ class Eav implements AttributeMapperInterface
     /**
      * @param Attribute $attribute
      * @param array $attributeValues
-     * @param $storeId
+     * @param int|string $storeId
      * @return array
      */
     private function convertAttribute(Attribute $attribute, array $attributeValues, $storeId): array
     {
         $productAttributes = [];
-        $retrievedValue = $this->retrieveFieldValue($attributeValues);
-        if ($retrievedValue !== null) {
-            $productAttributes[$attribute->getAttributeCode()] = $retrievedValue;
-            if ($this->isAttributeLabelsShouldBeMapped($attribute)) {
-                $attributeLabels = $this->getValuesLabels($attribute, $attributeValues, $storeId);
-                $retrievedLabel = $this->retrieveFieldValue($attributeLabels);
-                if ($retrievedLabel) {
-                    $productAttributes[$attribute->getAttributeCode() . '_value'] = $retrievedLabel;
+        $attributeCode = $attribute->getAttributeCode();
+
+        if ($attribute->usesSource()) {
+            $isSwatch = $this->swatchHelper->isSwatchAttribute($attribute);
+            $options = $this->getAttributeOptions($attribute, $storeId);
+
+            $swatchData = $isSwatch ? $this->swatchHelper->getSwatchesByOptionsId(array_column($options, 'value')) : [];
+
+            $finalValues = [];
+            foreach ($options as $option) {
+                if (in_array($option['value'], $attributeValues)) {
+                    $label = $option['label'];
+
+                    if ($isSwatch && isset($swatchData[$option['value']])) {
+                        $swatch = $swatchData[$option['value']];
+                        $type = $swatch['type'];
+                        $value = $swatch['value'];
+
+                        $finalValues[] = "{$label}|{$type}|{$value}";
+                    } else {
+                        $finalValues[] = $label;
+                    }
                 }
             }
+
+            $result = $this->retrieveFieldValue($finalValues);
+            if ($result !== null) {
+                $productAttributes[$attributeCode] = $result;
+                return $productAttributes;
+            }
+        }
+
+        $retrievedValue = $this->retrieveFieldValue($attributeValues);
+        if ($retrievedValue !== null) {
+            $productAttributes[$attributeCode] = $retrievedValue;
         }
 
         return $productAttributes;
@@ -186,78 +195,49 @@ class Eav implements AttributeMapperInterface
      */
     private function prepareMultiselectValues(array $values): array
     {
-        return \array_merge(
-            ...\array_map(
-                function (string $value) {
-                    return \explode(',', $value);
-                },
-                $values
-            )
-        );
+        $result = [];
+        foreach ($values as $value) {
+            if (is_string($value)) {
+                $result = array_merge($result, explode(',', $value));
+            } elseif (is_array($value)) {
+                $result = array_merge($result, $value);
+            } else {
+                $result[] = $value;
+            }
+        }
+        return $result;
     }
 
     /**
      * @param array $values
-     * @return array|mixed|null
+     * @return mixed
      */
     private function retrieveFieldValue(array $values): mixed
     {
-        $values = array_unique($values);
+        $values = array_filter(array_unique($values), function($v) {
+            return $v !== null && $v !== '';
+        });
+
+        if (empty($values)) {
+            return null;
+        }
+
         return count($values) === 1 ? array_shift($values) : array_values($values);
     }
 
     /**
      * @param Attribute $attribute
-     * @return bool
-     */
-    private function isAttributeLabelsShouldBeMapped(Attribute $attribute): bool
-    {
-        return (
-            $attribute->getIsSearchable()
-            || $attribute->getIsVisibleInAdvancedSearch()
-            || $attribute->getIsFilterable()
-            || $attribute->getIsFilterableInSearch()
-        );
-    }
-
-    /**
-     * @param Attribute $attribute
-     * @param array $attributeValues
-     * @param $storeId
-     * @return array
-     */
-    private function getValuesLabels(Attribute $attribute, array $attributeValues, $storeId): array
-    {
-        $attributeLabels = [];
-
-        $options = $this->getAttributeOptions($attribute, $storeId);
-        if (empty($options)) {
-            return $attributeLabels;
-        }
-
-        foreach ($options as $option) {
-            if (\in_array($option['value'], $attributeValues)) {
-                $attributeLabels[] = $option['label'];
-            }
-        }
-
-        return $attributeLabels;
-    }
-
-    /**
-     * @param Attribute $attribute
-     * @param $storeId
+     * @param int $storeId
      * @return array
      */
     private function getAttributeOptions(Attribute $attribute, $storeId): array
     {
-        if (!isset($this->attributeOptionsCache[$storeId][$attribute->getId()])) {
-            $attributeStoreId = $attribute->getStoreId();
-            $options = $attribute->usesSource() ? $attribute->setStoreId($storeId)->getSource()->getAllOptions() : [];
-            $this->attributeOptionsCache[$storeId][$attribute->getId()] = $options;
-            $attribute->setStoreId($attributeStoreId);
+        $cacheKey = $storeId . '_' . $attribute->getId();
+        if (!isset($this->attributeOptionsCache[$cacheKey])) {
+            $options = $attribute->setStoreId($storeId)->getSource()->getAllOptions();
+            $this->attributeOptionsCache[$cacheKey] = $options;
         }
 
-        return $this->attributeOptionsCache[$storeId][$attribute->getId()];
+        return $this->attributeOptionsCache[$cacheKey];
     }
 }

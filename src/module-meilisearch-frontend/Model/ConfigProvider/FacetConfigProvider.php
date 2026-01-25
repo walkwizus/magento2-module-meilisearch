@@ -95,7 +95,7 @@ class FacetConfigProvider implements ConfigProviderInterface
         $renderRegion = $this->determineRenderRegion($attribute);
         $useSource = $attribute->usesSource();
 
-        $config = [
+        return [
             'code' => $this->attributeResolver->resolve($attributeCode),
             'position' => (int)$attribute->getPosition(),
             'showMore' => (bool)$attribute->getMeilisearchShowMore(),
@@ -106,14 +106,9 @@ class FacetConfigProvider implements ConfigProviderInterface
             'label' => $attribute->getStoreLabel(),
             'type' => $frontendInput,
             'renderRegion' => $renderRegion,
-            'hasOptions' => $useSource
+            'hasOptions' => $useSource,
+            'isSwatch' => $this->swatchHelper->isSwatchAttribute($attribute)
         ];
-
-        if ($useSource) {
-            $config = $this->addSourceOptions($config, $attribute);
-        }
-
-        return $config;
     }
 
     /**
@@ -130,76 +125,5 @@ class FacetConfigProvider implements ConfigProviderInterface
         $frontendInput = $attribute->getFrontendInput();
 
         return $this->regionMapping[$frontendInput] ?? 'checkbox';
-    }
-
-    /**
-     * @param array $config
-     * @param Attribute $attribute
-     * @return array
-     * @throws LocalizedException
-     */
-    private function addSourceOptions(array $config, Attribute $attribute): array
-    {
-        if ($this->swatchHelper->isSwatchAttribute($attribute)) {
-            $config['frontendInput'] = $attribute->getData('frontend_input');
-            $config['swatchInputType'] = $attribute->getData(Swatch::SWATCH_INPUT_TYPE_KEY);
-        }
-
-        $allOptions = $attribute->getSource()->getAllOptions();
-        $config['options'] = [];
-
-        $swatchData = [];
-        if ($this->swatchHelper->isSwatchAttribute($attribute)) {
-            $optionIds = array_column($allOptions, 'value');
-            $swatchData = $this->swatchHelper->getSwatchesByOptionsId($optionIds);
-        }
-
-        foreach ($allOptions as $option) {
-            $optionId = $option['value'];
-
-            if ($optionId === '') {
-                continue;
-            }
-
-            $optionConfig = $this->buildOptionConfig($option, $optionId, $swatchData[$optionId] ?? null);
-            $config['isSwatch'] = $this->swatchHelper->isSwatchAttribute($attribute);
-            $config['options'][$optionId] = $optionConfig;
-        }
-
-        return $config;
-    }
-
-    /**
-     * @param array $option
-     * @param mixed $optionId
-     * @param array|null $swatchData
-     * @return array
-     */
-    private function buildOptionConfig(array $option, $optionId, ?array $swatchData): array
-    {
-        $optionConfig = [
-            'label' => $option['label'],
-            'value' => $optionId
-        ];
-
-        if ($swatchData) {
-            $optionConfig['swatchType'] = (int)$swatchData['type'];
-            $optionConfig['swatchValue'] = $this->formatSwatchValue($swatchData);
-        }
-
-        return $optionConfig;
-    }
-
-    /**
-     * @param array $swatch
-     * @return string
-     */
-    private function formatSwatchValue(array $swatch): string
-    {
-        if ($swatch['type'] == Swatch::SWATCH_TYPE_VISUAL_COLOR) {
-            return $swatch['value'] && $swatch['value'][0] !== '#' ? '#' . $swatch['value'] : $swatch['value'];
-        }
-
-        return $swatch['value'];
     }
 }

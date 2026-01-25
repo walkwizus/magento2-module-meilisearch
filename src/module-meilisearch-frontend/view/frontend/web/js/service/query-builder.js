@@ -25,12 +25,13 @@
 
                     if (Array.isArray(values) && values.length > 0) {
                         const expressions = values.map(value => {
-                            if (typeof value === 'string' && value.includes('_')) {
+                            if (typeof value === 'string' && /^\d+(\.\d+)?_\d+(\.\d+)?$/.test(value)) {
                                 const [from, to] = value.split('_');
                                 return `(${facetCode} >= ${from} AND ${facetCode} <= ${to})`;
                             }
 
-                            return `${facetCode} = ${value}`;
+                            const safeValue = String(value).replace(/"/g, '\\"');
+                            return `${facetCode} = "${safeValue}"`;
                         });
 
                         if (expressions.length === 1) {

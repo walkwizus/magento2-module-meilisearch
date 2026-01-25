@@ -7,6 +7,8 @@ namespace Walkwizus\MeilisearchMerchandising\Service;
 use Walkwizus\MeilisearchMerchandising\Model\AttributeRuleProvider;
 use Magento\Eav\Api\AttributeRepositoryInterface;
 use Walkwizus\MeilisearchBase\Model\AttributeResolver;
+use Magento\Swatches\Helper\Data as SwatchHelper;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 class QueryBuilderService
 {
@@ -31,11 +33,13 @@ class QueryBuilderService
      * @param AttributeRuleProvider $attributeRuleProvider
      * @param AttributeRepositoryInterface $attributeRepository
      * @param AttributeResolver $attributeResolver
+     * @param SwatchHelper $swatchHelper
      */
     public function __construct(
         private readonly AttributeRuleProvider $attributeRuleProvider,
         private readonly AttributeRepositoryInterface $attributeRepository,
-        private readonly AttributeResolver $attributeResolver
+        private readonly AttributeResolver $attributeResolver,
+        private readonly SwatchHelper $swatchHelper
     ) { }
 
     /**
@@ -97,16 +101,19 @@ class QueryBuilderService
     {
         if ($type === 'boolean') {
             return $val ? '1' : '0';
-        } elseif (is_numeric($val)) {
-            return $val;
-        } else {
-            return "\"$val\"";
         }
+
+        if (is_numeric($val) && strpos((string)$val, '|') === false) {
+            return $val;
+        }
+
+        $val = str_replace('"', '\"', (string)$val);
+        return "\"$val\"";
     }
 
     /**
      * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     public function convertAttributesToRules(): array
     {
@@ -127,9 +134,9 @@ class QueryBuilderService
                     break;
                 case 'select':
                 case 'multiselect':
-                    $rule['type'] = 'integer';
+                    $rule['type'] = 'string';
                     $rule['input'] = 'select';
-                    $rule['operators'] = ['in', 'not_in'];
+                    $rule['operators'] = ['in', 'not_in', 'equal', 'not_equal'];
                     $rule['multiple'] = true;
                     $rule['values'] = $this->getSelectValues($attribute['code']);
                     break;
@@ -153,7 +160,7 @@ class QueryBuilderService
     /**
      * @param $attributeCode
      * @return array
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws NoSuchEntityException
      */
     protected function getSelectValues($attributeCode): array
     {
@@ -161,10 +168,27 @@ class QueryBuilderService
         $attribute = $this->attributeRepository->get('catalog_product', $attributeCode);
         $options = $attribute->getSource()->getAllOptions();
 
+        $isSwatch = $this->swatchHelper->isSwatchAttribute($attribute);
+        $swatches = [];
+        if ($isSwatch) {
+            $optionIds = array_column($options, 'value');
+            $swatches = $this->swatchHelper->getSwatchesByOptionsId($optionIds);
+        }
+
         foreach ($options as $option) {
-            if (isset($option['value'])) {
-                $values[$option['value']] = $option['label'];
+            $optionId = $option['value'];
+            if (!$optionId) continue;
+
+            if ($isSwatch && isset($swatches[$optionId])) {
+                $swatchData = $swatches[$optionId];
+                $type = $swatchData['type'];
+                $val = $swatchData['value'];
+                $meiliValue = $option['label'] . '|' . $type . '|' . $val;
+            } else {
+                $meiliValue = $option['label'];
             }
+
+            $values[$meiliValue] = $option['label'];
         }
 
         return $values;

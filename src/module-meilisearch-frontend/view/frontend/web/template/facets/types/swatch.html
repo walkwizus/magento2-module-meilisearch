@@ -3,7 +3,7 @@
         foreach: { data: filter.visibleOptions(), as: 'option' },
         afterRender: $parents[1].renderSwatchTooltip"
     >
-        <!-- ko if: option.swatchType === 1 -->
+        <!-- ko if: option.swatchType === '1' -->
         <div class="swatch-option color"
              data-bind="
                  attr: {
@@ -28,7 +28,7 @@
                  }">
         </div>
         <!-- /ko -->
-        <!-- ko if: option.swatchType === 2 -->
+        <!-- ko if: option.swatchType === '2' -->
         <div class="swatch-option image"
              data-bind="
                  attr: {
@@ -54,7 +54,7 @@
                  }">
         </div>
         <!-- /ko -->
-        <!-- ko if: !option.swatchType || option.swatchType === 0 -->
+        <!-- ko if: !option.swatchType || option.swatchType === '0' -->
         <div class="swatch-option text"
              data-bind="
                  text: option.label,

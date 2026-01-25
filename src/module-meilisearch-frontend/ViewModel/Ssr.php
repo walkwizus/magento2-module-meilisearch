@@ -42,8 +42,7 @@ class Ssr implements ArgumentInterface
 
     /**
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws \Exception
      */
     public function getSearchResult(): array
     {
@@ -55,9 +54,9 @@ class Ssr implements ArgumentInterface
         $currentPageParam = (int)$this->request->getParam('page', 1);
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
 
-        $defaultSortBy = $this->config['defaultSortBy'];
+        $defaultSortBy = $this->config['defaultSortBy'] ?? null;
         $indexName = $this->config['indexName'];
-        $facets = $this->config['facets']['facetList'];
+        $facets = $this->config['facets']['facetList'] ?? [];
 
         $hitsPerPage = $this->getHitsPerPage();
         $selectedFacets = $this->getSelectedFacets();
@@ -90,7 +89,7 @@ class Ssr implements ArgumentInterface
 
             $filters = $this->buildFilters($excludeFilters);
 
-            $disjunctiveFilters = $this->searchQueryFactory->create()
+            $disjunctiveQuery = $this->searchQueryFactory->create()
                 ->setIndexUid($indexName)
                 ->setQuery($query)
                 ->setFacets([$code])
@@ -98,15 +97,16 @@ class Ssr implements ArgumentInterface
                 ->setHitsPerPage($hitsPerPage);
 
             if (!empty($filters)) {
-                $disjunctiveFilters->setFilter($filters);
+                $disjunctiveQuery->setFilter($filters);
             }
 
-            $queries[] = $disjunctiveFilters;
+            $queries[] = $disjunctiveQuery;
         }
 
         $results = $this->searchManager->multisearch($queries);
+        $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
 
-        return $this->mergeDisjunctiveResults($results, $activeCodes);
+        return $this->searchResultCache;
     }
 
     /**
@@ -126,18 +126,14 @@ class Ssr implements ArgumentInterface
         }
 
         $mainResults = $multiResults['results'][0];
-
         $finalDistribution = $mainResults['facetDistribution'] ?? [];
 
         foreach ($activeCodes as $index => $code) {
             $disjunctiveIndex = $index + 1;
 
-            if (empty($multiResults['results'][$disjunctiveIndex]['facetDistribution'][$code])) {
-                continue;
+            if (isset($multiResults['results'][$disjunctiveIndex]['facetDistribution'][$code])) {
+                $finalDistribution[$code] = $multiResults['results'][$disjunctiveIndex]['facetDistribution'][$code];
             }
-
-            $facetValues = $multiResults['results'][$disjunctiveIndex]['facetDistribution'][$code];
-            $finalDistribution[$code] = $facetValues;
         }
 
         $mainResults['facetDistribution'] = $finalDistribution;
@@ -167,9 +163,9 @@ class Ssr implements ArgumentInterface
 
         foreach ($selectedFacets as $name => $values) {
             $orGroup = [];
-
-            foreach ($values as $valueId) {
-                $orGroup[] = sprintf('%s = %s', $name, $valueId);
+            foreach ($values as $value) {
+                $escapedValue = str_replace('"', '\"', (string)$value);
+                $orGroup[] = sprintf('%s = "%s"', $name, $escapedValue);
             }
 
             if ($orGroup) {
@@ -182,40 +178,11 @@ class Ssr implements ArgumentInterface
 
     /**
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getFacets(): array
-    {
-        $searchResult = $this->getSearchResult();
-        $facetDistribution = (array)($searchResult['facetDistribution'] ?? []);
-        $facetConfig = (array)($this->config['facets']['facetConfig'] ?? []);
-
-        $facets = array_filter(
-            $facetConfig,
-            static fn(array $cfg, string $code): bool => isset($facetDistribution[$cfg['code'] ?? $code]),
-            ARRAY_FILTER_USE_BOTH
-        );
-
-        uasort(
-            $facets,
-            static fn(array $a, array $b): int => (int)($a['position'] ?? 0) <=> (int)($b['position'] ?? 0)
-        );
-
-        return array_values($facets);
-    }
-
-    /**
-     * @return array
      */
     public function getSelectedFacets(): array
     {
         $selected = [];
-
         $facetList = $this->config['facets']['facetList'] ?? [];
-        $facetList = array_map('strval', $facetList);
-
-        $facetConfig = $this->config['facets']['facetConfig'] ?? [];
         $params = $this->request->getParams();
 
         foreach ($params as $name => $value) {
@@ -228,36 +195,9 @@ class Ssr implements ArgumentInterface
             }
 
             $labels = array_filter(array_map('trim', explode(',', $value)));
-            if (!$labels) {
-                continue;
-            }
 
-            if (!isset($facetConfig[$name]['options'])) {
-                continue;
-            }
-
-            $options = $facetConfig[$name]['options'];
-            $values = [];
-
-            foreach ($labels as $label) {
-                $matchedValue = null;
-
-                foreach ($options as $optValue => $optData) {
-                    if (isset($optData['label']) && strcasecmp($optData['label'], $label) === 0) {
-                        $matchedValue = (string)$optValue;
-                        break;
-                    }
-                }
-
-                if ($matchedValue === null) {
-                    continue;
-                }
-
-                $values[] = $matchedValue;
-            }
-
-            if ($values) {
-                $selected[$name] = $values;
+            if (!empty($labels)) {
+                $selected[$name] = array_values($labels);
             }
         }
 
@@ -265,13 +205,37 @@ class Ssr implements ArgumentInterface
     }
 
     /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getFacets(): array
+    {
+        $searchResult = $this->getSearchResult();
+        $facetDistribution = (array)($searchResult['facetDistribution'] ?? []);
+        $facetConfig = (array)($this->config['facets']['facetConfig'] ?? []);
+
+        $facets = array_filter(
+            $facetConfig,
+            static fn(array $cfg, string $code): bool => isset($facetDistribution[$code]),
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        uasort(
+            $facets,
+            static fn(array $a, array $b): int => (int)($a['position'] ?? 0) <=> (int)($b['position'] ?? 0)
+        );
+
+        return array_values($facets);
+    }
+
+    /**
      * @return int
      */
     public function getHitsPerPage(): int
     {
-        $currentHitsPerPage = $this->request->getParam('product_list_limit', false);
+        $currentHitsPerPage = $this->request->getParam('product_list_limit');
 
-        if ($currentHitsPerPage !== false) {
+        if ($currentHitsPerPage) {
             return (int)$currentHitsPerPage;
         }
 
@@ -305,17 +269,17 @@ class Ssr implements ArgumentInterface
     {
         $available = $this->config['availableSortBy'] ?? [];
 
-        $sort = (string) $this->request->getParam('product_list_order', '');
+        $sort = (string)$this->request->getParam('product_list_order', '');
         if ($sort && isset($available[$sort])) {
             return $sort;
         }
 
-        $default = (string) ($this->config['defaultSortBy'] ?? '');
+        $default = (string)($this->config['defaultSortBy'] ?? '');
         if ($default && isset($available[$default])) {
             return $default;
         }
 
-        return (string) array_key_first($available);
+        return (string)array_key_first($available);
     }
 
     /**
@@ -328,29 +292,29 @@ class Ssr implements ArgumentInterface
     }
 
     /**
-     * @param $urlKey
+     * @param string $urlKey
      * @return string
      */
-    public function getProductUrl($urlKey): string
+    public function getProductUrl(string $urlKey): string
     {
         return $this->config['baseUrl'] . $urlKey . $this->config['productUrlSuffix'];
     }
 
     /**
-     * @param $image
+     * @param string $image
      * @return string
      */
-    public function getProductImage($image): string
+    public function getProductImage(string $image): string
     {
         return $this->config['mediaBaseUrl'] . $image;
     }
 
     /**
-     * @param $price
+     * @param float|string $price
      * @return string
      */
     public function getProductPrice($price): string
     {
-        return $this->priceCurrency->convertAndFormat($price);
+        return $this->priceCurrency->convertAndFormat((float)$price);
     }
 }

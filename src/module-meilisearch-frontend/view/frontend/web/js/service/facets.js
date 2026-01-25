@@ -20,46 +20,38 @@
 
         return facetList
             .filter(function(code) {
-                const values = facetDistribution[code];
-                const config = facetConfig[code];
-
-                if (!values || !config) {
-                    return false;
-                }
-
-                if (config.hasOptions) {
-                    return Object.keys(values).some(function(value) {
-                        return config.options && config.options[value];
-                    });
-                }
-
-                return Object.keys(values).length > 0;
+                return facetDistribution[code] && Object.keys(facetDistribution[code]).length > 0;
             })
             .map(function(code) {
                 const config = facetConfig[code] || {};
-                const values = facetDistribution[code] || {};
+                const valuesDistribution = facetDistribution[code] || {};
 
-                const options = Object.entries(values).map(function([val, count]) {
-                    if (config.hasOptions && config.options && config.options[val]) {
-                        const opt = config.options[val];
-                        return Object.assign({}, opt, {
-                            value: val,
-                            count: count
-                        });
+                const options = Object.entries(valuesDistribution).map(function([rawValue, count]) {
+                    const parts = rawValue.split('|');
+                    const label = parts[0];
+                    const swatchType = parts[1] || null;
+                    let swatchValue = parts[2] || null;
+
+                    if (swatchType == 1 && swatchValue && swatchValue[0] !== '#') {
+                        swatchValue = '#' + swatchValue;
                     }
 
                     return {
-                        value: val,
+                        value: rawValue,
+                        label: label,
                         count: count,
-                        label: val
+                        swatchType: swatchType,
+                        swatchValue: swatchValue
                     };
                 });
 
                 return Object.assign({}, config, {
                     code: code,
-                    options: options
+                    options: options,
+                    isSwatch: config.isSwatch || false
                 });
-            });
+            })
+            .sort((a, b) => (a.position || 0) - (b.position || 0));
     }
 
     return {
