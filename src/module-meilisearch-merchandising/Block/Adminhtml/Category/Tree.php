@@ -47,6 +47,10 @@ class Tree extends Template
      */
     public function getStoreId(): mixed
     {
+        if ($this->_storeManager->isSingleStoreMode()) {
+            return $this->_storeManager->getDefaultStoreView()->getId();
+        }
+
         return $this->getRequest()->getParam('store', false);
     }
 
@@ -56,7 +60,8 @@ class Tree extends Template
      */
     public function getCategoryTree(): bool|string
     {
-        $rootCategoryId = 2;
+        $rootCategoryId = $this->_storeManager->getStore()->getRootCategoryId();
+
         try {
             $rootCategory = $this->categoryManagement->getTree($rootCategoryId);
             $jsTreeData = $this->convertToJsTreeFormat($rootCategory);

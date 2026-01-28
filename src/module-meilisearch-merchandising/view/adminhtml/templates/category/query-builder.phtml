@@ -1,7 +1,7 @@
 <?php
 /** @var \Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Query\Builder $block */
 ?>
-<?php if (!$block->getStoreId()) : ?>
+<?php if ($block->getStoreId() === false) : ?>
     <div class="notices-wrapper">
         <div class="messages">
             <div class="message">

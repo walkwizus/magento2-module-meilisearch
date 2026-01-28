@@ -69,6 +69,10 @@ class Builder extends Template
      */
     public function getStoreId(): mixed
     {
+        if ($this->_storeManager->isSingleStoreMode()) {
+            return $this->_storeManager->getDefaultStoreView()->getId();
+        }
+
         return $this->getRequest()->getParam('store', false);
     }
 
