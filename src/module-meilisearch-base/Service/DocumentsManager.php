@@ -53,4 +53,16 @@ class DocumentsManager
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateDocuments($documents);
     }
+
+    /**
+     * @param $indexName
+     * @param array $documentIds
+     * @return Task
+     * @throws \Exception
+     */
+    public function deleteDocuments($indexName, array $documentIds): Task
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->index($indexName)->deleteDocuments($documentIds);
+    }
 }

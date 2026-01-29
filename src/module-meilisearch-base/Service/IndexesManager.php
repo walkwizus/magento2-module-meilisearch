@@ -61,4 +61,15 @@ class IndexesManager
         $client = $this->connectionManager->getConnection();
         return $client->deleteIndex($indexName);
     }
+
+    /**
+     * @param array $swaps
+     * @return Task
+     * @throws \Exception
+     */
+    public function swapIndexes(array $swaps): Task
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->swapIndexes($swaps);
+    }
 }
