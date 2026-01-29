@@ -134,6 +134,11 @@ class BaseIndexerHandler implements IndexerInterface
             $tmpIndexName = $indexName . '_' . self::INDEX_SWAP_SUFFIX;
 
             $this->temporaryIndexes[$indexName] = $tmpIndexName;
+
+            if (!$this->indexesManager->indexExists($indexName)) {
+                $this->indexesManager->createIndex($indexName, $this->indexPrimaryKey);
+            }
+
             $this->indexesManager->deleteIndex($tmpIndexName);
         }
 

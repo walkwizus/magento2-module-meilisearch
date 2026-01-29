@@ -7,6 +7,7 @@ namespace Walkwizus\MeilisearchBase\Service;
 use Meilisearch\Contracts\IndexesResults;
 use Meilisearch\Contracts\Task;
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
+use Meilisearch\Exceptions\ApiException;
 
 class IndexesManager
 {
@@ -71,5 +72,25 @@ class IndexesManager
     {
         $client = $this->connectionManager->getConnection();
         return $client->swapIndexes($swaps);
+    }
+
+    /**
+     * @param string $indexName
+     * @return bool
+     * @throws ApiException
+     */
+    public function indexExists(string $indexName): bool
+    {
+        try {
+            $client = $this->connectionManager->getConnection();
+            $client->index($indexName)->fetchRawInfo();
+            return true;
+        } catch (ApiException $e) {
+            if ($e->httpStatus === 404) {
+                return false;
+            }
+
+            throw $e;
+        }
     }
 }
