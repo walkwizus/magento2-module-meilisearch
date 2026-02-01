@@ -75,9 +75,13 @@ define([
                 });
             });
 
-            this.computedFacets.subscribe(facets => {
-                facetsState.computedFacets(facets);
-            });
+            const updateGlobalState = (facets) => {
+                if (facets && facets.length > 0) {
+                    facetsState.computedFacets(facets);
+                }
+            };
+            updateGlobalState(this.computedFacets());
+            this.computedFacets.subscribe(updateGlobalState);
 
             this.isFilterActive.subscribe(isActive => {
                 $('body').toggleClass('filter-active', isActive);

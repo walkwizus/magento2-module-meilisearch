@@ -20,9 +20,13 @@ define([
         observeFacetChanges: function() {
             facetsState.computedFacets.subscribe(facets => {
                 facets.forEach(facet => {
+                    if (facet.options && !facet.allOptionsRaw) {
+                        facet.allOptionsRaw = facet.options();
+                    }
+
                     let facetConfig = this.facetConfig[facet.code];
-                    if (facetConfig.searchboxFuzzyEnabled) {
-                        this.fuseInstances[facet.code] = new Fuse(facet.options(), {
+                    if (facetConfig && facetConfig.searchboxFuzzyEnabled && facet.allOptionsRaw) {
+                        this.fuseInstances[facet.code] = new Fuse(facet.allOptionsRaw, {
                             keys: ['label'],
                             threshold: 0.3,
                             minMatchCharLength: 1
@@ -34,29 +38,27 @@ define([
 
         search: function(facetCode, inputValue) {
             const facet = facetsState.computedFacets().find(f => f.code === facetCode);
-            if (!facet || !facet.options) return;
+
+            if (!facet || !facet.options || !facet.allOptionsRaw) return;
 
             const facetConfig = this.facetConfig[facetCode];
-            const searchTerm = inputValue.trim();
+            const searchTerm = inputValue ? inputValue.trim() : '';
 
             if (!searchTerm) {
-                facet.options(facet.sortedOptions.slice());
+                facet.options(facet.allOptionsRaw);
                 return;
             }
 
-            if (facetConfig.searchboxFuzzyEnabled) {
-                const fuse = this.fuseInstances[facetCode];
-                if (!fuse) return;
-
-                const results = fuse.search(searchTerm).map(result => result.item);
-                facet.options(results);
+            let results;
+            if (facetConfig && facetConfig.searchboxFuzzyEnabled && this.fuseInstances[facetCode]) {
+                results = this.fuseInstances[facetCode].search(searchTerm).map(r => r.item);
             } else {
-                const filtered = facet.sortedOptions.filter(opt =>
+                results = facet.allOptionsRaw.filter(opt =>
                     opt.label?.toLowerCase().includes(searchTerm.toLowerCase())
                 );
-
-                facet.options(filtered);
             }
+
+            facet.options(results);
         }
     });
 });
