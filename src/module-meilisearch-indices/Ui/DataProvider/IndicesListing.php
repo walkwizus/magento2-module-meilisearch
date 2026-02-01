@@ -43,21 +43,37 @@ class IndicesListing extends AbstractDataProvider
     public function getData(): array
     {
         $indexes = $this->indexesManager->getIndexes()->toArray();
-
-        $data = [];
+        $data = [
+            'items' => [],
+            'totalRecords' => 0
+        ];
 
         foreach ($indexes['results'] as $index) {
             $uid = $index->getUid();
             $storeId = $this->indexStoreResolver->resolve($uid);
-            $store = $this->storeManager->getStore($storeId);
+
+            $storeName = 'N/A';
+            $storeCode = 'External/Deleted';
+
+            try {
+                if ($storeId > 0) {
+                    $store = $this->storeManager->getStore($storeId);
+                    $storeName = $store->getName();
+                    $storeCode = $store->getCode();
+                }
+            } catch (NoSuchEntityException $e) {
+                $storeName = "Store Inconnu (ID: $storeId)";
+            } catch (\Exception $e) {
+
+            }
 
             $data['items'][] = [
                 'id' => $uid,
-                'store' => $store->getName() . ' (' . $store->getCode() . ')',
+                'store' => sprintf('%s (%s)', $storeName, $storeCode),
             ];
         }
 
-        $data['totalRecords'] = $indexes['total'];
+        $data['totalRecords'] = $indexes['total'] ?? count($data['items']);
 
         return $data;
     }
