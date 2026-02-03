@@ -9,6 +9,8 @@ use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
 use Magento\Eav\Model\Entity\Attribute;
 use Magento\Eav\Api\Data\AttributeOptionInterface;
 use Magento\Swatches\Helper\Data as SwatchHelper;
+use Magento\Store\Model\App\Emulation;
+use Magento\Framework\App\Area;
 
 class Eav implements AttributeMapperInterface
 {
@@ -53,11 +55,13 @@ class Eav implements AttributeMapperInterface
     /**
      * @param DataProvider $dataProvider
      * @param SwatchHelper $swatchHelper
+     * @param Emulation $appEmulation
      * @param array $excludedAttributes
      */
     public function __construct(
         private readonly DataProvider $dataProvider,
         private readonly SwatchHelper $swatchHelper,
+        private readonly Emulation $appEmulation,
         array $excludedAttributes = [],
     ) {
         $this->excludedAttributes = array_merge($this->defaultExcludedAttributes, $excludedAttributes);
@@ -70,15 +74,20 @@ class Eav implements AttributeMapperInterface
      */
     public function map(array $documentData, $storeId): array
     {
-        $documents = [];
+        $this->appEmulation->startEnvironmentEmulation((int)$storeId, Area::AREA_FRONTEND, true);
 
-        foreach ($documentData as $productId => $indexData) {
-            $productIndexData = $this->convertToProductData((int)$productId, $indexData, $storeId);
+        try {
+            $documents = [];
+            foreach ($documentData as $productId => $indexData) {
+                $productIndexData = $this->convertToProductData((int)$productId, $indexData, $storeId);
 
-            $documents[$productId] = ['id' => $productId];
-            foreach ($productIndexData as $attributeCode => $value) {
-                $documents[$productId][$attributeCode] = $value;
+                $documents[$productId] = ['id' => $productId];
+                foreach ($productIndexData as $attributeCode => $value) {
+                    $documents[$productId][$attributeCode] = $value;
+                }
             }
+        } finally {
+            $this->appEmulation->stopEnvironmentEmulation();
         }
 
         return $documents;
@@ -162,6 +171,10 @@ class Eav implements AttributeMapperInterface
                 if (in_array($option['value'], $attributeValues)) {
                     $label = $option['label'];
 
+                    if ($attribute->getFrontendInput() === 'boolean') {
+                        $label = __($label);
+                    }
+
                     if ($isSwatch && isset($swatchData[$option['value']])) {
                         $swatch = $swatchData[$option['value']];
                         $type = $swatch['type'];
@@ -169,7 +182,7 @@ class Eav implements AttributeMapperInterface
 
                         $finalValues[] = "{$label}|{$type}|{$value}";
                     } else {
-                        $finalValues[] = $label;
+                        $finalValues[] = (string)$label;
                     }
                 }
             }
