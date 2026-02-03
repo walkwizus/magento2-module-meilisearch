@@ -1,59 +1,91 @@
 .facets-container {
     padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    align-items: stretch;
 }
 
 .facet-card {
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 4px;
-    margin-bottom: 15px;
-    cursor: move;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .facet-content {
-    padding: 15px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .facet-header {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.facet-toggle {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.facet-toggle:hover {
+    color: #333;
+}
+
+.facet-toggle span {
+    display: inline-block;
+    transition: transform 0.2s;
 }
 
 .facet-drag-handle {
     cursor: move;
-    margin-right: 10px;
     color: #999;
-    font-size: 20px;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px;
 }
 
 .facet-header strong {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .facet-header small {
     color: #666;
-    margin-left: 8px;
+    font-size: 12px;
 }
 
 .facet-options {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
 }
 
 .facet-field {
-    margin-bottom: 15px;
+    margin-bottom: 0;
 }
 
 .facet-field label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     font-weight: 600;
+    font-size: 13px;
 }
 
 .facet-field input[type="checkbox"] {
@@ -61,18 +93,21 @@
 }
 
 .facet-actions {
-    margin-top: 20px;
+    margin-top: 12px;
     text-align: right;
-    padding: 0 20px 20px;
+    padding: 0 12px 12px;
 }
 
 .ui-sortable-helper {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0.95;
 }
 
 .ui-sortable-placeholder {
     visibility: visible !important;
     background: #f7f7f7;
     border: 2px dashed #ccc;
-    margin-bottom: 15px;
+    border-radius: 4px;
+    margin: 0;
+    min-height: 60px;
 }

@@ -17,10 +17,18 @@
         const facetConfig = meilisearchConfig.facets.facetConfig || {};
         const facetList = meilisearchConfig.facets.facetList || [];
         const facetDistribution = results.facetDistribution || {};
+        const totalHits = results.totalHits || 0;
 
         return facetList
             .filter(function(code) {
-                return facetDistribution[code] && Object.keys(facetDistribution[code]).length > 0;
+                const values = facetDistribution[code];
+
+                if (!values || Object.keys(values).length === 0) {
+                    return false;
+                }
+
+                const isUseless = facetConfig[code].hideIfNonDiscriminant && Object.values(values).every(count => count === totalHits);
+                return !isUseless;
             })
             .map(function(code) {
                 const config = facetConfig[code] || {};

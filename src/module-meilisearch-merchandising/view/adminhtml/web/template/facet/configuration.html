@@ -9,7 +9,6 @@
     <div data-bind="text: errorMessage"></div>
 </div>
 <!-- /ko -->
-
 <div class="facets-container" data-bind="foreach: facetsConfig, afterRender: initSortable">
     <div class="facet-card" data-bind="attr: { 'data-facet-code': code }">
         <div class="facet-content">
@@ -19,10 +18,19 @@
                 </span>
                 <strong data-bind="text: label"></strong>
                 <small data-bind="text: '(' + code + ')'"></small>
+                <button class="facet-toggle"
+                        data-bind="click: function() { expanded(!expanded()); },
+                                   css: { 'is-expanded': expanded }">
+                    <span data-bind="text: expanded() ? '▼' : '▶'"></span>
+                </button>
             </div>
-
-            <!-- ko if: !$parent.isBoolean(type) && !$parent.isPrice(type) -->
+            <!-- ko if: expanded -->
             <div class="facet-options">
+                <!-- ko if: !$parent.isBoolean(type) && !$parent.isPrice(type) -->
+                <div class="facet-field" style="margin-top: 10px;">
+                    <label data-bind="i18n: 'Hide if non-discriminant'"></label>
+                    <input type="checkbox" data-bind="checked: hide_if_non_discriminant">
+                </div>
                 <div class="facet-field">
                     <label data-bind="i18n: 'Enable Search in Values'"></label>
                     <input type="checkbox" data-bind="checked: searchable">
@@ -53,12 +61,12 @@
                                      value: sort_values_by">
                     </select>
                 </div>
-            </div>
-            <!-- /ko -->
-
-            <!-- ko if: $parent.isBoolean(type) || $parent.isPrice(type) -->
-            <div class="facet-field">
-                <p data-bind="i18n: 'Configuration not available for this attribute type.'"></p>
+                <!-- /ko -->
+                <!-- ko if: $parent.isBoolean(type) || $parent.isPrice(type) -->
+                <div class="facet-field">
+                    <p data-bind="i18n: 'Configuration not available for this attribute type.'"></p>
+                </div>
+                <!-- /ko -->
             </div>
             <!-- /ko -->
         </div>

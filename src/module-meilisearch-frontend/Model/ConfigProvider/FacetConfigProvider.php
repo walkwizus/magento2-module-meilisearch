@@ -103,6 +103,7 @@ class FacetConfigProvider implements ConfigProviderInterface
             'searchable' => (bool)$attribute->getMeilisearchSearchable(),
             'searchboxFuzzyEnabled' => (bool)$attribute->getMeilisearchSearchboxFuzzyEnabled(),
             'sortValuesBy' => $attribute->getMeilisearchSortValuesBy(),
+            'hideIfNonDiscriminant' => (bool)$attribute->getMeilisearchHideIfNonDiscriminant(),
             'label' => $attribute->getStoreLabel(),
             'type' => $frontendInput,
             'renderRegion' => $renderRegion,

@@ -17,5 +17,6 @@
         <column xsi:type="boolean" default="0" name="meilisearch_searchable" nullable="false" comment="Searchable"/>
         <column xsi:type="boolean" default="0" name="meilisearch_searchbox_fuzzy_enabled" nullable="false" comment="Fuzzy Search"/>
         <column xsi:type="varchar" default="magento" name="meilisearch_sort_values_by" nullable="false" comment="Sort Values By"/>
+        <column xsi:type="boolean" default="0" name="meilisearch_hide_if_non_discriminant" nullable="false" comment="Hide If Non Discriminant"/>
     </table>
 </schema>
