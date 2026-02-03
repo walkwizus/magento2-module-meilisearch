@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">meilisearch_ai_embedders_form.meilisearch_ai_embedders_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Embedder Information</item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="save" class="Walkwizus\MeilisearchAi\Block\Adminhtml\Embedder\Edit\SaveButton"/>
+            <button name="delete" class="Walkwizus\MeilisearchAi\Block\Adminhtml\Embedder\Edit\DeleteButton"/>
+            <button name="back" class="Walkwizus\MeilisearchAi\Block\Adminhtml\Embedder\Edit\BackButton"/>
+        </buttons>
+        <namespace>meilisearch_ai_embedders_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>meilisearch_ai_embedders_form.meilisearch_ai_embedders_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="meilisearch_ai_embedders_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="meilisearch_ai/embedders/save"/>
+        </settings>
+        <dataProvider class="Walkwizus\MeilisearchAi\Ui\DataProvider\EmbedderForm" name="meilisearch_ai_embedders_form_data_source">
+            <settings>
+                <requestFieldName>embedder_id</requestFieldName>
+                <primaryFieldName>embedder_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <fieldset name="general">
+        <settings>
+            <label translate="true">General Configuration</label>
+        </settings>
+        <field name="embedder_id" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <visible>false</visible>
+            </settings>
+        </field>
+        <field name="name" sortOrder="10" formElement="input">
+            <settings>
+                <label translate="true">Profile Name</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="identifier" sortOrder="20" formElement="input">
+            <settings>
+                <label translate="true">Meilisearch Identifier</label>
+                <notice translate="true">The key used in Meilisearch settings (e.g., 'default').</notice>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="source" sortOrder="30" formElement="select">
+            <settings>
+                <label translate="true">Source Provider</label>
+                <dataType>text</dataType>
+                <switcherConfig>
+                    <rules>
+                        <rule name="openai">
+                            <value>openAi</value>
+                            <actions>
+                                <action name="0">
+                                    <target>meilisearch_ai_embedders_form.meilisearch_ai_embedders_form.general.api_key</target>
+                                    <callback>show</callback>
+                                </action>
+                                <action name="1">
+                                    <target>meilisearch_ai_embedders_form.meilisearch_ai_embedders_form.general.url</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="ollama">
+                            <value>ollama</value>
+                            <actions>
+                                <action name="0">
+                                    <target>meilisearch_ai_embedders_form.meilisearch_ai_embedders_form.general.api_key</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>meilisearch_ai_embedders_form.meilisearch_ai_embedders_form.general.url</target>
+                                    <callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                    <enabled>true</enabled>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options>
+                            <option name="0" xsi:type="array">
+                                <item name="value" xsi:type="string">openAi</item>
+                                <item name="label" xsi:type="string">OpenAI</item>
+                            </option>
+                            <option name="1" xsi:type="array">
+                                <item name="value" xsi:type="string">ollama</item>
+                                <item name="label" xsi:type="string">Ollama</item>
+                            </option>
+                            <option name="2" xsi:type="array">
+                                <item name="value" xsi:type="string">huggingFace</item>
+                                <item name="label" xsi:type="string">Hugging Face</item>
+                            </option>
+                        </options>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="api_key" sortOrder="40" formElement="input">
+            <settings>
+                <label translate="true">API Key</label>
+            </settings>
+        </field>
+        <field name="url" sortOrder="50" formElement="input">
+            <settings>
+                <label translate="true">Base URL</label>
+            </settings>
+        </field>
+        <field name="document_template" sortOrder="60" formElement="textarea">
+            <settings>
+                <label translate="true">Document Template (Liquid)</label>
+            </settings>
+        </field>
+    </fieldset>
+</form>

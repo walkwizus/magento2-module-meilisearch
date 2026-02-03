@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">meilisearch_ai_embedders_listing.meilisearch_ai_embedders_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="add">
+                <url path="*/*/new"/>
+                <class>primary</class>
+                <label translate="true">Add New Embedder Profile</label>
+            </button>
+        </buttons>
+        <spinner>meilisearch_ai_embedders_columns</spinner>
+        <deps>
+            <dep>meilisearch_ai_embedders_listing.meilisearch_ai_embedders_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="meilisearch_ai_embedders_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">embedder_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>Walkwizus_MeilisearchAi::embedders</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="meilisearch_ai_embedders_listing_data_source">
+            <settings>
+                <requestFieldName>embedder_id</requestFieldName>
+                <primaryFieldName>embedder_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <columns name="meilisearch_ai_embedders_columns">
+        <column name="embedder_id">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">ID</label>
+                <sorting>asc</sorting>
+            </settings>
+        </column>
+        <column name="name">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Name</label>
+            </settings>
+        </column>
+        <column name="identifier">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Meilisearch Identifier</label>
+            </settings>
+        </column>
+        <column name="source">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Source</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Walkwizus\MeilisearchAi\Ui\Component\Listing\Column\EmbedderActions">
+            <settings>
+                <indexField>embedder_id</indexField>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

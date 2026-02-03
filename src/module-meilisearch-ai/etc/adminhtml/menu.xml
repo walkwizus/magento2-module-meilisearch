@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add
+            id="Walkwizus_MeilisearchAi::embedders"
+            title="AI Embedders Profiles"
+            translate="title"
+            module="Walkwizus_MeilisearchAi"
+            resource="Walkwizus_MeilisearchAi::embedders"
+            parent="Walkwizus_MeilisearchIndices::indices"
+            action="meilisearch_ai/embedders/index"
+            sortOrder="20"
+        />
+    </menu>
+</config>

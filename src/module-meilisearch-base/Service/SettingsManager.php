@@ -122,4 +122,16 @@ class SettingsManager
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateTypoTolerance($typoTolerance);
     }
+
+    /**
+     * @param $indexName
+     * @param array $embedders
+     * @return Task
+     * @throws \Exception
+     */
+    public function updateEmbedders($indexName, array $embedders): Task
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->index($indexName)->updateEmbedders($embedders);
+    }
 }

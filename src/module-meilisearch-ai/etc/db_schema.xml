@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="meilisearch_ai_embedder" resource="default" engine="innodb" comment="Meilisearch AI Embedders Profiles">
+        <column xsi:type="int" name="embedder_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Profile Name (Admin display)"/>
+        <column xsi:type="varchar" name="identifier" nullable="false" length="100" comment="Meilisearch Technical Key (e.g. 'default')"/>
+        <column xsi:type="varchar" name="source" nullable="false" length="50" comment="Provider: openAi, huggingFace, ollama, rest, userProvided"/>
+        <column xsi:type="varchar" name="url" nullable="true" length="255" comment="The URL Meilisearch contacts"/>
+        <column xsi:type="varchar" name="api_key" nullable="true" length="255" comment="Authentication token"/>
+        <column xsi:type="varchar" name="model" nullable="true" length="255" comment="The model name (e.g. text-embedding-3-small)"/>
+        <column xsi:type="text" name="document_template" nullable="true" comment="Liquid Template defining data to vectorize"/>
+        <column xsi:type="int" name="document_template_max_bytes" unsigned="true" nullable="true" comment="Maximum size of rendered template"/>
+        <column xsi:type="int" name="dimensions" unsigned="true" nullable="true" comment="Number of dimensions in the model"/>
+        <column xsi:type="varchar" name="revision" nullable="true" length="255" comment="Model revision hash (Hugging Face)"/>
+        <column xsi:type="varchar" name="pooling" nullable="true" length="50" comment="Pooling method for Hugging Face"/>
+        <column xsi:type="boolean" name="binary_quantized" nullable="true" comment="Convert dimensions to 1-bit values"/>
+        <column xsi:type="text" name="distribution" nullable="true" comment="JSON: Natural distribution"/>
+        <column xsi:type="text" name="request_config" nullable="true" comment="JSON: Custom REST request mapping"/>
+        <column xsi:type="text" name="response_config" nullable="true" comment="JSON: Custom REST response mapping"/>
+        <column xsi:type="text" name="indexing_config" nullable="true" comment="JSON: indexingEmbedder configuration"/>
+        <column xsi:type="text" name="search_config" nullable="true" comment="JSON: searchEmbedder configuration"/>
+        <column xsi:type="text" name="indexing_fragments" nullable="true" comment="JSON: indexingFragments for multimodal"/>
+        <column xsi:type="text" name="search_fragments" nullable="true" comment="JSON: searchFragments for multimodal"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Creation Time"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Update Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="embedder_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="WALKWIZUS_MEILISEARCH_EMBEDDER_IDENTIFIER">
+            <column name="identifier"/>
+        </constraint>
+        <index referenceId="WALKWIZUS_MEILISEARCH_EMBEDDER_SOURCE" indexType="btree">
+            <column name="source"/>
+        </index>
+    </table>
+</schema>

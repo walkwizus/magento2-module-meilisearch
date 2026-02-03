@@ -27,6 +27,7 @@
         "walkwizus/magento2-hyva-meilisearch": "Required for compatibility with Hyvä Themes frontend."
     },
     "replace": {
+        "walkwizus/module-meilisearch-ai": "self.version",
         "walkwizus/module-meilisearch-base": "self.version",
         "walkwizus/module-meilisearch-catalog": "self.version",
         "walkwizus/module-meilisearch-frontend": "self.version",
@@ -35,6 +36,7 @@
     },
     "autoload": {
         "files": [
+            "src/module-meilisearch-ai/registration.php",
             "src/module-meilisearch-base/registration.php",
             "src/module-meilisearch-catalog/registration.php",
             "src/module-meilisearch-frontend/registration.php",
@@ -42,6 +44,7 @@
             "src/module-meilisearch-merchandising/registration.php"
         ],
         "psr-4": {
+            "Walkwizus\\MeilisearchAi\\": "src/module-meilisearch-ai",
             "Walkwizus\\MeilisearchBase\\": "src/module-meilisearch-base",
             "Walkwizus\\MeilisearchCatalog\\": "src/module-meilisearch-catalog",
             "Walkwizus\\MeilisearchFrontend\\": "src/module-meilisearch-frontend",

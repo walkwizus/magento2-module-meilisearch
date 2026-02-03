@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface" type="Walkwizus\MeilisearchAi\Model\Embedder" />
+    <preference for="Walkwizus\MeilisearchAi\Api\EmbedderRepositoryInterface" type="Walkwizus\MeilisearchAi\Model\EmbedderRepository" />
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="meilisearch_ai_embedders_listing_data_source" xsi:type="string">Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">meilisearch_ai_embedder</argument>
+            <argument name="resourceModel" xsi:type="string">Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\EntityManager\MetadataPool">
+        <arguments>
+            <argument name="metadata" xsi:type="array">
+                <item name="Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface" xsi:type="array">
+                    <item name="entityTableName" xsi:type="string">meilisearch_ai_embedder</item>
+                    <item name="identifierField" xsi:type="string">embedder_id</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>
