@@ -34,4 +34,13 @@
             <column name="source"/>
         </index>
     </table>
+    <table name="meilisearch_ai_indices_embedder_link" resource="default" engine="innodb">
+        <column xsi:type="varchar" name="index_uid" nullable="false" length="255" comment="Meilisearch Index UID"/>
+        <column xsi:type="int" name="embedder_id" unsigned="true" nullable="false" comment="Embedder ID"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="index_uid"/>
+            <column name="embedder_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FK_LINK_AI_EMBEDDER_ID" table="meilisearch_indices_embedder_link" column="embedder_id" referenceTable="meilisearch_ai_embedder" referenceColumn="embedder_id" onDelete="CASCADE"/>
+    </table>
 </schema>
