@@ -18,4 +18,7 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Catalog\Helper\Data">
+        <plugin name="meilisearch_virtual_category_breadcrumbs" type="Walkwizus\MeilisearchFrontend\Plugin\CatalogDataPlugin"/>
+    </type>
 </config>
