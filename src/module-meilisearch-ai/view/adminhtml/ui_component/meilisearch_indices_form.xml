@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="meilisearch_ai_vector_settings">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">AI Vector Search</item>
+                <item name="collapsible" xsi:type="boolean">true</item>
+                <item name="opened" xsi:type="boolean">false</item>
+                <item name="sortOrder" xsi:type="number">100</item>
+            </item>
+        </argument>
+        <field name="embedder_ids" formElement="multiselect" sortOrder="10">
+            <settings>
+                <label translate="true">Embedder Profiles</label>
+                <dataType>text</dataType>
+                <notice translate="true">Select one or more AI profiles. Each identifier must be unique in Meilisearch.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Walkwizus\MeilisearchAi\Model\Config\Source\EmbedderOptions"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+        <htmlContent name="ai_configuration_help">
+            <block name="ai_help_block" class="Magento\Backend\Block\Template">
+                <arguments>
+                    <argument name="template" xsi:type="string">Walkwizus_MeilisearchAi::ai-help.phtml</argument>
+                </arguments>
+            </block>
+        </htmlContent>
+    </fieldset>
+</form>
