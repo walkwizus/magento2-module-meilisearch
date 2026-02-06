@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Walkwizus\MeilisearchFrontend\Plugin\Catalog\Helper;
+namespace Walkwizus\MeilisearchMerchandising\Plugin\Catalog\Helper;
 
 use Magento\Catalog\Helper\Product as ProductHelper;
 use Magento\Framework\Registry;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Model\Session as CatalogSession;
 use Walkwizus\MeilisearchBase\Service\DocumentsManager;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Store\Model\StoreManagerInterface;
@@ -16,6 +17,7 @@ class ProductPlugin
     /**
      * @param Registry $registry
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param CatalogSession $catalogSession
      * @param DocumentsManager $documentsManager
      * @param SearchIndexNameResolver $indexNameResolver
      * @param StoreManagerInterface $storeManager
@@ -23,6 +25,7 @@ class ProductPlugin
     public function __construct(
         private readonly Registry $registry,
         private readonly CategoryRepositoryInterface $categoryRepository,
+        private readonly CatalogSession $catalogSession,
         private readonly DocumentsManager $documentsManager,
         private readonly SearchIndexNameResolver $indexNameResolver,
         private readonly StoreManagerInterface $storeManager
@@ -43,7 +46,11 @@ class ProductPlugin
             return $product;
         }
 
-        $categoryId = $this->getCategoryIdFromMeilisearch((int)$product->getId());
+        $categoryId = $this->catalogSession->getLastVisitedCategoryId();
+
+        if (!$categoryId) {
+            $categoryId = $this->getCategoryIdFromMeilisearch((int)$product->getId());
+        }
 
         if ($categoryId) {
             try {

@@ -2,21 +2,24 @@
 
 declare(strict_types=1);
 
-namespace Walkwizus\MeiliSearchMerchandising\Model\AttributePostMapper\CatalogProduct;
+namespace Walkwizus\MeilisearchMerchandising\Model\AttributePostMapper\CatalogProduct;
 
 use Walkwizus\MeilisearchBase\Api\AttributeMapperInterface;
 use Walkwizus\MeilisearchMerchandising\Model\ResourceModel\Category\CollectionFactory;
+use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory as CategoryCollectionFactory;
 use Walkwizus\MeilisearchMerchandising\Service\QueryBuilderService;
-use Walkwizus\MeilisearchMerchandising\Api\Data\CategoryInterface;
+use Magento\Framework\Exception\LocalizedException;
 
 class Category implements AttributeMapperInterface
 {
     /**
-     * @param CollectionFactory $collectionFactory
+     * @param CollectionFactory $virtualCategoryCollectionFactory
+     * @param CategoryCollectionFactory $categoryCollectionFactory
      * @param QueryBuilderService $queryBuilderService
      */
     public function __construct(
-        private readonly CollectionFactory $collectionFactory,
+        private readonly CollectionFactory $virtualCategoryCollectionFactory,
+        private readonly CategoryCollectionFactory $categoryCollectionFactory,
         private readonly QueryBuilderService $queryBuilderService
     ) { }
 
@@ -24,39 +27,63 @@ class Category implements AttributeMapperInterface
      * @param array $documentData
      * @param $storeId
      * @return array
+     * @throws LocalizedException
      */
     public function map(array $documentData, $storeId): array
     {
-        $virtualCategories = $this->collectionFactory->create()
+        $virtualCategories = $this->virtualCategoryCollectionFactory
+            ->create()
             ->addFieldToFilter('store_id', $storeId);
 
-        if (!$virtualCategories->getSize()) {
-            return $documentData;
-        }
+        $priorities = $this->getCategoriesPriorities();
 
-        $enrichedDocuments = [];
+        foreach ($documentData as $productId => &$productData) {
+            $categoryIds = $productData['category_ids'] ?? [];
+            $matchedVirtualIds = [];
 
-        foreach ($documentData as $productId => $productData) {
-            $newProductData = $productData;
-            $categoryIds = $newProductData['category_ids'] ?? [];
-
-            /** @var CategoryInterface $virtualCategory */
-            foreach ($virtualCategories as $virtualCategory) {
-                $ruleArray = json_decode($virtualCategory->getQuery(), true);
-
-                if ($ruleArray && $this->queryBuilderService->isMatch($productData, $ruleArray)) {
-                    $vCatId = (int)$virtualCategory->getCategoryId();
-                    $categoryIds[] = $vCatId;
+            foreach ($virtualCategories as $vCat) {
+                $rule = json_decode($vCat->getQuery(), true);
+                if ($rule && $this->queryBuilderService->isMatch($productData, $rule)) {
+                    $matchedVirtualIds[] = (int)$vCat->getCategoryId();
                 }
             }
 
-            if (!empty($categoryIds)) {
-                $newProductData['category_ids'] = array_unique($categoryIds);
-            }
+            $allIds = array_unique(array_merge($categoryIds, $matchedVirtualIds));
 
-            $enrichedDocuments[$productId] = $newProductData;
+            if (!empty($allIds)) {
+                usort($allIds, function ($a, $b) use ($priorities) {
+                    $prioA = $priorities[$a] ?? 0;
+                    $prioB = $priorities[$b] ?? 0;
+
+                    if ($prioA === $prioB) {
+                        return $a <=> $b;
+                    }
+
+                    return $prioA <=> $prioB;
+                });
+
+                $productData['category_ids'] = array_values($allIds);
+            }
         }
 
-        return $enrichedDocuments;
+        return $documentData;
+    }
+
+    /**
+     * @return array
+     * @throws LocalizedException
+     */
+    private function getCategoriesPriorities(): array
+    {
+        $collection = $this->categoryCollectionFactory
+            ->create()
+            ->addAttributeToSelect('breadcrumb_priority');
+
+        $data = [];
+        foreach ($collection as $category) {
+            $data[(int)$category->getId()] = (int)$category->getData('breadcrumb_priority');
+        }
+
+        return $data;
     }
 }
