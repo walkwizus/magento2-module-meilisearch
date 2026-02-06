@@ -16,6 +16,15 @@
             </argument>
         </arguments>
     </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeMapper">
+        <arguments>
+            <argument name="postMappers" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="merchandisingCategory" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributePostMapper\CatalogProduct\Category</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
     <type name="Walkwizus\MeilisearchBase\Model\AttributeProvider">
         <arguments>
             <argument name="providers" xsi:type="array">

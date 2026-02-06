@@ -4,6 +4,7 @@
     <module name="Walkwizus_MeilisearchMerchandising">
         <sequence>
             <module name="Walkwizus_MeilisearchBase"/>
+            <module name="Walkwizus_MeilisearchCatalog"/>
         </sequence>
     </module>
 </config>

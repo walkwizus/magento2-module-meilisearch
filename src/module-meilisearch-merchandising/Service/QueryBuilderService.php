@@ -52,6 +52,114 @@ class QueryBuilderService
     }
 
     /**
+     * @param array $documentData
+     * @param array $rule
+     * @return bool
+     */
+    public function isMatch(array $documentData, array $rule): bool
+    {
+        $condition = $rule['condition'] ?? 'AND';
+
+        if (isset($rule['rules']) && is_array($rule['rules'])) {
+            $results = [];
+            foreach ($rule['rules'] as $subRule) {
+                $results[] = $this->isMatch($documentData, $subRule);
+            }
+
+            return ($condition === 'OR')
+                ? in_array(true, $results, true)
+                : !in_array(false, $results, true);
+        }
+
+        $field = $this->attributeResolver->resolve($rule['field']);
+        $currentValue = $documentData[$field] ?? null;
+        $operator = $rule['operator'];
+        $targetValue = $rule['value'];
+
+        return $this->evaluateCondition($currentValue, $operator, $targetValue);
+    }
+
+    /**
+     * @param $currentValue
+     * @param string $operator
+     * @param $targetValue
+     * @return bool
+     */
+    private function evaluateCondition($currentValue, string $operator, $targetValue): bool
+    {
+        $currentValues = is_array($currentValue) ? $currentValue : [$currentValue];
+        $targetValues = is_array($targetValue) ? $targetValue : [$targetValue];
+
+        switch ($operator) {
+            case 'in':
+                foreach ($currentValues as $cVal) {
+                    foreach ($targetValues as $tVal) {
+                        if ($this->compareValues($cVal, $tVal)) return true;
+                    }
+                }
+                return false;
+
+            case 'not_in':
+                foreach ($currentValues as $cVal) {
+                    foreach ($targetValues as $tVal) {
+                        if ($this->compareValues($cVal, $tVal)) return false;
+                    }
+                }
+                return true;
+
+            case 'equal':
+                return $this->compareValues($currentValue, $targetValue);
+
+            case 'not_equal':
+                return !$this->compareValues($currentValue, $targetValue);
+
+            case 'less':
+                return $currentValue < $targetValue;
+
+            case 'less_or_equal':
+                return $currentValue <= $targetValue;
+
+            case 'greater':
+                return $currentValue > $targetValue;
+
+            case 'greater_or_equal':
+                return $currentValue >= $targetValue;
+
+            case 'between':
+                if (!is_array($targetValue) || count($targetValue) < 2) return false;
+                return $currentValue >= $targetValue[0] && $currentValue <= $targetValue[1];
+
+            case 'is_null':
+                return $currentValue === null || $currentValue === '';
+
+            case 'is_not_null':
+                return $currentValue !== null && $currentValue !== '';
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @param $currentValue
+     * @param $targetValue
+     * @return bool
+     */
+    private function compareValues($currentValue, $targetValue): bool
+    {
+        if ($currentValue == $targetValue) {
+            return true;
+        }
+
+        if (is_string($targetValue) && str_contains($targetValue, '|')) {
+            $parts = explode('|', $targetValue);
+            return $currentValue == $parts[0];
+        }
+
+        return false;
+    }
+
+    /**
      * @param array $rule
      * @return string
      */
