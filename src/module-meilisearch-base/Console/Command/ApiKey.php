@@ -10,6 +10,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestionFactory;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Console\QuestionPerformer\YesNo;
@@ -30,6 +31,7 @@ class ApiKey extends Command
         private readonly WriterInterface $writer,
         private readonly YesNo $yesNo,
         private readonly Encryptor $encryptor,
+        private readonly ChoiceQuestionFactory $choiceQuestionFactory,
         ?string $name = null
     ) {
         parent::__construct($name);
@@ -93,7 +95,11 @@ class ApiKey extends Command
             $choices[$index] = sprintf('%s (%s)', $label, $key->getUid());
         }
 
-        $keyQuestion = new ChoiceQuestion('Select a key to save', $choices, 0);
+        $keyQuestion = $this->choiceQuestionFactory->create([
+            'question' => 'Select a key to save',
+            'choices' => $choices,
+            'default' => 0
+        ]);
         $keyQuestion->setErrorMessage('Key %s is invalid.');
         $selectedLabel = $questionHelper->ask($input, $output, $keyQuestion);
         $selectedIndex = array_search($selectedLabel, $choices, true);
@@ -107,7 +113,11 @@ class ApiKey extends Command
             'admin' => 'Admin API Key (server side)',
             'client' => 'Client API Key (public search)',
         ];
-        $targetQuestion = new ChoiceQuestion('Save key as', array_values($targetOptions), 0);
+        $targetQuestion = $this->choiceQuestionFactory->create([
+            'question' => 'Save key as',
+            'choices' => array_values($targetOptions),
+            'default' => 0
+        ]);
         $targetQuestion->setErrorMessage('Choice %s is invalid.');
         $targetLabel = $questionHelper->ask($input, $output, $targetQuestion);
         $targetKey = array_search($targetLabel, $targetOptions, true);
