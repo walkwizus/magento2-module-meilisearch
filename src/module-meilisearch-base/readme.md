@@ -8,7 +8,7 @@ Core integration layer between Magento and Meilisearch. Registers Meilisearch as
 - Implement `Walkwizus\MeilisearchBase\Api\AttributeResolverInterface` and register it in the `resolvers` argument of `Walkwizus\MeilisearchBase\Model\AttributeResolver` in DI.
 - Use services in `src/module-meilisearch-base/Service/` to programmatically manage indexes and documents.
 - CLI command `meilisearch:generate:master-key` generates and optionally stores a master key.
-- CLI command `meilisearch:keys` lists Meilisearch API keys.
+- CLI command `meilisearch:keys` lists Meilisearch API keys and optionally stores them.
 
 **Config**
 - Admin path: Stores > Configuration > Meilisearch > Server Settings.
