@@ -18,6 +18,19 @@ class DocumentsManager
 
     /**
      * @param $indexName
+     * @param $id
+     * @param array|null $fields
+     * @return array
+     * @throws \Exception
+     */
+    public function getDocument($indexName, $id, ?array $fields = null): array
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->index($indexName)->getDocument($id, $fields);
+    }
+
+    /**
+     * @param $indexName
      * @param array $documents
      * @param string $primaryKey
      * @return Task[]

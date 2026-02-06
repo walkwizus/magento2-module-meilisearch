@@ -9,8 +9,10 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Catalog\Api\Data\ProductAttributeInterface;
+use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\EntityManager\MetadataPool;
 
 class Image implements AttributeMapperInterface
 {
@@ -34,7 +36,8 @@ class Image implements AttributeMapperInterface
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
         private readonly ResourceConnection $resourceConnection,
-        private readonly EavConfig $eavConfig
+        private readonly EavConfig $eavConfig,
+        private readonly MetadataPool $metadataPool
     ) { }
 
     /**
@@ -72,6 +75,8 @@ class Image implements AttributeMapperInterface
         $entityTypeId = (int) $this->eavConfig
             ->getEntityType(ProductAttributeInterface::ENTITY_TYPE_CODE)
             ->getEntityTypeId();
+        
+        $linkField = $this->metadataPool->getMetadata(ProductInterface::class)->getLinkField();
 
         $select = $connection->select()
             ->from(
@@ -83,7 +88,7 @@ class Image implements AttributeMapperInterface
                 'cpev.attribute_id = ea.attribute_id',
                 ['attribute_code' => 'ea.attribute_code']
             )
-            ->where('cpev.entity_id = ?', $productId)
+            ->where('cpev.' . $linkField . ' = ?', $productId)
             ->where('cpev.store_id = ?', 0)
             ->where('ea.entity_type_id = ?', $entityTypeId)
             ->where('ea.attribute_code IN (?)', $this->imagesAttributes);

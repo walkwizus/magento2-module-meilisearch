@@ -10,9 +10,11 @@ class AttributeMapper
 {
     /**
      * @param array $mappers
+     * @param array $postMappers
      */
     public function __construct(
-        private readonly array $mappers = []
+        private readonly array $mappers = [],
+        private readonly array $postMappers = []
     ) { }
 
     /**
@@ -24,23 +26,32 @@ class AttributeMapper
     public function map(string $indexerId, array $documentData, $storeId): array
     {
         $mergedDocuments = [];
-        $mappers = $this->resolve($indexerId);
+        $mappers = $this->resolve($indexerId, $this->mappers);
 
-        if (count($mappers) == 0) {
-            return $documentData;
+        if (count($mappers) > 0) {
+            foreach ($mappers as $mapper) {
+                if (!$mapper instanceof AttributeMapperInterface) {
+                    throw new \LogicException('Attribute provider must implement "Walkwizus\MeilisearchBase\Api\AttributeMapperInterface".');
+                }
+                $data = $mapper->map($documentData, $storeId);
+                foreach ($data as $key => $value) {
+                    if (!isset($mergedDocuments[$key])) {
+                        $mergedDocuments[$key] = [];
+                    }
+                    $mergedDocuments[$key] = array_merge($mergedDocuments[$key], $value);
+                }
+            }
+        } else {
+            $mergedDocuments = $documentData;
         }
 
-        foreach ($mappers as $mapper) {
-            if (!$mapper instanceof AttributeMapperInterface) {
-                throw new \LogicException('Attribute provider must implement "Walkwizus\MeilisearchBase\Api\AttributeMapperInterface".');
+        $postMappers = $this->resolve($indexerId, $this->postMappers);
+
+        foreach ($postMappers as $postMapper) {
+            if (!$postMapper instanceof AttributeMapperInterface) {
+                throw new \LogicException('Post-attribute mapper must implement "Walkwizus\MeilisearchBase\Api\AttributeMapperInterface".');
             }
-            $data = $mapper->map($documentData, $storeId);
-            foreach ($data as $key => $value) {
-                if (!isset($mergedDocuments[$key])) {
-                    $mergedDocuments[$key] = [];
-                }
-                $mergedDocuments[$key] = array_merge($mergedDocuments[$key], $value);
-            }
+            $mergedDocuments = $postMapper->map($mergedDocuments, $storeId);
         }
 
         return $mergedDocuments;
@@ -48,10 +59,11 @@ class AttributeMapper
 
     /**
      * @param $indexerId
+     * @param array $source
      * @return AttributeMapperInterface|array
      */
-    private function resolve($indexerId): AttributeMapperInterface|array
+    private function resolve($indexerId, array $source): AttributeMapperInterface|array
     {
-        return $this->mappers[$indexerId] ?? [];
+        return $source[$indexerId] ?? [];
     }
 }
