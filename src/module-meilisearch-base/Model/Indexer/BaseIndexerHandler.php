@@ -6,6 +6,7 @@ namespace Walkwizus\MeilisearchBase\Model\Indexer;
 
 use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
 use Magento\Search\Model\EngineResolver;
+use Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface;
 use Walkwizus\MeilisearchBase\Service\SettingsManager;
 use Walkwizus\MeilisearchBase\Service\IndexesManager;
 use Walkwizus\MeilisearchBase\Service\DocumentsManager;
@@ -14,6 +15,8 @@ use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Indexer\SaveHandler\Batch;
 use Walkwizus\MeilisearchBase\Model\AttributeMapper;
 use Walkwizus\MeilisearchBase\Model\AttributeProvider;
+use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\Link as EmbedderLinkResource;
+use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\CollectionFactory as EmbedderCollectionFactory;
 use Magento\Framework\Search\Request\Dimension;
 use Walkwizus\MeilisearchBase\Model\ResourceModel\Engine;
 
@@ -56,6 +59,8 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly string $indexerId,
         private readonly AttributeMapper $attributeMapper,
         private readonly AttributeProvider $attributeProvider,
+        private readonly EmbedderLinkResource $embedderLinkResource,
+        private readonly EmbedderCollectionFactory $embedderCollectionFactory,
         private readonly int $batchSize = 10000,
         private readonly string $indexPrimaryKey = 'id'
     ) { }
@@ -78,6 +83,28 @@ class BaseIndexerHandler implements IndexerInterface
                 $this->settingsManager->updateFilterableAttributes($targetIndexName, $this->attributeProvider->getFilterableAttributes($indexerId, 'index'));
                 $this->settingsManager->updateSortableAttributes($targetIndexName, $this->attributeProvider->getSortableAttributes($indexerId, 'index'));
                 $this->settingsManager->updateSearchableAttributes($targetIndexName, $this->attributeProvider->getSearchableAttributes($indexerId, 'index'));
+
+                $embedderIds = $this->embedderLinkResource->getEmbedderIdsByUid($indexName);
+                $embeddersConfig = [];
+
+                if (!empty($embedderIds)) {
+                    $embedders = $this->embedderCollectionFactory
+                        ->create()
+                        ->addFieldToFilter('embedder_id', ['in' => $embedderIds]);
+
+                    /** @var EmbedderInterface $embedder */
+                    foreach ($embedders as $embedder) {
+                        $embeddersConfig[$embedder->getIdentifier()] = [
+                            'source' => $embedder->getSource(),
+                            'model' => $embedder->getModel(),
+                            'apiKey' => $embedder->getApiKey(),
+                            'documentTemplate' => $embedder->getDocumentTemplate(),
+                        ];
+                    }
+                }
+
+                $this->settingsManager->updateEmbedders($targetIndexName, $embeddersConfig);
+
             } catch (\Exception $exception) {
                 return $this;
             }
