@@ -45,6 +45,8 @@ class BaseIndexerHandler implements IndexerInterface
      * @param string $indexerId
      * @param AttributeMapper $attributeMapper
      * @param AttributeProvider $attributeProvider
+     * @param EmbedderLinkResource $embedderLinkResource
+     * @param EmbedderCollectionFactory $embedderCollectionFactory
      * @param int $batchSize
      * @param string $indexPrimaryKey
      */
