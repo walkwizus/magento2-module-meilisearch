@@ -11,7 +11,6 @@ use Magento\Framework\Api\Filter;
 
 class IndexForm extends ModifierPoolDataProvider
 {
-
     /**
      * @var string|null
      */
@@ -33,13 +32,13 @@ class IndexForm extends ModifierPoolDataProvider
         private readonly SettingsManager $settingsManager,
         array $meta = [],
         array $data = [],
-        ?PoolInterface $pool = null
+        private readonly ?PoolInterface $pool = null
     ) {
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data, $pool);
     }
 
     /**
-     * @return array[]
+     * @return array
      * @throws \Exception
      */
     public function getData(): array
@@ -62,11 +61,11 @@ class IndexForm extends ModifierPoolDataProvider
         foreach ($settings['synonyms'] as $word => $synonym) {
             $synonyms[] = [
                 'word' => $word,
-                'synonyms' => implode(',', $synonym)
+                'synonyms' => is_array($synonym) ? implode(',', $synonym) : $synonym
             ];
         }
 
-        return [
+        $data = [
             $this->requestedId => [
                 'id' => $this->requestedId,
                 'rankingRules' => $rankingRules,
@@ -79,6 +78,12 @@ class IndexForm extends ModifierPoolDataProvider
                 'disableOnAttributes' => array_values($settings['typoTolerance']['disableOnAttributes'])
             ]
         ];
+
+        foreach ($this->pool->getModifiersInstances() as $modifier) {
+            $data = $modifier->modifyData($data);
+        }
+
+        return $data;
     }
 
     /**

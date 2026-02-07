@@ -281,6 +281,13 @@
                 <dataType>text</dataType>
                 <label translate="true">Disable on attributes</label>
             </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Walkwizus\MeilisearchIndices\Model\Config\Source\SearchableAttributes"/>
+                    </settings>
+                </multiselect>
+            </formElements>
         </field>
         <field name="disableOnNumbers" formElement="checkbox">
             <settings>

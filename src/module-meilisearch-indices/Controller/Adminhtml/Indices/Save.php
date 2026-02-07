@@ -95,6 +95,9 @@ class Save extends Action implements HttpPostActionInterface
         $post = $this->getRequest()->getPost();
 
         $disableOnWords = array_filter(array_map('trim', explode(',', (string)($post['disableOnWords'] ?? ''))));
+        $disableOnAttributes = (isset($post['disableOnAttributes']) && is_array($post['disableOnAttributes']))
+            ? array_values($post['disableOnAttributes'])
+            : [];
 
         return [
             'enabled' => $post['enableTypoTolerance'] === 'true',
@@ -103,7 +106,7 @@ class Save extends Action implements HttpPostActionInterface
                 'twoTypos' => (int)$post['twoTypos'],
             ],
             'disableOnWords' => $disableOnWords,
-            'disableOnAttributes' => array_values($post['disableOnAttributes']),
+            'disableOnAttributes' => $disableOnAttributes,
             'disableOnNumbers' => $post['disableOnNumbers'] === 'true'
         ];
     }

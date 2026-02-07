@@ -6,22 +6,16 @@ namespace Walkwizus\MeilisearchAi\Model\Config\Source;
 
 use Magento\Framework\Data\OptionSourceInterface;
 use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\CollectionFactory;
+use Walkwizus\MeilisearchAi\Model\Embedder;
 
 class EmbedderOptions implements OptionSourceInterface
 {
     /**
-     * @var CollectionFactory
-     */
-    protected $collectionFactory;
-
-    /**
      * @param CollectionFactory $collectionFactory
      */
     public function __construct(
-        CollectionFactory $collectionFactory
-    ) {
-        $this->collectionFactory = $collectionFactory;
-    }
+        private readonly CollectionFactory $collectionFactory
+    ) { }
 
     /**
      * @return array
@@ -31,11 +25,11 @@ class EmbedderOptions implements OptionSourceInterface
         $options = [];
         $collection = $this->collectionFactory->create();
 
-        /** @var \Walkwizus\MeilisearchAi\Model\Embedder $embedder */
+        /** @var Embedder $embedder */
         foreach ($collection as $embedder) {
             $options[] = [
-                'value' => $embedder->getId(),
-                'label' => sprintf('%s (%s)', $embedder->getName(), $embedder->getSource())
+                'label' => sprintf('%s (%s)', $embedder->getName(), $embedder->getSource()),
+                'value' => $embedder->getId()
             ];
         }
 
