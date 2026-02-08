@@ -1,8 +1,7 @@
 define([
     'uiComponent',
-    'Walkwizus_MeilisearchFrontend/js/service/search',
     'Walkwizus_MeilisearchFrontend/js/model/sorter-state'
-], function(Component, searchService, sorterState) {
+], function(Component, sorterState) {
     'use strict';
 
     const meilisearchConfig = window.meilisearchFrontendConfig;

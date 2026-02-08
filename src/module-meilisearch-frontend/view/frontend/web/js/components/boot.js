@@ -1,7 +1,7 @@
 define([
     'uiComponent',
-    'Walkwizus_MeilisearchFrontend/js/service/search'
-], function(Component, searchService) {
+    'Walkwizus_MeilisearchFrontend/js/components/search'
+], function(Component, search) {
     'use strict';
 
     return Component.extend({
@@ -9,7 +9,7 @@ define([
             this._super();
 
             let initialState = this.initialState || null;
-            searchService.init(initialState);
+            search.init(initialState);
             return this;
         }
     });
