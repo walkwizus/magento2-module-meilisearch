@@ -24,15 +24,20 @@ define([
     let searchService;
 
     function getHybridParams(searchQuery) {
+        const params = {};
+
         if (hybridConfig.enabled && searchQuery && searchQuery.trim().length > 0) {
-            return {
-                hybrid: {
-                    semanticRatio: hybridConfig.semanticRatio,
-                    embedder: hybridConfig.embedder
-                }
+            params.hybrid = {
+                semanticRatio: parseFloat(hybridConfig.semanticRatio),
+                embedder: hybridConfig.embedder
             };
+
+            if (hybridConfig.rankingScoreThreshold !== undefined && hybridConfig.rankingScoreThreshold !== null) {
+                params.rankingScoreThreshold = parseFloat(hybridConfig.rankingScoreThreshold);
+            }
         }
-        return {};
+
+        return params;
     }
 
     function init(initialState) {
@@ -87,6 +92,8 @@ define([
     }
 
     function performSearch() {
+        searchState.isLoading(true);
+
         const searchQuery = facetsState.searchQuery();
         const sortField = sorterState.sortBy() ?? meilisearchConfig.defaultSortBy;
         const sortDirection = sorterState.isDescending() ? 'desc' : 'asc';
@@ -135,9 +142,12 @@ define([
             sort: sortParams
         });
 
-        if (hybridParams) {
+        if (hybridParams.hybrid) {
             queries.forEach(query => {
                 query.hybrid = hybridParams.hybrid;
+                if (hybridParams.rankingScoreThreshold !== undefined) {
+                    query.rankingScoreThreshold = hybridParams.rankingScoreThreshold;
+                }
             });
         }
 
@@ -161,7 +171,7 @@ define([
 
     function updateResults(results) {
         searchState.searchResults(results);
-        searchState.totalHits(results.totalHits);
+        searchState.totalHits(results.totalHits || 0);
         searchState.hitsPerPage(results.hitsPerPage);
     }
 

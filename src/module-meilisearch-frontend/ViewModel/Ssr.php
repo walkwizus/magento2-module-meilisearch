@@ -7,7 +7,7 @@ namespace Walkwizus\MeilisearchFrontend\ViewModel;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\App\RequestInterface;
 use Meilisearch\Contracts\SearchQueryFactory;
-use Meilisearch\Contracts\HybridSearchOptions; // Nouvel import
+use Meilisearch\Contracts\HybridSearchOptions;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
@@ -27,6 +27,7 @@ class Ssr implements ArgumentInterface
     /**
      * @param RequestInterface $request
      * @param SearchQueryFactory $searchQueryFactory
+     * @param HybridSearchOptions $hybridSearchOptions
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
      * @param PriceCurrencyInterface $priceCurrency
@@ -34,6 +35,7 @@ class Ssr implements ArgumentInterface
     public function __construct(
         private readonly RequestInterface $request,
         private readonly SearchQueryFactory $searchQueryFactory,
+        private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
         private readonly PriceCurrencyInterface $priceCurrency
@@ -65,11 +67,16 @@ class Ssr implements ArgumentInterface
 
         $hybridConfig = $this->config['hybridSearch'] ?? [];
         $hybridOptions = null;
+        $threshold = null;
 
         if (!empty($query) && !empty($hybridConfig['enabled']) && !empty($hybridConfig['embedder'])) {
-            $hybridOptions = (new HybridSearchOptions())
+            $hybridOptions = $this->hybridSearchOptions
                 ->setSemanticRatio((float)$hybridConfig['semanticRatio'])
                 ->setEmbedder((string)$hybridConfig['embedder']);
+
+            if (isset($hybridConfig['rankingScoreThreshold'])) {
+                $threshold = (float)$hybridConfig['rankingScoreThreshold'];
+            }
         }
 
         $queries = [];
@@ -84,6 +91,9 @@ class Ssr implements ArgumentInterface
 
         if ($hybridOptions) {
             $mainQuery->setHybrid($hybridOptions);
+            if ($threshold !== null) {
+                $mainQuery->setRankingScoreThreshold($threshold);
+            }
         }
 
         if (!empty($mainFilters)) {
@@ -111,6 +121,9 @@ class Ssr implements ArgumentInterface
 
             if ($hybridOptions) {
                 $disjunctiveQuery->setHybrid($hybridOptions);
+                if ($threshold !== null) {
+                    $disjunctiveQuery->setRankingScoreThreshold($threshold);
+                }
             }
 
             if (!empty($filters)) {
@@ -275,7 +288,7 @@ class Ssr implements ArgumentInterface
      */
     public function getProductListMode(): string
     {
-        $defaultViewMode = $this->config['defaultViewMode'];
+        $defaultViewMode = $this->config['defaultViewMode'] ?? 'grid';
         return (string)$this->request->getParam('product_list_mode', $defaultViewMode);
     }
 

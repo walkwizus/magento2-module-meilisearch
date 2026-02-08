@@ -10,7 +10,7 @@
                 <item name="sortOrder" xsi:type="number">100</item>
             </item>
         </argument>
-        <field name="is_vector_enabled" formElement="checkbox" sortOrder="5">
+        <field name="is_vector_enabled" formElement="checkbox" sortOrder="10">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="default" xsi:type="number">0</item>
@@ -46,6 +46,10 @@
                                     <target>meilisearch_indices_form.meilisearch_indices_form.meilisearch_ai_vector_settings.search_embedder_id</target>
                                     <callback>show</callback>
                                 </action>
+                                <action name="2">
+                                    <target>meilisearch_indices_form.meilisearch_indices_form.meilisearch_ai_vector_settings.ranking_score_threshold</target>
+                                    <callback>show</callback>
+                                </action>
                             </actions>
                         </rule>
                     </rules>
@@ -64,7 +68,7 @@
                 </checkbox>
             </formElements>
         </field>
-        <field name="search_embedder_id" formElement="select" sortOrder="7">
+        <field name="search_embedder_id" formElement="select" sortOrder="20">
             <settings>
                 <label translate="true">Search Embedder</label>
                 <dataType>text</dataType>
@@ -82,7 +86,7 @@
                 </select>
             </formElements>
         </field>
-        <field name="semantic_ratio" formElement="input" sortOrder="8">
+        <field name="semantic_ratio" formElement="input" sortOrder="30">
             <settings>
                 <label translate="true">Semantic Ratio</label>
                 <dataType>text</dataType>
@@ -94,7 +98,19 @@
                 </validation>
             </settings>
         </field>
-        <field name="embedder_ids" formElement="multiselect" sortOrder="10">
+        <field name="ranking_score_threshold" formElement="input" sortOrder="40">
+            <settings>
+                <label translate="true">Ranking Score Threshold</label>
+                <dataType>text</dataType>
+                <visible>false</visible>
+                <notice translate="true">Excludes results below the specified ranking score, value between 0.0 and 1.0.</notice>
+                <validation>
+                    <rule name="validate-number-range" xsi:type="string">0-1</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="embedder_ids" formElement="multiselect" sortOrder="50">
             <settings>
                 <label translate="true">Embedder Profiles (Indexing)</label>
                 <dataType>text</dataType>

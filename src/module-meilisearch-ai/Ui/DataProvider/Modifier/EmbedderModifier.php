@@ -36,6 +36,7 @@ class EmbedderModifier implements ModifierInterface
             $data[$indexUid]['is_vector_enabled'] = $settings['is_vector_enabled'];
             $data[$indexUid]['semantic_ratio'] = $settings['semantic_ratio'];
             $data[$indexUid]['embedder_id'] = $settings['embedder_id'];
+            $data[$indexUid]['ranking_score_threshold'] = $settings['ranking_score_threshold'];
         }
 
         return $data;

@@ -13,6 +13,7 @@ class VectorSettings
     const IS_VECTOR_ENABLED = 'is_vector_enabled';
     const EMBEDDER_ID = 'embedder_id';
     const SEMANTIC_RATIO = 'semantic_ratio';
+    const RANKING_SCORE_THRESHOLD = 'ranking_score_threshold';
 
     /**
      * @param ScopeConfigInterface $scopeConfig
@@ -32,7 +33,8 @@ class VectorSettings
         return [
             'is_vector_enabled' => $this->getIsVectorEnabled($indexUid),
             'embedder_id' => $this->getEmbedderId($indexUid),
-            'semantic_ratio' => $this->getSemanticRatio($indexUid)
+            'semantic_ratio' => $this->getSemanticRatio($indexUid),
+            'ranking_score_threshold' => $this->getRankingScoreThreshold($indexUid)
         ];
     }
 
@@ -41,17 +43,20 @@ class VectorSettings
      * @param bool $isEnabled
      * @param int $embedderId
      * @param float $semanticRatio
+     * @param float|null $rankingScoreThreshold
      * @return array
      */
     public function setVectorSettings(
         string $indexUid,
         bool $isEnabled,
         int $embedderId,
-        float $semanticRatio
+        float $semanticRatio = 0.5,
+        ?float $rankingScoreThreshold = null
     ): array {
         $this->setIsVectorEnabled($indexUid, $isEnabled);
         $this->setEmbedderId($indexUid, $embedderId);
         $this->setSemanticRatio($indexUid, $semanticRatio);
+        $this->setRankingScoreThreshold($indexUid, $rankingScoreThreshold);
 
         return $this->getVectorSettings($indexUid);
     }
@@ -91,6 +96,17 @@ class VectorSettings
 
     /**
      * @param string $indexUid
+     * @return mixed
+     */
+    public function getRankingScoreThreshold(string $indexUid): mixed
+    {
+        return $this->scopeConfig->getValue(
+            self::XML_PATH_MEILISEARCH_AI_INDICES_SETTINGS_PREFIX . '/' . $indexUid . '_' . self::RANKING_SCORE_THRESHOLD
+        );
+    }
+
+    /**
+     * @param string $indexUid
      * @param bool $isEnabled
      * @return void
      */
@@ -125,6 +141,19 @@ class VectorSettings
         $this->writer->save(
             self::XML_PATH_MEILISEARCH_AI_INDICES_SETTINGS_PREFIX . '/' . $indexUid . '_' . self::SEMANTIC_RATIO,
             $semanticRatio
+        );
+    }
+
+    /**
+     * @param string $indexUid
+     * @param float $rankingScoreThreshold
+     * @return void
+     */
+    public function setRankingScoreThreshold(string $indexUid, float $rankingScoreThreshold): void
+    {
+        $this->writer->save(
+            self::XML_PATH_MEILISEARCH_AI_INDICES_SETTINGS_PREFIX . '/' . $indexUid . '_' . self::RANKING_SCORE_THRESHOLD,
+            $rankingScoreThreshold
         );
     }
 }

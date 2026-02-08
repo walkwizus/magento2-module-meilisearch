@@ -52,7 +52,8 @@ class HybridConfigProvider implements ConfigProviderInterface
             'hybridSearch' => [
                 'enabled' => (bool)$settings['is_vector_enabled'],
                 'semanticRatio' => (float)$settings['semantic_ratio'],
-                'embedder' => $embedderIdentifier
+                'embedder' => $embedderIdentifier,
+                'rankingScoreThreshold' => (float)$settings['ranking_score_threshold']
             ]
         ];
     }

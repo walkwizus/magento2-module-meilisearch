@@ -77,8 +77,9 @@ class IndexSavePlugin
                 $this->vectorSettings->setVectorSettings(
                     $indexUid,
                     (bool)($postData['is_vector_enabled'] ?? false),
-                    (int)($postData['search_embedder_id'] ?? 0),
-                    (float)($postData['semantic_ratio'] ?? 0.5)
+                    (int)($postData['search_embedder_id']),
+                    (float)($postData['semantic_ratio']),
+                    (float)($postData['ranking_score_threshold'])
                 );
 
             } catch (\Exception $e) {
