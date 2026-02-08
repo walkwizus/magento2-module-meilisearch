@@ -20,7 +20,20 @@ define([
     'use strict';
 
     const meilisearchConfig = window.meilisearchFrontendConfig;
+    const hybridConfig = meilisearchConfig.hybridSearch || {};
     let searchService;
+
+    function getHybridParams(searchQuery) {
+        if (hybridConfig.enabled && searchQuery && searchQuery.trim().length > 0) {
+            return {
+                hybrid: {
+                    semanticRatio: hybridConfig.semanticRatio,
+                    embedder: hybridConfig.embedder
+                }
+            };
+        }
+        return {};
+    }
 
     function init(initialState) {
         searchService = meilisearchService({
@@ -83,18 +96,20 @@ define([
         const currentPage = facetsState.currentPage();
         const facetList = meilisearchConfig.facets.facetList;
         const hitsPerPage = limiterState.currentLimit();
+        const hybridParams = getHybridParams(searchQuery);
 
         if (activeFacetCodes.length === 0) {
             const filterParams = queryBuilder.buildFilters({}, meilisearchConfig.currentCategoryId, meilisearchConfig.categoryRule);
+            const searchParams = Object.assign({
+                filter: filterParams,
+                facets: facetList,
+                sort: sortParams,
+                page: currentPage,
+                hitsPerPage: hitsPerPage
+            }, hybridParams);
 
             searchService
-                .search(searchQuery, {
-                    filter: filterParams,
-                    facets: facetList,
-                    sort: sortParams,
-                    page: currentPage,
-                    hitsPerPage: hitsPerPage
-                })
+                .search(searchQuery, searchParams)
                 .then(updateResults)
                 .finally(() => {
                     searchState.isLoading(false);
@@ -119,6 +134,12 @@ define([
             hitsPerPage: hitsPerPage,
             sort: sortParams
         });
+
+        if (hybridParams) {
+            queries.forEach(query => {
+                query.hybrid = hybridParams.hybrid;
+            });
+        }
 
         searchService.multiSearch(queries)
             .then(function (response) {

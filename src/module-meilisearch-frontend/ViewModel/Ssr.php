@@ -7,6 +7,7 @@ namespace Walkwizus\MeilisearchFrontend\ViewModel;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\App\RequestInterface;
 use Meilisearch\Contracts\SearchQueryFactory;
+use Meilisearch\Contracts\HybridSearchOptions; // Nouvel import
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
@@ -62,8 +63,16 @@ class Ssr implements ArgumentInterface
         $selectedFacets = $this->getSelectedFacets();
         $activeCodes = array_keys($selectedFacets);
 
-        $queries = [];
+        $hybridConfig = $this->config['hybridSearch'] ?? [];
+        $hybridOptions = null;
 
+        if (!empty($query) && !empty($hybridConfig['enabled']) && !empty($hybridConfig['embedder'])) {
+            $hybridOptions = (new HybridSearchOptions())
+                ->setSemanticRatio((float)$hybridConfig['semanticRatio'])
+                ->setEmbedder((string)$hybridConfig['embedder']);
+        }
+
+        $queries = [];
         $mainFilters = $this->buildFilters($selectedFacets);
 
         $mainQuery = $this->searchQueryFactory->create()
@@ -72,6 +81,10 @@ class Ssr implements ArgumentInterface
             ->setFacets($facets)
             ->setPage($currentPage)
             ->setHitsPerPage($hitsPerPage);
+
+        if ($hybridOptions) {
+            $mainQuery->setHybrid($hybridOptions);
+        }
 
         if (!empty($mainFilters)) {
             $mainQuery->setFilter($mainFilters);
@@ -95,6 +108,10 @@ class Ssr implements ArgumentInterface
                 ->setFacets([$code])
                 ->setPage($currentPage)
                 ->setHitsPerPage($hitsPerPage);
+
+            if ($hybridOptions) {
+                $disjunctiveQuery->setHybrid($hybridOptions);
+            }
 
             if (!empty($filters)) {
                 $disjunctiveQuery->setFilter($filters);
