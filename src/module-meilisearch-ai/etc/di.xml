@@ -3,6 +3,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface" type="Walkwizus\MeilisearchAi\Model\Embedder" />
     <preference for="Walkwizus\MeilisearchAi\Api\EmbedderRepositoryInterface" type="Walkwizus\MeilisearchAi\Model\EmbedderRepository" />
+    <preference for="Walkwizus\MeilisearchAi\Api\Data\LinkInterface" type="Walkwizus\MeilisearchAi\Model\Link" />
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
@@ -23,6 +24,13 @@
                     <item name="entityTableName" xsi:type="string">meilisearch_ai_embedder</item>
                     <item name="identifierField" xsi:type="string">embedder_id</item>
                 </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchFrontend\Model\ConfigProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="hybrid_config" xsi:type="object">Walkwizus\MeilisearchAi\Model\ConfigProvider\HybridConfigProvider</item>
             </argument>
         </arguments>
     </type>

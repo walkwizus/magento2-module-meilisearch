@@ -17,9 +17,9 @@ interface EmbedderRepositoryInterface
 
     /**
      * @param $embedderId
-     * @return mixed
+     * @return EmbedderInterface
      */
-    public function getById($embedderId);
+    public function getById($embedderId): EmbedderInterface;
 
     /**
      * @param SearchCriteriaInterface $searchCriteria

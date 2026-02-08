@@ -125,6 +125,17 @@ class SettingsManager
 
     /**
      * @param $indexName
+     * @return array|null
+     * @throws \Exception
+     */
+    public function getEmbedders($indexName): ?array
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->index($indexName)->getEmbedders();
+    }
+
+    /**
+     * @param $indexName
      * @param array $embedders
      * @return Task
      * @throws \Exception
@@ -133,5 +144,17 @@ class SettingsManager
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->updateEmbedders($embedders);
+    }
+
+    /**
+     * @param $indexName
+     * @param $embedders
+     * @return Task
+     * @throws \Exception
+     */
+    public function resetEmbedders($indexName, $embedders): Task
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->index($indexName)->resetEmbedders();
     }
 }

@@ -6,15 +6,99 @@
             <item name="config" xsi:type="array">
                 <item name="label" xsi:type="string" translate="true">AI Vector Search</item>
                 <item name="collapsible" xsi:type="boolean">true</item>
-                <item name="opened" xsi:type="boolean">false</item>
+                <item name="opened" xsi:type="boolean">true</item>
                 <item name="sortOrder" xsi:type="number">100</item>
             </item>
         </argument>
+        <field name="is_vector_enabled" formElement="checkbox" sortOrder="5">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <label translate="true">Enable Vector Search</label>
+                <dataScope>is_vector_enabled</dataScope>
+                <switcherConfig>
+                    <rules>
+                        <rule name="0">
+                            <value>0</value>
+                            <actions>
+                                <action name="0">
+                                    <target>meilisearch_indices_form.meilisearch_indices_form.meilisearch_ai_vector_settings.semantic_ratio</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>meilisearch_indices_form.meilisearch_indices_form.meilisearch_ai_vector_settings.search_embedder_id</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>1</value>
+                            <actions>
+                                <action name="0">
+                                    <target>meilisearch_indices_form.meilisearch_indices_form.meilisearch_ai_vector_settings.semantic_ratio</target>
+                                    <callback>show</callback>
+                                </action>
+                                <action name="1">
+                                    <target>meilisearch_indices_form.meilisearch_indices_form.meilisearch_ai_vector_settings.search_embedder_id</target>
+                                    <callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                    <enabled>true</enabled>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="number">0</map>
+                            <map name="true" xsi:type="number">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="search_embedder_id" formElement="select" sortOrder="7">
+            <settings>
+                <label translate="true">Search Embedder</label>
+                <dataType>text</dataType>
+                <visible>false</visible>
+                <notice translate="true">The embedder profile will use to search queries.</notice>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Walkwizus\MeilisearchAi\Model\Config\Source\EmbedderOptions"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="semantic_ratio" formElement="input" sortOrder="8">
+            <settings>
+                <label translate="true">Semantic Ratio</label>
+                <dataType>text</dataType>
+                <visible>false</visible>
+                <notice translate="true">Value between 0.0 (full keyword) and 1.0 (full semantic).</notice>
+                <validation>
+                    <rule name="validate-number-range" xsi:type="string">0-1</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
         <field name="embedder_ids" formElement="multiselect" sortOrder="10">
             <settings>
-                <label translate="true">Embedder Profiles</label>
+                <label translate="true">Embedder Profiles (Indexing)</label>
                 <dataType>text</dataType>
-                <notice translate="true">Select one or more AI profiles. Each identifier must be unique in Meilisearch.</notice>
+                <notice translate="true">Select AI profiles used for indexing. Must include the Search Embedder selected above.</notice>
             </settings>
             <formElements>
                 <multiselect>
