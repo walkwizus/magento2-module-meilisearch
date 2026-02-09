@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="meilisearch.frontend.layers" remove="true"/>
+        <referenceContainer name="sidebar.main">
+            <block name="meilisearch.frontend.layers.minimal" template="Walkwizus_MeilisearchFrontendMinimal::layers.minimal.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+        <referenceContainer name="content">
+            <block name="meilisearch.frontend.search" class="Walkwizus\MeilisearchFrontend\Block\Search" template="Walkwizus_MeilisearchFrontendMinimal::search.minimal.phtml">
+                <container name="meilisearch.product.above_image" as="meilisearch_product_above_image" label="Meilisearch Product Above Image"/>
+                <container name="meilisearch.product.below_image" as="meilisearch_product_below_image" label="Meilisearch Product Below Image"/>
+                <container name="meilisearch.product.below_title" as="meilisearch_product_below_title" label="Meilisearch Product Below Title"/>
+                <container name="meilisearch.product.below_price" as="meilisearch_product_below_price" label="Meilisearch Product Below Price">
+                    <block name="meilisearch.frontend.stock_qty" template="Walkwizus_MeilisearchFrontendMinimal::product-details/stock.qty.phtml"/>
+                </container>
+                <container name="meilisearch.product.actions" as="meilisearch_product_actions" label="Meilisearch Product Actions"/>
+                <block name="meilisearch.frontend.search.pagination" template="Walkwizus_MeilisearchFrontendMinimal::pagination.minimal.phtml">
+                    <arguments>
+                        <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr\Pagination</argument>
+                    </arguments>
+                </block>
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

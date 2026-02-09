@@ -1,0 +1,28 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+?>
+<div class="meilisearch-stock-qty" data-role="meilisearch-stock-qty"></div>
+<script>
+(function () {
+    var placeholder = document.currentScript && document.currentScript.previousElementSibling;
+    if (!placeholder) return;
+
+    var root = document.currentScript.closest('[data-meilisearch-hit]');
+    if (!root) return;
+
+    var raw = root.getAttribute('data-meilisearch-hit');
+    if (!raw) return;
+
+    var hit;
+    try {
+        hit = JSON.parse(raw);
+    } catch (e) {
+        return;
+    }
+
+    var qty = hit && hit.stock && hit.stock.qty != null ? hit.stock.qty : null;
+    if (qty == null) return;
+
+    placeholder.textContent = 'Stock: ' + qty;
+})();
+</script>

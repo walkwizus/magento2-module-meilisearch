@@ -1,0 +1,57 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Walkwizus\MeilisearchFrontend\ViewModel\Ssr $viewModel */
+$viewModel = $block->getViewModel();
+$searchResult = $viewModel->getSearchResult();
+$facets = $viewModel->getFacets();
+$facetDistribution = (array)($searchResult['facetDistribution'] ?? []);
+$params = $block->getRequest()->getParams();
+?>
+<?php if (!empty($facets)): ?>
+    <div class="block filter">
+        <div class="block-title"><strong><?= $escaper->escapeHtml(__('Shop By')) ?></strong></div>
+        <div class="block-content">
+            <?php foreach ($facets as $facet): ?>
+                <?php
+                $code = $facet['code'];
+                $label = $facet['label'] ?? $code;
+                $options = $facetDistribution[$code] ?? [];
+                $selected = isset($params[$code]) && is_string($params[$code]) ? (string)$params[$code] : '';
+                ?>
+                <?php if (!empty($options)): ?>
+                    <div class="filter-options-item">
+                        <div class="filter-options-title"><?= $escaper->escapeHtml($label) ?></div>
+                        <div class="filter-options-content">
+                            <?php foreach ($options as $value => $count): ?>
+                                <?php
+                                $query = $params;
+                                $query[$code] = (string)$value;
+                                $url = $block->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true, '_query' => $query]);
+                                $isActive = $selected === (string)$value;
+                                ?>
+                                <div class="filter-option">
+                                    <a href="<?= $escaper->escapeUrl($url) ?>" class="<?= $isActive ? 'active' : '' ?>">
+                                        <?= $escaper->escapeHtml((string)$value) ?> (<?= (int)$count ?>)
+                                    </a>
+                                </div>
+                            <?php endforeach; ?>
+
+                            <?php if ($selected !== ''): ?>
+                                <?php
+                                $clearQuery = $params;
+                                unset($clearQuery[$code]);
+                                $clearUrl = $block->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true, '_query' => $clearQuery]);
+                                ?>
+                                <div class="filter-option">
+                                    <a href="<?= $escaper->escapeUrl($clearUrl) ?>">
+                                        <?= $escaper->escapeHtml(__('Clear')) ?>
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>

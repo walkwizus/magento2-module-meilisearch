@@ -1,0 +1,88 @@
+<?php
+/**
+ * Product list template
+ * 
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Walkwizus\MeilisearchFrontend\ViewModel\Ssr $viewModel
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+$viewModel = $block->getViewModel();
+$config = $viewModel->getConfig();
+$searchResult = $viewModel->getSearchResult();
+$totalHits = (int)($searchResult['totalHits'] ?? 0);
+$productListMode = $viewModel->getProductListMode();
+$imageConfig = $config['images']['category_page_' . $productListMode] ?? [];
+$imageAttribute = $imageConfig['type'] ?? 'small_image';
+$imageWidth = (int)($imageConfig['width'] ?? 240);
+$imageHeight = (int)($imageConfig['height'] ?? 300);
+?>
+
+<?php if ($totalHits === 0): ?>
+    <div class="message info empty">
+        <div><?= $escaper->escapeHtml(__('We can\'t find products matching the selection.')) ?></div>
+    </div>
+<?php else: ?>
+    <div class="products wrapper <?= $escaper->escapeHtmlAttr($productListMode) ?> products-<?= $escaper->escapeHtmlAttr($productListMode) ?>">
+        <ol class="products list items product-items">
+            <?php foreach (($searchResult['hits'] ?? []) as $hit): ?>
+                <?php
+                $urlKey = $hit['url_key'] ?? '';
+                $name = $hit['name'] ?? '';
+                $image = $hit[$imageAttribute] ?? '';
+                $price = $hit[$config['priceAttributeCode']] ?? null;
+                $block->setData('meilisearch_current_hit', $hit);
+                $hitJson = json_encode($hit, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+                ?>
+                <li class="item product product-item" data-meilisearch-hit='<?= $escaper->escapeHtmlAttr((string)$hitJson) ?>'>
+                    <div class="product-item-info">
+                        <?= $block->getChildHtml('meilisearch_product_above_image') ?>
+                        <a 
+                            href="<?= $escaper->escapeUrl($viewModel->getProductUrl((string)$urlKey)) ?>" 
+                            class="product photo product-item-photo"
+                            aria-label="<?= $escaper->escapeHtmlAttr((string)$name) ?>">
+                            <span class="product-image-container" style="width: <?= $imageWidth ?>px;">
+                                <span class="product-image-wrapper" style="padding-bottom: <?= $imageHeight > 0 ? (int)(($imageHeight / max(1, $imageWidth)) * 100) : 125 ?>%;">
+                                    <img
+                                        src="<?= $escaper->escapeUrl($viewModel->getProductImage((string)$image)) ?>"
+                                        alt="<?= $escaper->escapeHtmlAttr((string)$name) ?>"
+                                        class="product-image-photo"
+                                        loading="lazy"
+                                        width="<?= $imageWidth ?>"
+                                        height="<?= $imageHeight ?>"
+                                    />
+                                </span>
+                            </span>
+                        </a>
+                        <?= $block->getChildHtml('meilisearch_product_below_image') ?>
+                        <div class="product details product-item-details">
+                            <strong class="product name product-item-name">
+                                <a href="<?= $escaper->escapeUrl($viewModel->getProductUrl((string)$urlKey)) ?>" class="product-item-link">
+                                    <?= $escaper->escapeHtml((string)$name) ?>
+                                </a>
+                            </strong>
+                            <?= $block->getChildHtml('meilisearch_product_below_title') ?>
+                            <?php if ($price !== null): ?>
+                                <?= $viewModel->getProductPrice($price) ?>
+                            <?php endif; ?>
+                            <?= $block->getChildHtml('meilisearch_product_below_price') ?>
+                            <div class="product actions product-item-actions">
+                            <?= $block->getChildHtml('meilisearch_product_actions') ?>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    </div>
+
+    <div class="toolbar toolbar-products">
+        <?php
+        $pagination = $block
+            ->getChildBlock('meilisearch.frontend.search.pagination')
+            ->setData('config', $config)
+            ->setData('searchResult', $searchResult);
+        ?>
+        <?= $pagination ? $pagination->toHtml() : '' ?>
+    </div>
+<?php endif; ?>

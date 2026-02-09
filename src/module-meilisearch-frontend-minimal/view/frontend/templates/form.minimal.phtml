@@ -1,0 +1,20 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Search\Helper\Data $searchHelper */
+$searchHelper = $block->helper('Magento\\Search\\Helper\\Data');
+$query = (string)$searchHelper->getEscapedQueryText();
+$action = $searchHelper->getResultUrl();
+?>
+<form class="form minisearch" action="<?= $escaper->escapeUrl($action) ?>" method="get">
+    <label class="label" for="search">
+        <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+    </label>
+    <div class="control">
+        <input id="search" type="text" name="q" value="<?= $escaper->escapeHtmlAttr($query) ?>" class="input-text" autocomplete="off" />
+    </div>
+    <div class="actions">
+        <button type="submit" class="action search primary">
+            <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+        </button>
+    </div>
+</form>
