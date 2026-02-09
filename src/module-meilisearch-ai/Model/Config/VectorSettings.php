@@ -6,6 +6,7 @@ namespace Walkwizus\MeilisearchAi\Model\Config;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
+use Magento\Framework\App\Config\ReinitableConfigInterface;
 
 class VectorSettings
 {
@@ -18,10 +19,12 @@ class VectorSettings
     /**
      * @param ScopeConfigInterface $scopeConfig
      * @param WriterInterface $writer
+     * @param ReinitableConfigInterface $reinitableConfig
      */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly WriterInterface $writer
+        private readonly WriterInterface $writer,
+        private readonly ReinitableConfigInterface $reinitableConfig
     ) { }
 
     /**
@@ -57,6 +60,8 @@ class VectorSettings
         $this->setEmbedderId($indexUid, $embedderId);
         $this->setSemanticRatio($indexUid, $semanticRatio);
         $this->setRankingScoreThreshold($indexUid, $rankingScoreThreshold);
+
+        $this->reinitableConfig->reinit();
 
         return $this->getVectorSettings($indexUid);
     }
