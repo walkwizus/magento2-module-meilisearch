@@ -87,12 +87,13 @@ class BaseIndexerHandler implements IndexerInterface
                 $this->settingsManager->updateSearchableAttributes($targetIndexName, $this->attributeProvider->getSearchableAttributes($indexerId, 'index'));
 
                 $embedderIds = $this->embedderLinkResource->getEmbedderIdsByUid($indexName);
-                $embeddersConfig = [];
 
                 if (!empty($embedderIds)) {
                     $embedders = $this->embedderCollectionFactory
                         ->create()
                         ->addFieldToFilter('embedder_id', ['in' => $embedderIds]);
+
+                    $embeddersConfig = [];
 
                     /** @var EmbedderInterface $embedder */
                     foreach ($embedders as $embedder) {
@@ -103,9 +104,12 @@ class BaseIndexerHandler implements IndexerInterface
                             'documentTemplate' => $embedder->getDocumentTemplate(),
                         ];
                     }
+
+                    $this->settingsManager->updateEmbedders($targetIndexName, $embeddersConfig);
+                } else {
+                    $this->settingsManager->resetEmbedders($targetIndexName);
                 }
 
-                $this->settingsManager->updateEmbedders($targetIndexName, $embeddersConfig);
 
             } catch (\Exception $exception) {
                 return $this;

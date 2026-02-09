@@ -148,11 +148,10 @@ class SettingsManager
 
     /**
      * @param $indexName
-     * @param $embedders
      * @return Task
      * @throws \Exception
      */
-    public function resetEmbedders($indexName, $embedders): Task
+    public function resetEmbedders($indexName): Task
     {
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->resetEmbedders();
