@@ -109,8 +109,6 @@ class BaseIndexerHandler implements IndexerInterface
                 } else {
                     $this->settingsManager->resetEmbedders($targetIndexName);
                 }
-
-
             } catch (\Exception $exception) {
                 return $this;
             }

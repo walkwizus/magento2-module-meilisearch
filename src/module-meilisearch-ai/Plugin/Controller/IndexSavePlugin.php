@@ -74,14 +74,10 @@ class IndexSavePlugin
                 }
 
                 $this->settingsManager->updateEmbedders($indexUid, $meiliEmbeddersConfig);
-
-                $isVectorEnabled = !empty($ids) && (bool)($postData['is_vector_enabled'] ?? false);
-                $searchEmbedderId = !empty($ids) ? (int)($postData['search_embedder_id']) : 0;
-
                 $this->vectorSettings->setVectorSettings(
                     $indexUid,
-                    $isVectorEnabled,
-                    $searchEmbedderId,
+                    (bool)($postData['is_vector_enabled'] ?? false),
+                    (int)($postData['search_embedder_id']),
                     (float)($postData['semantic_ratio']),
                     (float)($postData['ranking_score_threshold'])
                 );
