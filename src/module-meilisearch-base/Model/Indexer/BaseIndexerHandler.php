@@ -49,6 +49,7 @@ class BaseIndexerHandler implements IndexerInterface
      * @param EmbedderCollectionFactory $embedderCollectionFactory
      * @param int $batchSize
      * @param string $indexPrimaryKey
+     * @param array $preProcessors
      */
     public function __construct(
         private readonly EngineResolver $engineResolver,
@@ -64,7 +65,8 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly EmbedderLinkResource $embedderLinkResource,
         private readonly EmbedderCollectionFactory $embedderCollectionFactory,
         private readonly int $batchSize = 10000,
-        private readonly string $indexPrimaryKey = 'id'
+        private readonly string $indexPrimaryKey = 'id',
+        private readonly array $preProcessors = []
     ) { }
 
     /**
@@ -114,7 +116,13 @@ class BaseIndexerHandler implements IndexerInterface
             }
 
             foreach ($this->batch->getItems($documents, $this->batchSize) as $batchDocuments) {
-                $batchDocuments = $this->attributeMapper->map($indexerId, $batchDocuments, $storeId);
+                $context = [];
+
+                if (isset($this->preProcessors[$indexerId])) {
+                    $context = $this->preProcessors[$indexerId]->prepare($indexerId, $batchDocuments, $storeId);
+                }
+
+                $batchDocuments = $this->attributeMapper->map($indexerId, $batchDocuments, $storeId, $context);
                 try {
                     $this->documentsManager->addDocumentsInBatches($targetIndexName, $batchDocuments, $this->indexPrimaryKey);
                 } catch (\Exception $e) {

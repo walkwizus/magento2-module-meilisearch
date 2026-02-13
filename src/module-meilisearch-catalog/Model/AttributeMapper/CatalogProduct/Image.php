@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper;
+namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct;
 
 use Walkwizus\MeilisearchBase\Api\AttributeMapperInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -32,6 +32,7 @@ class Image implements AttributeMapperInterface
      * @param ScopeConfigInterface $scopeConfig
      * @param ResourceConnection $resourceConnection
      * @param EavConfig $eavConfig
+     * @param MetadataPool $metadataPool
      */
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig,
@@ -42,11 +43,12 @@ class Image implements AttributeMapperInterface
 
     /**
      * @param array $documentData
-     * @param int|string $storeId
+     * @param $storeId
+     * @param array $context
      * @return array
      * @throws LocalizedException
      */
-    public function map(array $documentData, $storeId): array
+    public function map(array $documentData, $storeId, array $context = []): array
     {
         $documents = [];
         $storeId = (int) $storeId;
@@ -67,6 +69,7 @@ class Image implements AttributeMapperInterface
      * @param int $productId
      * @return array
      * @throws LocalizedException
+     * @throws \Exception
      */
     protected function getProductImagesByCode(int $productId): array
     {
@@ -75,7 +78,7 @@ class Image implements AttributeMapperInterface
         $entityTypeId = (int) $this->eavConfig
             ->getEntityType(ProductAttributeInterface::ENTITY_TYPE_CODE)
             ->getEntityTypeId();
-        
+
         $linkField = $this->metadataPool->getMetadata(ProductInterface::class)->getLinkField();
 
         $select = $connection->select()
