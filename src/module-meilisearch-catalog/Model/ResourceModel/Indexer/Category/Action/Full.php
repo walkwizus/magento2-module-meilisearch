@@ -61,11 +61,16 @@ class Full
         $data = [];
         /** @var CategoryInterface $category */
         foreach ($categories as $category) {
+            $requestPath = (string) $category->getRequestPath();
+            if ($requestPath === '') {
+                $requestPath = 'catalog/category/view/id/' . $category->getId();
+            }
+
             $data[$category->getId()] = [
                 'entity_id' => $category->getId(),
                 'product_count' => $category->getProductCollection()->getSize(),
                 'name' => $category->getName(),
-                'url_key' => $category->getRequestPath(),
+                'url_key' => $requestPath,
                 'path' => $namesByPath[$category->getId()]
             ];
         }
