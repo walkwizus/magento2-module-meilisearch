@@ -6,15 +6,15 @@ namespace Walkwizus\MeilisearchBase\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Walkwizus\MeilisearchBase\Service\KeysManager;
+use Magento\Framework\App\Config\Storage\WriterInterface;
+use Magento\Framework\App\Config\ReinitableConfigInterface;
+use Magento\Framework\Console\QuestionPerformer\YesNo;
+use Magento\Framework\Encryption\Encryptor;
+use Symfony\Component\Console\Question\ChoiceQuestionFactory;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestionFactory;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Magento\Framework\App\Config\Storage\WriterInterface;
-use Magento\Framework\Console\QuestionPerformer\YesNo;
-use Magento\Framework\Encryption\Encryptor;
 use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 
 class ApiKey extends Command
@@ -22,13 +22,16 @@ class ApiKey extends Command
     /**
      * @param KeysManager $keysManager
      * @param WriterInterface $writer
+     * @param ReinitableConfigInterface $reinitableConfig
      * @param YesNo $yesNo
      * @param Encryptor $encryptor
+     * @param ChoiceQuestionFactory $choiceQuestionFactory
      * @param string|null $name
      */
     public function __construct(
         private readonly KeysManager $keysManager,
         private readonly WriterInterface $writer,
+        private readonly ReinitableConfigInterface $reinitableConfig,
         private readonly YesNo $yesNo,
         private readonly Encryptor $encryptor,
         private readonly ChoiceQuestionFactory $choiceQuestionFactory,
@@ -131,6 +134,8 @@ class ApiKey extends Command
             $this->writer->save(ServerSettings::MEILISEARCH_SERVER_SETTINGS_CLIENT_API_KEY, $selectedKey);
             $output->writeln('<info>Key saved in Magento config at "' . ServerSettings::MEILISEARCH_SERVER_SETTINGS_CLIENT_API_KEY . '".</info>');
         }
+
+        $this->reinitableConfig->reinit();
 
         return self::SUCCESS;
     }
