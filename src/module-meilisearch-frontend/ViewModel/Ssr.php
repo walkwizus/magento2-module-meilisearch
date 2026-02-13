@@ -58,6 +58,8 @@ class Ssr implements ArgumentInterface
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
 
         $defaultSortBy = $this->config['defaultSortBy'] ?? null;
+        $sortBy = $this->getSortBy();
+        $sortDirection = $this->isDescending() ? 'desc' : 'asc';
         $indexName = $this->config['indexName'];
         $facets = $this->config['facets']['facetList'] ?? [];
 
@@ -100,7 +102,9 @@ class Ssr implements ArgumentInterface
             $mainQuery->setFilter($mainFilters);
         }
 
-        if (!empty($defaultSortBy)) {
+        if ($sortBy !== '') {
+            $mainQuery->setSort([$sortBy . ':' . $sortDirection]);
+        } elseif ($defaultSortBy !== '') {
             $mainQuery->setSort([$defaultSortBy . ':asc']);
         }
 
