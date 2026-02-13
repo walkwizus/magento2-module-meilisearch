@@ -10,9 +10,9 @@ use Magento\Eav\Model\Entity\Attribute;
 use Magento\Eav\Api\Data\AttributeOptionInterface;
 use Magento\Swatches\Helper\Data as SwatchHelper;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\ResourceConnection;
 use Walkwizus\MeilisearchBase\Service\Translation;
 use Magento\Store\Model\ScopeInterface;
+use Walkwizus\MeilisearchCatalog\Model\Indexer\PreProcessor\CatalogProduct\UrlKey;
 
 class Eav implements AttributeMapperInterface
 {
@@ -72,7 +72,6 @@ class Eav implements AttributeMapperInterface
         private readonly DataProvider $dataProvider,
         private readonly SwatchHelper $swatchHelper,
         private readonly ScopeConfigInterface $scopeConfig,
-        private readonly ResourceConnection $resourceConnection,
         private readonly Translation $translation,
         array $excludedAttributes = []
     ) {
@@ -97,15 +96,12 @@ class Eav implements AttributeMapperInterface
 
         try {
             $storeId = (int) $storeId;
-            $productIds = array_map('intval', array_keys($documentData));
-            $productRewritePaths = $this->getProductRewritePaths($productIds, $storeId);
+            $productUrlKeys = $this->getProductUrlKeysFromContext($context);
 
             foreach ($documentData as $productId => $indexData) {
                 $productIndexData = $this->convertToProductData((int)$productId, $indexData, $storeId);
-                $productIndexData['url_key'] = $this->resolveProductUrlKey(
-                    (int) $productId,
-                    $productRewritePaths
-                );
+                $productIndexData['url_key'] = $productUrlKeys[(int) $productId]
+                    ?? sprintf(self::PRODUCT_URL_FALLBACK_PATTERN, (int) $productId);
 
                 $documents[$productId] = ['id' => $productId];
                 foreach ($productIndexData as $attributeCode => $value) {
@@ -281,91 +277,16 @@ class Eav implements AttributeMapperInterface
     }
 
     /**
-     * @param int[] $productIds
-     * @param int $storeId
+     * @param array $context
      * @return array<int, string>
      */
-    private function getProductRewritePaths(array $productIds, int $storeId): array
+    private function getProductUrlKeysFromContext(array $context): array
     {
-        if (empty($productIds)) {
+        $productUrlKeys = $context[UrlKey::CONTEXT_PRODUCT_URL_KEYS] ?? [];
+        if (!is_array($productUrlKeys)) {
             return [];
         }
 
-        $connection = $this->resourceConnection->getConnection();
-        $select = $connection->select()
-            ->from(
-                ['url_rewrite' => $connection->getTableName('url_rewrite')],
-                ['entity_id', 'request_path', 'metadata']
-            )
-            ->where('url_rewrite.entity_type = ?', 'product')
-            ->where('url_rewrite.store_id = ?', $storeId)
-            ->where('url_rewrite.entity_id IN (?)', $productIds)
-            ->where('url_rewrite.redirect_type = ?', 0)
-            ->where('url_rewrite.request_path IS NOT NULL')
-            ->where("url_rewrite.request_path <> ''");
-
-        $rows = $connection->fetchAll($select);
-
-        $bestByProduct = [];
-        foreach ($rows as $row) {
-            $entityId = (int) ($row['entity_id'] ?? 0);
-            $requestPath = ltrim((string) ($row['request_path'] ?? ''), '/');
-
-            if ($entityId <= 0 || $requestPath === '') {
-                continue;
-            }
-
-            if (!isset($bestByProduct[$entityId])) {
-                $bestByProduct[$entityId] = [
-                    'request_path' => $requestPath,
-                    'metadata' => (string) ($row['metadata'] ?? ''),
-                ];
-                continue;
-            }
-
-            if ($this->isPreferredRewritePath($requestPath, (string) ($row['metadata'] ?? ''), $bestByProduct[$entityId])) {
-                $bestByProduct[$entityId] = [
-                    'request_path' => $requestPath,
-                    'metadata' => (string) ($row['metadata'] ?? ''),
-                ];
-            }
-        }
-
-        return array_map(
-            static fn(array $row): string => (string) $row['request_path'],
-            $bestByProduct
-        );
-    }
-
-    /**
-     * @param string $candidatePath
-     * @param string $candidateMetadata
-     * @param array{request_path: string, metadata: string} $current
-     * @return bool
-     */
-    private function isPreferredRewritePath(string $candidatePath, string $candidateMetadata, array $current): bool
-    {
-        $candidateHasCategory = str_contains($candidateMetadata, '"category_id"');
-        $currentHasCategory = str_contains((string) $current['metadata'], '"category_id"');
-
-        if ($candidateHasCategory !== $currentHasCategory) {
-            return !$candidateHasCategory;
-        }
-
-        return strlen($candidatePath) < strlen((string) $current['request_path']);
-    }
-
-    /**
-     * @param int $productId
-     * @param array<int, string> $productRewritePaths
-     * @return string
-     */
-    private function resolveProductUrlKey(int $productId, array $productRewritePaths): string
-    {
-        if (isset($productRewritePaths[$productId]) && $productRewritePaths[$productId] !== '') {
-            return $productRewritePaths[$productId];
-        }
-
-        return sprintf(self::PRODUCT_URL_FALLBACK_PATTERN, $productId);
+        return array_map('strval', $productUrlKeys);
     }
 }
