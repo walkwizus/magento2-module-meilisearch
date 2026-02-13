@@ -329,7 +329,6 @@ class Ssr implements ArgumentInterface
     public function getProductUrl(string $urlKey): string
     {
         $baseUrl = rtrim((string)($this->config['baseUrl'] ?? ''), '/');
-        $suffix = (string)($this->config['productUrlSuffix'] ?? '');
         $path = ltrim(trim($urlKey), '/');
 
         if ($path === '') {
@@ -338,16 +337,6 @@ class Ssr implements ArgumentInterface
 
         if (preg_match('#^https?://#i', $path) === 1) {
             return $path;
-        }
-
-        $shouldAppendSuffix = $suffix !== ''
-            && !str_contains($path, '/')
-            && !str_contains($path, '?')
-            && !str_contains($path, '#')
-            && !str_ends_with($path, $suffix);
-
-        if ($shouldAppendSuffix) {
-            $path .= $suffix;
         }
 
         return $baseUrl . '/' . $path;

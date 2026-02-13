@@ -51,7 +51,6 @@ define([
 
         getProductUrl: function(urlKey) {
             const baseUrl = meilisearchConfig.baseUrl;
-            const suffix = String(meilisearchConfig.productUrlSuffix || '');
             const path = String(urlKey || '').replace(/^\/+/, '');
 
             if (!path) {
@@ -60,16 +59,6 @@ define([
 
             if (/^https?:\/\//i.test(path)) {
                 return path;
-            }
-
-            const shouldAppendSuffix = suffix !== ''
-                && !path.includes('/')
-                && !path.includes('?')
-                && !path.includes('#')
-                && !path.endsWith(suffix);
-
-            if (shouldAppendSuffix) {
-                return joinUrl(baseUrl, path + suffix);
             }
 
             return joinUrl(baseUrl, path);
