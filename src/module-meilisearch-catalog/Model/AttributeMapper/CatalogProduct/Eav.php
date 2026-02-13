@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper;
+namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct;
 
 use Walkwizus\MeilisearchBase\Api\AttributeMapperInterface;
 use Magento\CatalogSearch\Model\Indexer\Fulltext\Action\DataProvider;
@@ -77,10 +77,11 @@ class Eav implements AttributeMapperInterface
 
     /**
      * @param array $documentData
-     * @param int|string $storeId
+     * @param $storeId
+     * @param array $context
      * @return array
      */
-    public function map(array $documentData, $storeId): array
+    public function map(array $documentData, $storeId, array $context = []): array
     {
         $this->locale = $this->scopeConfig->getValue(
             'general/locale/code',

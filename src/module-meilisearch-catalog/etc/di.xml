@@ -47,11 +47,11 @@
         <arguments>
             <argument name="mappers" xsi:type="array">
                 <item name="catalog_product" xsi:type="array">
-                    <item name="category" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Category</item>
-                    <item name="eav" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Eav</item>
-                    <item name="image" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Image</item>
-                    <item name="inventory" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Inventory</item>
-                    <item name="price" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\Price</item>
+                    <item name="category" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Category</item>
+                    <item name="eav" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Eav</item>
+                    <item name="image" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Image</item>
+                    <item name="inventory" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Inventory</item>
+                    <item name="price" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Price</item>
                 </item>
             </argument>
         </arguments>

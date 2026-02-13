@@ -9,7 +9,8 @@ interface AttributeMapperInterface
     /**
      * @param array $documentData
      * @param $storeId
+     * @param array $context
      * @return array
      */
-    public function map(array $documentData, $storeId): array;
+    public function map(array $documentData, $storeId, array $context = []): array;
 }
