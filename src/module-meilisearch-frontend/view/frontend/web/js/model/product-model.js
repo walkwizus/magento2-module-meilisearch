@@ -50,14 +50,18 @@ define([
         },
 
         getProductUrl: function(urlKey) {
-            const suffix = meilisearchConfig.productUrlSuffix;
             const baseUrl = meilisearchConfig.baseUrl;
+            const path = String(urlKey || '').replace(/^\/+/, '');
 
-            if (typeof suffix === 'string' && suffix.trim() !== '') {
-                return baseUrl + urlKey + suffix;
+            if (!path) {
+                return String(baseUrl || '');
             }
 
-            return baseUrl + urlKey;
+            if (/^https?:\/\//i.test(path)) {
+                return path;
+            }
+
+            return joinUrl(baseUrl, path);
         },
 
         formatPrice: function(price) {

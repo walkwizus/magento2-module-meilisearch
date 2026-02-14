@@ -5,6 +5,9 @@
         <arguments>
             <argument name="indexerId" xsi:type="string">catalog_product</argument>
             <argument name="indexPrimaryKey" xsi:type="string">id</argument>
+            <argument name="preProcessors" xsi:type="array">
+                <item name="catalog_product" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\Indexer\PreProcessor\CatalogProduct\UrlKey</item>
+            </argument>
         </arguments>
     </virtualType>
     <type name="Magento\CatalogSearch\Model\Indexer\IndexerHandlerFactory">

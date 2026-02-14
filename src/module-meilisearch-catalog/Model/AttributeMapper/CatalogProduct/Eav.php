@@ -12,9 +12,12 @@ use Magento\Swatches\Helper\Data as SwatchHelper;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Walkwizus\MeilisearchBase\Service\Translation;
 use Magento\Store\Model\ScopeInterface;
+use Walkwizus\MeilisearchCatalog\Model\Indexer\PreProcessor\CatalogProduct\UrlKey;
 
 class Eav implements AttributeMapperInterface
 {
+    private const PRODUCT_URL_FALLBACK_PATTERN = 'catalog/product/view/id/%d';
+
     /**
      * @var array|string[]
      */
@@ -83,6 +86,8 @@ class Eav implements AttributeMapperInterface
      */
     public function map(array $documentData, $storeId, array $context = []): array
     {
+        $documents = [];
+
         $this->locale = $this->scopeConfig->getValue(
             'general/locale/code',
             ScopeInterface::SCOPE_STORE,
@@ -90,9 +95,13 @@ class Eav implements AttributeMapperInterface
         );
 
         try {
-            $documents = [];
+            $storeId = (int) $storeId;
+            $productUrlKeys = $this->getProductUrlKeysFromContext($context);
+
             foreach ($documentData as $productId => $indexData) {
                 $productIndexData = $this->convertToProductData((int)$productId, $indexData, $storeId);
+                $productIndexData['url_key'] = $productUrlKeys[(int) $productId]
+                    ?? sprintf(self::PRODUCT_URL_FALLBACK_PATTERN, (int) $productId);
 
                 $documents[$productId] = ['id' => $productId];
                 foreach ($productIndexData as $attributeCode => $value) {
@@ -265,5 +274,19 @@ class Eav implements AttributeMapperInterface
         }
 
         return $this->attributeOptionsCache[$cacheKey];
+    }
+
+    /**
+     * @param array $context
+     * @return array<int, string>
+     */
+    private function getProductUrlKeysFromContext(array $context): array
+    {
+        $productUrlKeys = $context[UrlKey::CONTEXT_PRODUCT_URL_KEYS] ?? [];
+        if (!is_array($productUrlKeys)) {
+            return [];
+        }
+
+        return array_map('strval', $productUrlKeys);
     }
 }
