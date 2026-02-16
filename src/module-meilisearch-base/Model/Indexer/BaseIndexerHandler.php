@@ -78,7 +78,7 @@ class BaseIndexerHandler implements IndexerInterface
     public function saveIndex($dimensions, \Traversable $documents): IndexerInterface
     {
         foreach ($dimensions as $dimension) {
-            $storeId = $dimension->getValue();
+            $storeId = (int)$dimension->getValue();
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
             $targetIndexName = $this->isFullReindex ? $indexName . '_' . self::INDEX_SWAP_SUFFIX : $indexName;
