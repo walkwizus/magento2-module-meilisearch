@@ -46,7 +46,12 @@ class ProductPlugin
             return $product;
         }
 
-        $categoryId = $this->catalogSession->getLastVisitedCategoryId();
+        $categoryId = null;
+        $lastVisitedId = $this->catalogSession->getLastVisitedCategoryId();
+
+        if ($lastVisitedId && $product->canBeShowInCategory($lastVisitedId)) {
+            $categoryId = $lastVisitedId;
+        }
 
         if (!$categoryId) {
             $categoryId = $this->getCategoryIdFromMeilisearch((int)$product->getId());
