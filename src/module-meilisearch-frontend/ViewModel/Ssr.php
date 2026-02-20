@@ -195,8 +195,7 @@ class Ssr implements ArgumentInterface
         foreach ($selectedFacets as $name => $values) {
             $orGroup = [];
             foreach ($values as $value) {
-                $escapedValue = str_replace('"', '\"', (string)$value);
-                $orGroup[] = sprintf('%s = "%s"', $name, $escapedValue);
+                $orGroup[] = $this->buildFacetExpression($name, (string)$value);
             }
 
             if ($orGroup) {
@@ -205,6 +204,69 @@ class Ssr implements ArgumentInterface
         }
 
         return $filters;
+    }
+
+    /**
+     * @param string $facetName
+     * @param string $value
+     * @return string
+     */
+    private function buildFacetExpression(string $facetName, string $value): string
+    {
+        if ($this->isRangeFacet($facetName)) {
+            $range = $this->extractRangeBounds($value);
+            if ($range !== null) {
+                [$from, $to] = $range;
+                return sprintf('(%1$s >= %2$s AND %1$s <= %3$s)', $facetName, $from, $to);
+            }
+        }
+
+        $escapedValue = str_replace('"', '\"', $value);
+        return sprintf('%s = "%s"', $facetName, $escapedValue);
+    }
+
+    /**
+     * @param string $facetName
+     * @return bool
+     */
+    private function isRangeFacet(string $facetName): bool
+    {
+        $facetConfig = (array)($this->config['facets']['facetConfig'] ?? []);
+        $config = (array)($facetConfig[$facetName] ?? []);
+
+        if (($config['type'] ?? null) === 'price' || ($config['renderRegion'] ?? null) === 'price') {
+            return true;
+        }
+
+        return preg_match('/^price(?:_|$)/', $facetName) === 1;
+    }
+
+    /**
+     * Accepts both "from_to" and "from-to" numeric formats.
+     *
+     * @param string $value
+     * @return array{0: string, 1: string}|null
+     */
+    private function extractRangeBounds(string $value): ?array
+    {
+        if (
+            preg_match(
+                '/^\s*(-?\d+(?:\.\d+)?)\s*(?:_|-)\s*(-?\d+(?:\.\d+)?)\s*$/',
+                $value,
+                $matches
+            ) !== 1
+        ) {
+            return null;
+        }
+
+        $from = $matches[1];
+        $to = $matches[2];
+
+        if ((float)$from > (float)$to) {
+            return [$to, $from];
+        }
+
+        return [$from, $to];
     }
 
     /**
@@ -217,7 +279,12 @@ class Ssr implements ArgumentInterface
         $params = $this->request->getParams();
 
         foreach ($params as $name => $value) {
-            if (!in_array($name, $facetList, true)) {
+            if (!is_string($name) || $name === '') {
+                continue;
+            }
+
+            $resolvedName = $this->resolveFacetParameterName($name, $facetList);
+            if ($resolvedName === null) {
                 continue;
             }
 
@@ -228,11 +295,48 @@ class Ssr implements ArgumentInterface
             $labels = array_filter(array_map('trim', explode(',', $value)));
 
             if (!empty($labels)) {
-                $selected[$name] = array_values($labels);
+                $selected[$resolvedName] = array_values(
+                    array_unique(
+                        array_merge($selected[$resolvedName] ?? [], $labels)
+                    )
+                );
             }
         }
 
         return $selected;
+    }
+
+    /**
+     * @param string $name
+     * @param array $facetList
+     * @return string|null
+     */
+    private function resolveFacetParameterName(string $name, array $facetList): ?string
+    {
+        if (in_array($name, $facetList, true)) {
+            return $name;
+        }
+
+        if (preg_match('/^price_\d+(?:_\d+)*$/', $name) !== 1) {
+            return null;
+        }
+
+        $priceFacetCodes = array_values(array_filter(
+            $facetList,
+            static fn($facetCode): bool => is_string($facetCode) && preg_match('/^price_\d+(?:_\d+)*$/', $facetCode) === 1
+        ));
+
+        foreach ($priceFacetCodes as $facetCode) {
+            if (
+                $facetCode === $name
+                || str_starts_with($name, $facetCode . '_')
+                || str_starts_with($facetCode, $name . '_')
+            ) {
+                return $facetCode;
+            }
+        }
+
+        return count($priceFacetCodes) === 1 ? $priceFacetCodes[0] : null;
     }
 
     /**
