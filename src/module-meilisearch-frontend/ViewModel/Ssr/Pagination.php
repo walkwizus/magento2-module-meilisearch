@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchFrontend\ViewModel\Ssr;
 
 use Magento\Framework\View\Element\Block\ArgumentInterface;
+use Magento\Framework\UrlInterface;
 
 class Pagination implements ArgumentInterface
 {
     /**
+     * @param UrlInterface $urlBuilder
      * @param int $frameLength
      */
     public function __construct(
+        private readonly UrlInterface $urlBuilder,
         private readonly int $frameLength = 5
     ) { }
 
@@ -146,6 +149,12 @@ class Pagination implements ArgumentInterface
      */
     public function getPageUrl(string $baseUrl, int $page): string
     {
-        return $page <= 1 ? $baseUrl : $baseUrl . '?page=' . $page;
+        return $this->urlBuilder->getUrl('*/*/*', [
+            '_current' => true,
+            '_escape' => true,
+            '_use_rewrite' => true,
+            '_fragment' => (string)(parse_url($baseUrl, PHP_URL_FRAGMENT) ?? ''),
+            '_query' => ['page' => $page > 1 ? $page : null],
+        ]);
     }
 }
