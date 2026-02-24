@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+         colors="true"
+         columns="max"
+         beStrictAboutTestsThatDoNotTestAnything="false"
+         bootstrap="src/Test/bootstrap.php">
+         
+    <coverage>
+        <include>
+            <directory suffix=".php">*</directory>
+        </include>
+        <exclude>
+            <directory>tmp/*</directory>
+            <directory>vendor/*</directory>
+            <directory>Test/**/*</directory>
+            <file>src/*/registration.php</file>
+            <file>vendor/autoload.php</file>
+            <file>Test/bootstrap.php</file>
+        </exclude>
+    </coverage>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">src</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
