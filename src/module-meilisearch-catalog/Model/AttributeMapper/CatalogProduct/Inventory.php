@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper;
+namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct;
 
 use Walkwizus\MeilisearchBase\Api\AttributeMapperInterface;
 use Magento\InventorySalesApi\Api\Data\SalesChannelInterface;
@@ -37,11 +37,12 @@ class Inventory implements AttributeMapperInterface
     /**
      * @param array $documentData
      * @param $storeId
+     * @param array $context
      * @return array
      * @throws NoSuchEntityException
      * @throws LocalizedException
      */
-    public function map(array $documentData, $storeId): array
+    public function map(array $documentData, $storeId, array $context = []): array
     {
         $indexData = [];
         $inventoryData = $this->loadInventoryData($storeId, array_keys($documentData));

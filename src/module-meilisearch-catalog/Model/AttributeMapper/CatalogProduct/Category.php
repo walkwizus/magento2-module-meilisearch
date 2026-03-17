@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper;
+namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct;
 
 use Walkwizus\MeilisearchBase\Api\AttributeMapperInterface;
 use Magento\Framework\App\ResourceConnection;
@@ -23,9 +23,10 @@ class Category implements AttributeMapperInterface
     /**
      * @param array $documentData
      * @param $storeId
+     * @param array $context
      * @return array
      */
-    public function map(array $documentData, $storeId): array
+    public function map(array $documentData, $storeId, array $context = []): array
     {
         $documents = [];
         $productIds = array_keys($documentData);

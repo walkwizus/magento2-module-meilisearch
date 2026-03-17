@@ -1,0 +1,18 @@
+parameters:
+  level: 5
+  phpVersion: 80399
+  treatPhpDocTypesAsCertain: false
+  parallel:
+    maximumNumberOfProcesses: 1
+  bootstrapFiles:
+    - vendor/bitexpert/phpstan-magento/autoload.php
+  paths:
+    - src
+  fileExtensions:
+    - php
+    - phtml
+  excludePaths:
+    - 'vendor/*'
+    - 'src/*/Test/*'
+    - 'src/Test/*'
+    - 'tmp/*'

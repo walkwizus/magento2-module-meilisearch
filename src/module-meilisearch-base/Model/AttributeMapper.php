@@ -21,9 +21,10 @@ class AttributeMapper
      * @param string $indexerId
      * @param array $documentData
      * @param $storeId
+     * @param array $context
      * @return array
      */
-    public function map(string $indexerId, array $documentData, $storeId): array
+    public function map(string $indexerId, array $documentData, $storeId, array $context = []): array
     {
         $mergedDocuments = [];
         $mappers = $this->resolve($indexerId, $this->mappers);
@@ -33,7 +34,7 @@ class AttributeMapper
                 if (!$mapper instanceof AttributeMapperInterface) {
                     throw new \LogicException('Attribute provider must implement "Walkwizus\MeilisearchBase\Api\AttributeMapperInterface".');
                 }
-                $data = $mapper->map($documentData, $storeId);
+                $data = $mapper->map($documentData, $storeId, $context);
                 foreach ($data as $key => $value) {
                     if (!isset($mergedDocuments[$key])) {
                         $mergedDocuments[$key] = [];

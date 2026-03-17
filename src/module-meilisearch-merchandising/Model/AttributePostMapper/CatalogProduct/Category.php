@@ -26,10 +26,11 @@ class Category implements AttributeMapperInterface
     /**
      * @param array $documentData
      * @param $storeId
+     * @param array $context
      * @return array
      * @throws LocalizedException
      */
-    public function map(array $documentData, $storeId): array
+    public function map(array $documentData, $storeId, array $context = []): array
     {
         $virtualCategories = $this->virtualCategoryCollectionFactory
             ->create()
