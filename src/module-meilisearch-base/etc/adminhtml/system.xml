@@ -68,6 +68,14 @@
                 <field id="indexes_prefix" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Indexes Name Prefix</label>
                 </field>
+                <field id="catalog_list_mode" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Catalog List Mode</label>
+                    <options>
+                        <option label="Server Side Querying and Rendering">0</option>
+                        <option label="Client Side Querying and Re-hydration">1</option>
+                    </options>
+                    <comment>Controls the search mode, in the first case executing both the query and the rendering of the elements server-side or in the second case directly hitting the meilisearch service (which must be exposed externally) and rehydrating the results once returned by the service.</comment>
+                </field>
             </group>
         </section>
     </system>

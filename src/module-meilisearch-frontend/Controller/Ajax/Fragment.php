@@ -10,6 +10,7 @@ use Magento\Framework\App\RequestInterface;
 use Walkwizus\MeilisearchFrontend\Model\FragmentAggregator;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\Controller\Result\Json;
+use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 
 class Fragment implements HttpPostActionInterface
 {
@@ -33,12 +34,14 @@ class Fragment implements HttpPostActionInterface
      * @param RequestInterface $request
      * @param FragmentAggregator $aggregator
      * @param CollectionFactory $collectionFactory
+     * @param ServerSettings $serverSettings
      */
     public function __construct(
         private readonly JsonFactory $jsonFactory,
         private readonly RequestInterface $request,
         private readonly FragmentAggregator $aggregator,
-        private readonly CollectionFactory $collectionFactory
+        private readonly CollectionFactory $collectionFactory,
+        private readonly ServerSettings $serverSettings
     ) { }
 
     /**
@@ -47,16 +50,20 @@ class Fragment implements HttpPostActionInterface
     public function execute(): Json
     {
         $result = $this->jsonFactory->create();
+        $payload = [];
 
-        $skus = (array)($this->request->getParam('skus') ?? []);
-        $skus = array_values(array_unique(array_filter($skus)));
+        if ($this->serverSettings->getCatalogListMode() === ServerSettings::MEILISEARCH_CLIENT_SIDE_CATALOG_LIST) {
 
-        $products = $this->collectionFactory
-            ->create()
-            ->addAttributeToSelect($this->attributesToSelect)
-            ->addAttributeToFilter('sku', ['in' => $skus]);
+            $skus = (array)($this->request->getParam('skus') ?? []);
+            $skus = array_values(array_unique(array_filter($skus)));
 
-        $payload = $this->aggregator->build($products);
+            $products = $this->collectionFactory
+                ->create()
+                ->addAttributeToSelect($this->attributesToSelect)
+                ->addAttributeToFilter('sku', ['in' => $skus]);
+
+            $payload = $this->aggregator->build($products);
+        }
 
         return $result->setData($payload);
     }

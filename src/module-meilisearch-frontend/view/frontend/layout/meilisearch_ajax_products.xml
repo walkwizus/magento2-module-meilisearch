@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <!-- TODO REMOVE ME -->
+    <update handle="catalog_list_item" />
+    <!-- TODO REMOVE ME -->
+    <body>
+        <block class="Walkwizus\MeilisearchFrontend\Block\Ajax\ProductList"
+               name="meilisearch.ajax.product.list"
+               template="Magento_Catalog::product/list.phtml">
+
+            <!-- TODO REMOVE ME -->
+            <block class="Magento\Framework\Pricing\Render" name="product.price.render.default">
+                <arguments>
+                    <argument name="price_render_handle" xsi:type="string">catalog_product_prices</argument>
+                    <argument name="use_link_for_as_low_as" xsi:type="boolean">true</argument>
+                    <!-- set "override" configuration settings here -->
+                </arguments>
+            </block>
+            <!-- TODO REMOVE ME -->
+
+            <block class="Magento\Framework\View\Element\RendererList"
+                   name="category.product.type.details.renderers">
+                <block class="Magento\Framework\View\Element\Template"
+                       name="category.product.type.details.renderers.default"/>
+            </block>
+            <block class="Magento\Catalog\Block\Product\ProductList\Item\AddTo\Compare"
+                   name="category.product.addto.compare"
+                   template="Magento_Catalog::product/list/addto/compare.phtml"/>
+            <block class="Magento\Wishlist\Block\Catalog\Product\ProductList\Item\AddTo\Wishlist"
+                   name="category.product.addto.wishlist"
+                   template="Magento_Wishlist::catalog/product/list/addto/wishlist.phtml"/>
+        </block>
+    </body>
+</page>

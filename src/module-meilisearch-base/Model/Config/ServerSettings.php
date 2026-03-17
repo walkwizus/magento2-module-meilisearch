@@ -16,6 +16,12 @@ class ServerSettings
     const MEILISEARCH_SERVER_SETTINGS_CLIENT_API_KEY = 'meilisearch_server/settings/client_api_key';
     const MEILISEARCH_SERVER_SETTINGS_INDEXES_PREFIX = 'meilisearch_server/settings/indexes_prefix';
 
+    const MEILISEARCH_SERVER_SETTINGS_CATALOG_LIST_MODE = 'meilisearch_server/settings/catalog_list_mode';
+
+    const MEILISEARCH_SERVER_SIDE_CATALOG_LIST = 0;
+
+    const MEILISEARCH_CLIENT_SIDE_CATALOG_LIST = 1;
+
     /**
      * @param ScopeConfigInterface $scopeConfig
      * @param Encryptor $encryptor
@@ -75,5 +81,13 @@ class ServerSettings
     public function getServerSettingsIndexesPrefix(): string
     {
         return $this->scopeConfig->getValue(self::MEILISEARCH_SERVER_SETTINGS_INDEXES_PREFIX) ?? '';
+    }
+
+    /**
+     * @return int
+     */
+    public function getCatalogListMode(): int
+    {
+        return (int) $this->scopeConfig->getValue(self::MEILISEARCH_SERVER_SETTINGS_CATALOG_LIST_MODE);
     }
 }

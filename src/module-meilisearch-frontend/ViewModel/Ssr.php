@@ -11,6 +11,7 @@ use Meilisearch\Contracts\HybridSearchOptions;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 
 class Ssr implements ArgumentInterface
 {
@@ -31,6 +32,7 @@ class Ssr implements ArgumentInterface
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
      * @param PriceCurrencyInterface $priceCurrency
+     * @param ServerSettings $serverSettings
      */
     public function __construct(
         private readonly RequestInterface $request,
@@ -38,7 +40,8 @@ class Ssr implements ArgumentInterface
         private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
-        private readonly PriceCurrencyInterface $priceCurrency
+        private readonly PriceCurrencyInterface $priceCurrency,
+        private readonly ServerSettings $serverSettings
     ) {
         $this->config = $this->configProvider->get();
     }

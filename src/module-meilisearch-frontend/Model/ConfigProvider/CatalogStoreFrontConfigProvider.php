@@ -38,9 +38,9 @@ class CatalogStoreFrontConfigProvider implements ConfigProviderInterface
 
         $config = $this->viewConfig->getViewConfig()->getMediaEntities('Magento_Catalog', 'images');
         $images = [
-            'category_page_grid' => $config['category_page_grid'],
-            'category_page_list' => $config['category_page_list'],
-            'mini_cart_product_thumbnail' => $config['mini_cart_product_thumbnail'],
+            'category_page_grid' => $config['category_page_grid'] ?? ['type' => 'swatch_image'],
+            'category_page_list' => $config['category_page_list'] ?? ['type' => 'swatch_image'],
+            'mini_cart_product_thumbnail' => $config['mini_cart_product_thumbnail'] ?? ['type' => 'swatch_image'],
         ];
 
         foreach ($images as $imageId => &$cfg) {
