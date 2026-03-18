@@ -1,0 +1,96 @@
+<?php
+/** @var \BA\MeilisearchFrontendMinimal\Block\Layer\SwatchRenderer $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$renderData = $block->getRenderData();
+$items = $renderData['items'] ?? [];
+$attributeCode = (string)($renderData['attribute_code'] ?? '');
+$attributeId = (int)($renderData['attribute_id'] ?? 0);
+?>
+<?php if ($attributeCode !== '' && $items !== []): ?>
+    <div class="swatch-attribute swatch-layered <?= $escaper->escapeHtmlAttr($attributeCode) ?>"
+         data-attribute-code="<?= $escaper->escapeHtmlAttr($attributeCode) ?>"
+         data-attribute-id="<?= $escaper->escapeHtmlAttr((string)$attributeId) ?>">
+        <ul class="swatch-attribute-options clearfix">
+            <?php foreach ($items as $item): ?>
+                <?php
+                $optionId = (string)($item['option_id'] ?? '');
+                $label = (string)($item['label'] ?? '');
+                $count = (int)($item['count'] ?? 0);
+                $link = (string)($item['link'] ?? '#');
+                $customStyle = (string)($item['custom_style'] ?? '');
+                $isActive = !empty($item['is_active']);
+                $activeClass = $isActive ? ' active' : '';
+                $swatchType = (string)($item['swatch_type'] ?? '');
+                $swatchValue = (string)($item['swatch_value'] ?? '');
+                $hasValidLink = $link !== '' && $link !== '#';
+                $ariaLabel = $label . ($count > 0 ? ', ' . $count . ' items' : '');
+                ?>
+                <li class="swatch-option-item">
+                <?php if ($hasValidLink): ?>
+                <a href="<?= $escaper->escapeUrl($link) ?>" rel="nofollow"
+                   aria-label="<?= $escaper->escapeHtmlAttr($ariaLabel) ?>"
+                   <?php if ($isActive): ?>aria-current="true"<?php endif; ?>
+                   class="swatch-option-link-layered<?= $escaper->escapeHtmlAttr($activeClass) ?>">
+                <?php else: ?>
+                <span class="swatch-option-link-layered disabled<?= $escaper->escapeHtmlAttr($activeClass) ?>"
+                      role="link"
+                      aria-disabled="true"
+                      aria-label="<?= $escaper->escapeHtmlAttr($ariaLabel) ?>">
+                <?php endif; ?>
+                    <?php if ($swatchType === '3'): ?>
+                        <div class="swatch-option <?= $escaper->escapeHtmlAttr($customStyle) ?>"
+                             tabindex="-1"
+                             data-option-type="3"
+                             data-option-id="<?= $escaper->escapeHtmlAttr($optionId) ?>"
+                             data-option-label="<?= $escaper->escapeHtmlAttr($label) ?>"
+                             data-option-tooltip-thumb=""
+                             data-option-tooltip-value=""></div>
+                    <?php elseif ($swatchType === '2' && $swatchValue !== ''): ?>
+                        <?php $swatchThumbPath = $block->getSwatchPath('swatch_thumb', $swatchValue); ?>
+                        <?php $swatchImagePath = $block->getSwatchPath('swatch_image', $swatchValue); ?>
+                        <div class="swatch-option image <?= $escaper->escapeHtmlAttr($customStyle) ?>"
+                             style="background: url('<?= $escaper->escapeUrl($swatchImagePath) ?>') no-repeat center; background-size: initial;"
+                             tabindex="-1"
+                             data-option-type="2"
+                             data-option-id="<?= $escaper->escapeHtmlAttr($optionId) ?>"
+                             data-option-label="<?= $escaper->escapeHtmlAttr($label) ?>"
+                             data-option-tooltip-thumb="<?= $escaper->escapeUrl($swatchThumbPath) ?>"
+                             data-option-tooltip-value=""></div>
+                    <?php elseif ($swatchType === '1' && $swatchValue !== ''): ?>
+                        <div class="swatch-option color <?= $escaper->escapeHtmlAttr($customStyle) ?>"
+                             style="background: <?= $escaper->escapeHtmlAttr($swatchValue) ?> no-repeat center; background-size: initial;"
+                             tabindex="-1"
+                             data-option-type="1"
+                             data-option-id="<?= $escaper->escapeHtmlAttr($optionId) ?>"
+                             data-option-label="<?= $escaper->escapeHtmlAttr($label) ?>"
+                             data-option-tooltip-thumb=""
+                             data-option-tooltip-value="<?= $escaper->escapeHtmlAttr($swatchValue) ?>"></div>
+                    <?php elseif ($swatchType === '0' && $swatchValue !== ''): ?>
+                        <div class="swatch-option text <?= $escaper->escapeHtmlAttr($customStyle) ?>"
+                             tabindex="-1"
+                             data-option-type="0"
+                             data-option-id="<?= $escaper->escapeHtmlAttr($optionId) ?>"
+                             data-option-label="<?= $escaper->escapeHtmlAttr($label) ?>"
+                             data-option-tooltip-thumb=""
+                             data-option-tooltip-value=""><?= $escaper->escapeHtml($swatchValue) ?></div>
+                    <?php else: ?>
+                        <span class="filter-option-label"><?= $escaper->escapeHtml($label) ?></span>
+                    <?php endif; ?>
+                <?php if ($hasValidLink): ?>
+                </a>
+                <?php else: ?>
+                </span>
+                <?php endif; ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+
+    <script>
+        require(['jquery', 'Magento_Swatches/js/swatch-renderer'], function ($) {
+            $('.swatch-layered.<?= $escaper->escapeJs($attributeCode) ?>')
+                .find('[data-option-type="1"], [data-option-type="2"], [data-option-type="0"], [data-option-type="3"]')
+                .SwatchRendererTooltip();
+        });
+    </script>
+<?php endif; ?>

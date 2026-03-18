@@ -1,0 +1,37 @@
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------
+// MOBILE FIRST
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------
+& when (@media-common =true) {
+    .ba-filter-options-content.filter-options-content{
+        .count:before {
+            content: unset;
+        }
+        .count:after {
+            content: unset;
+        }
+    }
+    .ba-mobile-filter-modal {
+        .filter-options{
+            display: block;
+        }
+    }
+
+    .filter .ba-filter-current.filter-current {
+        margin: 0;
+        .filter-current-subtitle:before {
+            content: unset;
+        }
+        .items {
+            display: block; // Override default list styles
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------
+// DESKTOP ONLY
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------
+.media-width (@extremum, @break) when (@extremum ='min') and (@break =@screen__m) {
+
+
+
+}

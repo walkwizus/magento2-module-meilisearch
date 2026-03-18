@@ -1,0 +1,32 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Walkwizus\MeilisearchFrontend\ViewModel\Ssr $viewModel */
+/** @var \BA\MeilisearchFrontendMinimal\Model\Layer\StateItemRendererPool|null $stateRendererPool */
+$viewModel = $block->getViewModel();
+$facets = $viewModel->getFacets();
+$params = $block->getRequest()->getParams();
+$stateRendererPool = $block->getData('state_renderer_pool');
+$itemsHtml = '';
+$activeFiltersCount = 0;
+
+if ($stateRendererPool instanceof \BA\MeilisearchFrontendMinimal\Model\Layer\StateItemRendererPool) {
+    foreach ($facets as $facet) {
+        $itemHtml = $stateRendererPool->render($block, $facet, $params);
+        if (trim($itemHtml) === '') {
+            continue;
+        }
+        $itemsHtml .= $itemHtml;
+        $activeFiltersCount++;
+    }
+}
+?>
+<?php if ($activeFiltersCount > 0) : ?>
+    <div class="filter-current ba-filter-current">
+        <strong class="block-subtitle filter-current-subtitle" role="heading" aria-level="2" data-count="<?= (int)$activeFiltersCount ?>">
+            <?= $escaper->escapeHtml(__('Now Shopping by')) ?>
+        </strong>
+        <ol class="items">
+            <?= /* @noEscape */ $itemsHtml ?>
+        </ol>
+    </div>
+<?php endif; ?>

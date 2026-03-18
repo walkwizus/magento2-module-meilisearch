@@ -1,0 +1,103 @@
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Meilisearch\Search\SearchResult $searchResult
+ * @var \Walkwizus\MeilisearchFrontend\ViewModel\Ssr\Pagination $paginationViewModel
+ */
+$searchResult = $block->getData('searchResult');
+$config = $block->getData('config') ?? [];
+$paginationViewModel = $block->getData('view_model');
+$currentCategoryUrl = $config['currentCategoryUrl'] ?? '';
+
+$currentPage = $paginationViewModel->getCurrentPage($searchResult);
+$lastPageNum = $paginationViewModel->getLastPageNum($searchResult);
+$framePages = $paginationViewModel->getFramePages($searchResult);
+$isFirstPage = $paginationViewModel->isFirstPage($searchResult);
+$isLastPage  = $paginationViewModel->isLastPage($searchResult);
+$canShowFirst = $paginationViewModel->canShowFirst($framePages);
+$canShowPreviousJump = $paginationViewModel->canShowPreviousJump($framePages);
+$canShowNextJump = $paginationViewModel->canShowNextJump($framePages, $lastPageNum);
+$canShowLast = $paginationViewModel->canShowLast($framePages, $lastPageNum);
+$previousJumpPage = $paginationViewModel->getPreviousJumpPage($framePages);
+$nextJumpPage = $paginationViewModel->getNextJumpPage($framePages, $lastPageNum);
+?>
+<?php if ($paginationViewModel->hasPagination($searchResult)) : ?>
+<div class="pages">
+    <strong class="label pages-label" id="paging-label">
+        <?= $escaper->escapeHtml(__('Page')) ?>
+    </strong>
+    <ul class="items pages-items" aria-labelledby="paging-label">
+        <?php if (!$isFirstPage): ?>
+            <li class="item pages-item-previous">
+                <a class="action previous"
+                   href="<?= $escaper->escapeUrl($paginationViewModel->getPageUrl($currentCategoryUrl, $currentPage - 1)) ?>">
+                    <span class="label"><?= $escaper->escapeHtml(__('Page')) ?></span>
+                    <span><?= $escaper->escapeHtml(__('Previous')) ?></span>
+                </a>
+            </li>
+        <?php endif; ?>
+        <?php if ($canShowFirst): ?>
+            <li class="item">
+                <a class="page first"
+                   href="<?= $escaper->escapeUrl($paginationViewModel->getPageUrl($currentCategoryUrl, 1)) ?>">
+                    <span class="label"><?= $escaper->escapeHtml(__('Page')) ?></span>
+                    <span>1</span>
+                </a>
+            </li>
+        <?php endif; ?>
+        <?php if ($canShowPreviousJump): ?>
+            <li class="item">
+                <a class="page previous jump"
+                   href="<?= $escaper->escapeUrl($paginationViewModel->getPageUrl($currentCategoryUrl, $previousJumpPage)) ?>">
+                    <span>…</span>
+                </a>
+            </li>
+        <?php endif; ?>
+        <?php foreach ($framePages as $page): ?>
+            <?php if ($page === $currentPage): ?>
+                <li class="item current">
+                    <strong class="page">
+                        <span class="label"><?= $escaper->escapeHtml(__('Page')) ?></span>
+                        <span><?= $escaper->escapeHtml($page) ?></span>
+                    </strong>
+                </li>
+            <?php else: ?>
+                <li class="item">
+                    <a class="page"
+                       href="<?= $escaper->escapeUrl($paginationViewModel->getPageUrl($currentCategoryUrl, $page)) ?>">
+                        <span class="label"><?= $escaper->escapeHtml(__('Page')) ?></span>
+                        <span><?= $escaper->escapeHtml($page) ?></span>
+                    </a>
+                </li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+        <?php if ($canShowNextJump): ?>
+            <li class="item">
+                <a class="page next jump"
+                   href="<?= $escaper->escapeUrl($paginationViewModel->getPageUrl($currentCategoryUrl, $nextJumpPage)) ?>">
+                    <span>…</span>
+                </a>
+            </li>
+        <?php endif; ?>
+        <?php if ($canShowLast): ?>
+            <li class="item">
+                <a class="page last"
+                   href="<?= $escaper->escapeUrl($paginationViewModel->getPageUrl($currentCategoryUrl, $lastPageNum)) ?>">
+                    <span class="label"><?= $escaper->escapeHtml(__('Page')) ?></span>
+                    <span><?= $escaper->escapeHtml($lastPageNum) ?></span>
+                </a>
+            </li>
+        <?php endif; ?>
+        <?php if (!$isLastPage): ?>
+            <li class="item pages-item-next">
+                <a class="action next"
+                   href="<?= $escaper->escapeUrl($paginationViewModel->getPageUrl($currentCategoryUrl, $currentPage + 1)) ?>">
+                    <span class="label"><?= $escaper->escapeHtml(__('Page')) ?></span>
+                    <span><?= $escaper->escapeHtml(__('Next')) ?></span>
+                </a>
+            </li>
+        <?php endif; ?>
+    </ul>
+</div>
+<?php endif; ?>
