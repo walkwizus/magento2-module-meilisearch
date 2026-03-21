@@ -14,12 +14,9 @@ class ConfigProvider
      */
     private ?array $configCache = null;
 
-    /**
-     * @param ServerSettings $serverSettings
-     * @param array $providers
-     */
     public function __construct(
         private readonly ServerSettings $serverSettings,
+        private readonly \Magento\Framework\Registry $registry,
         private readonly array $providers = []
     ) { }
 
@@ -30,6 +27,7 @@ class ConfigProvider
     {
         if ($this->configCache === null) {
             $config = [];
+            $currentCategory = $this->registry->registry('current_category');
 
             foreach ($this->providers as $provider) {
                 if ($provider instanceof ConfigProviderInterface) {
@@ -39,6 +37,9 @@ class ConfigProvider
                 }
             }
             $config['catalog_list_mode'] = (bool)$this->serverSettings->getCatalogListMode();
+            if ($currentCategory) {
+                $config['current_category'] = $currentCategory->getId();
+            }
             $this->configCache = $config;
         }
 

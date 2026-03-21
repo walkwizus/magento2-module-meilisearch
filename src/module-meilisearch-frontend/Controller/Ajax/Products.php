@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchFrontend\Controller\Ajax;
 
+use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
@@ -12,24 +14,22 @@ use Walkwizus\MeilisearchFrontend\Model\Search\SearchService;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Walkwizus\MeilisearchFrontend\Block\Ajax\ProductList;
 use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
+use Magento\PageCache\Model\Config as PageCacheConfig;
 
-class Products implements HttpGetActionInterface
+class Products extends Action implements HttpGetActionInterface
 {
 
-    /**
-     * @param JsonFactory $jsonFactory
-     * @param LayoutFactory $layoutFactory
-     * @param SearchService $searchService
-     * @param CollectionFactory $collectionFactory
-     * @param ServerSettings $serverSettings
-     */
     public function __construct(
         private readonly JsonFactory $jsonFactory,
         private readonly LayoutFactory $layoutFactory,
         private readonly SearchService $searchService,
         private readonly CollectionFactory $collectionFactory,
-        private readonly ServerSettings $serverSettings
-    ) {}
+        private readonly ServerSettings $serverSettings,
+        private readonly PageCacheConfig $pageCacheConfig,
+        Context $context
+    ) {
+        return parent::__construct($context);
+    }
 
     public function execute(): Json
     {
@@ -72,19 +72,48 @@ class Products implements HttpGetActionInterface
             $collection->getSelect()->order(new \Zend_Db_Expr("FIELD(e.entity_id, $idList)"));
 
             $layout = $this->layoutFactory->create();
-            $layout->getUpdate()->load(['', 'meilisearch_ajax_products']);
+            $layout->getUpdate()->load([
+                'default',
+                'catalog_category_view',
+                'catalog_list_item',
+                'meilisearch_ajax_products'
+            ]);
             $layout->generateXml();
             $layout->generateElements();
 
             /** @var ProductList|false $block */
             $block = $layout->getBlock('meilisearch.ajax.product.list');
+            $formKeyBlock = $layout->createBlock(
+                \Magento\Framework\View\Element\FormKey::class
+            );
+            $layout->setBlock('formkey', $formKeyBlock);
 
             if (!$block) {
                 return $result->setData(array_merge($meta, ['html' => '']));
             }
 
-            $block->setProductCollection($collection);
+            $block->setCollection($collection);
             $html = $block->toHtml();
+        }
+
+        $categoryIds = $this->getRequest()->getParam('category_ids');
+        if ($this->pageCacheConfig->isEnabled()) {
+            if (!$categoryIds) {
+                $this->getResponse()->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate', true);
+            } else {
+                $ttl = $this->pageCacheConfig->getTtl();
+                $this->getResponse()->setPublicHeaders($ttl);
+
+                $tags = [];
+                foreach (explode('|', $categoryIds) as $categoryId) {
+                    $tags[] = \Magento\Catalog\Model\Category::CACHE_TAG . '_' . (int)$categoryId;
+                    $tags[] = \Magento\Catalog\Model\Category::CACHE_TAG . '_p_' . (int)$categoryId;
+                }
+                foreach ($entityIds as $entityId) {
+                    $tags[] = \Magento\Catalog\Model\Product::CACHE_TAG . '_' . (int)$entityId;
+                }
+                $this->getResponse()->setHeader('X-Magento-Tags', implode(',', $tags));
+            }
         }
 
         return $result->setData(array_merge($meta, ['html' => $html]));

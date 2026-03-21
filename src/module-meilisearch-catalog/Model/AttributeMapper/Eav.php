@@ -191,7 +191,6 @@ class Eav implements AttributeMapperInterface
                         $swatch = $swatchData[$option['value']];
                         $type = $swatch['type'];
                         $value = $swatch['value'];
-
                         $finalValues[] = "{$label}|{$type}|{$value}";
                     } else {
                         $finalValues[] = (string)$label;

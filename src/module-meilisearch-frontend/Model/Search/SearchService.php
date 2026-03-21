@@ -44,10 +44,6 @@ class SearchService
      */
     public function getSearchResult(): array
     {
-        if ($this->searchResultCache !== null) {
-            return $this->searchResultCache;
-        }
-
         $query = $this->request->getParam('q', '');
         $currentPageParam = (int)$this->request->getParam('page', 1);
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
@@ -178,7 +174,7 @@ class SearchService
     {
         $filters = [];
 
-        $categoryId = (int)($this->config['currentCategoryId'] ?? 0);
+        $categoryId = $this->request->getParam('category_ids') ?? (int)($this->config['currentCategoryId'] ?? 0);
         if ($categoryId > 0) {
             $filters[] = 'category_ids = ' . $categoryId;
         } else {
@@ -194,7 +190,12 @@ class SearchService
             $orGroup = [];
             foreach ($values as $value) {
                 $escapedValue = str_replace('"', '\"', (string)$value);
-                $orGroup[] = sprintf('%s = "%s"', $name, $escapedValue);
+                if (str_contains($name, 'price_') && str_contains($value, '_')) {
+                    $priceRange = explode('_', $value);
+                    $orGroup[] = sprintf("(%s >= %s AND %s <= %s)", $name, $priceRange[0], $name, $priceRange[1]);
+                } else {
+                    $orGroup[] = sprintf('%s = "%s"', $name, $escapedValue);
+                }
             }
 
             if ($orGroup) {

@@ -6,20 +6,12 @@ namespace Walkwizus\MeilisearchFrontend\Block\Ajax;
 
 use Magento\Catalog\Block\Product\ListProduct;
 use Magento\Catalog\Model\ResourceModel\Product\Collection;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Pricing\Render;
 
 class ProductList extends ListProduct
 {
     protected $_productCollection = null;
 
     protected bool $collectionPrepared = false;
-
-    public function setProductCollection(Collection $collection): self
-    {
-        $this->_productCollection = $collection;
-        return $this;
-    }
 
     /**
      * @return Collection

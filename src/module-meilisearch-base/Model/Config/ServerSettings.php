@@ -18,6 +18,8 @@ class ServerSettings
 
     const MEILISEARCH_SERVER_SETTINGS_CATALOG_LIST_MODE = 'meilisearch_server/settings/catalog_list_mode';
 
+    const MEILISEARCH_AJAX_FILTERS_CACHE_TAG = 'mei_s';
+
     const MEILISEARCH_SERVER_SIDE_CATALOG_LIST = 0;
 
     const MEILISEARCH_CLIENT_SIDE_CATALOG_LIST = 1;

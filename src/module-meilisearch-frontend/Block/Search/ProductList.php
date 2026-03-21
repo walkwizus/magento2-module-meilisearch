@@ -13,7 +13,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\Data\Helper\PostHelper;
 use Magento\Framework\Url\Helper\Data as UrlHelper;
 use Walkwizus\MeilisearchFrontend\Block\Ajax\ProductList as AjaxProductList;
-use Walkwizus\MeilisearchFrontend\ViewModel\Ssr;
+use Walkwizus\MeilisearchFrontend\Model\Search\SearchService;
 
 class ProductList extends AjaxProductList
 {
@@ -24,7 +24,7 @@ class ProductList extends AjaxProductList
         Category $categoryHelper,
         CategoryRepositoryInterface $categoryRepository,
         UrlHelper $urlHelper,
-        private readonly Ssr $ssr,
+        private readonly SearchService $searchService,
         private readonly CollectionFactory $collectionFactory,
         array $data = []
     ) {
@@ -41,7 +41,7 @@ class ProductList extends AjaxProductList
             return parent::_getProductCollection();
         }
 
-        $searchResult = $this->ssr->getSearchResult();
+        $searchResult = $this->searchService->getSearchResult();
         $hits = $searchResult['hits'] ?? [];
 
         $entityIds = array_values(array_filter(array_map(
