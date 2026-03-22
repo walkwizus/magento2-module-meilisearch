@@ -60,8 +60,7 @@ class ProductList extends AjaxProductList
             $collection->addAttributeToFilter('entity_id', ['in' => [0]]);
         }
 
-        $this->setProductCollection($collection);
-
+        $this->setCollection($collection);
         return parent::_getProductCollection();
     }
 
