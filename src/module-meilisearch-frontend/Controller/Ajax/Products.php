@@ -15,6 +15,7 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Walkwizus\MeilisearchFrontend\Block\Ajax\ProductList;
 use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 use Magento\PageCache\Model\Config as PageCacheConfig;
+use Hyva\Theme\Service\CurrentTheme;
 
 class Products extends Action implements HttpGetActionInterface
 {
@@ -26,6 +27,7 @@ class Products extends Action implements HttpGetActionInterface
         private readonly CollectionFactory $collectionFactory,
         private readonly ServerSettings $serverSettings,
         private readonly PageCacheConfig $pageCacheConfig,
+        private readonly CurrentTheme $currentTheme,
         Context $context
     ) {
         return parent::__construct($context);
@@ -83,6 +85,9 @@ class Products extends Action implements HttpGetActionInterface
 
             /** @var ProductList|false $block */
             $block = $layout->getBlock('meilisearch.ajax.product.list');
+            if ($this->currentTheme->isHyva()) {
+                $block->setTemplate('Hyva_WalkwizusMeilisearch::product/list.phtml');
+            }
             $formKeyBlock = $layout->createBlock(
                 \Magento\Framework\View\Element\FormKey::class
             );
