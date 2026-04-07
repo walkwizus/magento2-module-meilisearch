@@ -60,7 +60,8 @@ class Tree extends Template
      */
     public function getCategoryTree(): bool|string
     {
-        $rootCategoryId = $this->_storeManager->getStore()->getRootCategoryId();
+        $storeId = $this->getStoreId();
+        $rootCategoryId = $this->_storeManager->getStore($storeId)->getRootCategoryId();
 
         try {
             $rootCategory = $this->categoryManagement->getTree($rootCategoryId);
