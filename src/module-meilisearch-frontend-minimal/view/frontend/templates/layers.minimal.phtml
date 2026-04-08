@@ -1,0 +1,220 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Walkwizus\MeilisearchFrontend\ViewModel\Ssr $viewModel */
+/** @var \BA\MeilisearchFrontendMinimal\Model\Layer\FacetRendererPool|null $facetRendererPool */
+$viewModel = $block->getViewModel();
+$facetRendererPool = $block->getData('facet_renderer_pool');
+$searchResult = $viewModel->getSearchResult();
+$facets = $viewModel->getFacets();
+$facetDistribution = (array)($searchResult['facetDistribution'] ?? []);
+$params = $block->getRequest()->getParams();
+$layoutName = (string)$block->getNameInLayout();
+$idBase = preg_replace('/[^a-z0-9\-_]/i', '-', $layoutName);
+if (!is_string($idBase) || $idBase === '') {
+    $idBase = 'ba-meilisearch-layers';
+}
+$navWrapperId = $idBase . '-wrapper';
+$mobilePopupId = $idBase . '-mobile-popup';
+
+$hasFacetOptions = false;
+foreach ($facets as $facet) {
+    $code = $facet['code'] ?? '';
+    if ($code !== '' && !empty($facetDistribution[$code])) {
+        $hasFacetOptions = true;
+        break;
+    }
+}
+
+$hasActiveFilters = false;
+foreach ($facets as $facet) {
+    $code = $facet['code'] ?? '';
+    if ($code !== '' && isset($params[$code]) && is_string($params[$code]) && $params[$code] !== '') {
+        $hasActiveFilters = true;
+        break;
+    }
+}
+?>
+<?php if ($hasFacetOptions) : ?>
+    <nav id="<?= $escaper->escapeHtmlAttr($navWrapperId) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Filter Menu')) ?>">
+
+        <?= $block->getChildHtml('meilisearch.layered-nav.inside-above') ?>
+
+        <div class="block filter" id="layered-filter-block">
+            <div class="block-title filter-title">
+                <button
+                    class="ba-filter-btn toggle"
+                    type="button"
+                    aria-controls="<?= $escaper->escapeHtmlAttr($mobilePopupId) ?>"
+                    aria-haspopup="dialog"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Toggle Filter')) ?>"
+                >
+                    <?= $escaper->escapeHtml(__('Filter')) ?>
+                </button>
+            </div>
+
+            <div class="block-content filter-content" aria-label="<?= $escaper->escapeHtmlAttr(__('Filter Menu')) ?>">
+                <?php $idPrefix = 'desktop-' ?>
+                <?= /* @noEscape */ $block->getChildHtml('state') ?>
+
+                <?php if ($hasActiveFilters) : ?>
+                    <?php
+                    $clearQuery = $params;
+                    foreach ($facets as $facet) {
+                        $facetCode = $facet['code'] ?? '';
+                        if ($facetCode !== '') {
+                            unset($clearQuery[$facetCode]);
+                        }
+                    }
+                    $clearUrl = $block->getUrl('*/*/*', ['_current' => false, '_use_rewrite' => true, '_query' => $clearQuery]);
+                    ?>
+                    <div class="block-actions filter-actions">
+                        <a href="<?= $escaper->escapeUrl($clearUrl) ?>" class="action clear filter-clear">
+                            <span><?= $escaper->escapeHtml(__('Clear All')) ?></span>
+                        </a>
+                    </div>
+                <?php endif; ?>
+
+                <strong role="heading" aria-level="2" class="block-subtitle filter-subtitle"><?= $escaper->escapeHtml(__('Shopping Options')) ?></strong>
+
+                <div class="filter-options" id="<?= $escaper->escapeHtmlAttr($idPrefix . 'narrow-by-list') ?>">
+                    <?= $block->getChildHtml('facet.above') ?>
+
+                    <?php foreach ($facets as $facet) : ?>
+                        <?php
+                        $code = $facet['code'] ?? '';
+                        $label = $facet['label'] ?? $code;
+                        $options = $code !== '' ? ($facetDistribution[$code] ?? []) : [];
+                        $facetIdSuffix = preg_replace('/[^a-z0-9\-_]/i', '-', $code);
+                        if (!is_string($facetIdSuffix) || $facetIdSuffix === '') {
+                            $facetIdSuffix = 'facet';
+                        }
+                        $facetContentId = $idPrefix . 'facet-' . $facetIdSuffix;
+                        ?>
+                        <?php if (!empty($options)) : ?>
+                            <details class="ba-filter-item filter-options-item">
+                                <summary aria-expanded="false" aria-controls="<?= $escaper->escapeHtmlAttr($facetContentId) ?>" class="filter-options-title">
+                                    <?= $escaper->escapeHtml(__($label)) ?>
+                                </summary>
+
+                                <div class="ba-filter-options-content filter-options-content" id="<?= $escaper->escapeHtmlAttr($facetContentId) ?>">
+                                    <?php if ($facetRendererPool instanceof \BA\MeilisearchFrontendMinimal\Model\Layer\FacetRendererPool) : ?>
+                                        <?= /* @noEscape */ $facetRendererPool->render($block, $facet, $options, $params) ?>
+                                    <?php else : ?>
+                                        <?php $selected = isset($params[$code]) && is_string($params[$code]) ? (string)$params[$code] : ''; ?>
+                                        <?php foreach ($options as $value => $count) : ?>
+                                            <?php
+                                            $query = $params;
+                                            $query[$code] = (string)$value;
+                                            $url = $block->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true, '_query' => $query]);
+                                            $isActive = $selected === (string)$value;
+                                            ?>
+                                            <div class="filter-option">
+                                                <a href="<?= $escaper->escapeUrl($url) ?>" class="<?= $isActive ? 'active' : '' ?>">
+                                                    <?= $escaper->escapeHtml((string)$value) ?> (<?= (int)$count ?>)
+                                                </a>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </details>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+
+                    <?= $block->getChildHtml('facet.below') ?>
+                </div>
+            </div>
+        </div>
+
+        <div id="<?= $escaper->escapeHtmlAttr($mobilePopupId) ?>" class="ba-mobile-filter-popup" style="display: none;">
+            <div class="block filter">
+                <div class="block-content filter-content" aria-label="<?= $escaper->escapeHtmlAttr(__('Filter Menu')) ?>">
+                    <?php $idPrefix = 'mobile-' ?>
+                    <?= /* @noEscape */ $block->getChildHtml('state') ?>
+
+                    <?php if ($hasActiveFilters) : ?>
+                        <?php
+                        $clearQuery = $params;
+                        foreach ($facets as $facet) {
+                            $facetCode = $facet['code'] ?? '';
+                            if ($facetCode !== '') {
+                                unset($clearQuery[$facetCode]);
+                            }
+                        }
+                        $clearUrl = $block->getUrl('*/*/*', ['_current' => false, '_use_rewrite' => true, '_query' => $clearQuery]);
+                        ?>
+                        <div class="block-actions filter-actions">
+                            <a href="<?= $escaper->escapeUrl($clearUrl) ?>" class="action clear filter-clear">
+                                <span><?= $escaper->escapeHtml(__('Clear All')) ?></span>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+
+                    <strong role="heading" aria-level="2" class="block-subtitle filter-subtitle"><?= $escaper->escapeHtml(__('Shopping Options')) ?></strong>
+
+                    <div class="filter-options" id="<?= $escaper->escapeHtmlAttr($idPrefix . 'narrow-by-list') ?>">
+                        <?= $block->getChildHtml('facet.above') ?>
+
+                        <?php foreach ($facets as $facet) : ?>
+                            <?php
+                            $code = $facet['code'] ?? '';
+                            $label = $facet['label'] ?? $code;
+                            $options = $code !== '' ? ($facetDistribution[$code] ?? []) : [];
+                            $facetIdSuffix = preg_replace('/[^a-z0-9\-_]/i', '-', $code);
+                            if (!is_string($facetIdSuffix) || $facetIdSuffix === '') {
+                                $facetIdSuffix = 'facet';
+                            }
+                            $facetContentId = $idPrefix . 'facet-' . $facetIdSuffix;
+                            ?>
+                            <?php if (!empty($options)) : ?>
+                                <details class="ba-filter-item filter-options-item">
+                                    <summary aria-expanded="false" aria-controls="<?= $escaper->escapeHtmlAttr($facetContentId) ?>" class="filter-options-title">
+                                        <?= $escaper->escapeHtml(__($label)) ?>
+                                    </summary>
+
+                                    <div class="ba-filter-options-content filter-options-content" id="<?= $escaper->escapeHtmlAttr($facetContentId) ?>">
+                                        <?php if ($facetRendererPool instanceof \BA\MeilisearchFrontendMinimal\Model\Layer\FacetRendererPool) : ?>
+                                            <?= /* @noEscape */ $facetRendererPool->render($block, $facet, $options, $params) ?>
+                                        <?php else : ?>
+                                            <?php $selected = isset($params[$code]) && is_string($params[$code]) ? (string)$params[$code] : ''; ?>
+                                            <?php foreach ($options as $value => $count) : ?>
+                                                <?php
+                                                $query = $params;
+                                                $query[$code] = (string)$value;
+                                                $url = $block->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true, '_query' => $query]);
+                                                $isActive = $selected === (string)$value;
+                                                ?>
+                                                <div class="filter-option">
+                                                    <a href="<?= $escaper->escapeUrl($url) ?>" class="<?= $isActive ? 'active' : '' ?>">
+                                                        <?= $escaper->escapeHtml((string)$value) ?> (<?= (int)$count ?>)
+                                                    </a>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </details>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+
+                        <?= $block->getChildHtml('facet.below') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <?php
+    $mobilePopupInit = [
+        '*' => [
+            'BA_MeilisearchFrontendMinimal/js/mobile-filter-popup' => [
+                'popupSelector' => '#' . $mobilePopupId,
+                'triggerSelector' => '#' . $navWrapperId . ' .ba-filter-btn.toggle',
+                'mobileMedia' => '(max-width: 767px)',
+                'title' => (string)__('Filter')
+            ]
+        ]
+    ];
+    ?>
+    <script type="text/x-magento-init">
+        <?= /* @noEscape */ json_encode($mobilePopupInit) ?>
+    </script>
+<?php endif; ?>
