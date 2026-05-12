@@ -28,6 +28,7 @@
                 <item name="facet_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\FacetConfigProvider</item>
                 <item name="source_autocomplete_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\IndexAutocompleteConfigProvider</item>
                 <item name="price_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\PriceConfigProvider</item>
+                <item name="locale_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\LocaleConfigProvider</item>
                 <item name="server_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\ServerConfigProvider</item>
                 <item name="url_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\UrlConfigProvider</item>
             </argument>
