@@ -12,6 +12,7 @@ use Meilisearch\Contracts\HybridSearchOptions;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Catalog\Model\Product\Image\UrlBuilder as ImageUrlBuilder;
 
 class Ssr implements ArgumentInterface
 {
@@ -32,6 +33,7 @@ class Ssr implements ArgumentInterface
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
      * @param PriceCurrencyInterface $priceCurrency
+     * @param ImageUrlBuilder $imageUrlBuilder
      */
     public function __construct(
         private readonly RequestInterface $request,
@@ -39,7 +41,8 @@ class Ssr implements ArgumentInterface
         private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
-        private readonly PriceCurrencyInterface $priceCurrency
+        private readonly PriceCurrencyInterface $priceCurrency,
+        private readonly ImageUrlBuilder $imageUrlBuilder
     ) {
         $this->config = $this->configProvider->get();
     }
@@ -456,7 +459,16 @@ class Ssr implements ArgumentInterface
      */
     public function getProductImage(string $image): string
     {
-        return $this->config['mediaBaseUrl'] . $image;
+        $mode = $this->getProductListMode();
+
+        // The view mode is an unvalidated request parameter. An unknown value resolves to an
+        // image display area that has no view.xml entry, which silently renders the placeholder
+        // on every tile instead of the product image.
+        if (!in_array($mode, ['grid', 'list'], true)) {
+            $mode = 'grid';
+        }
+
+        return $this->imageUrlBuilder->getUrl($image, 'category_page_' . $mode);
     }
 
     /**

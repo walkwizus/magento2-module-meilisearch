@@ -15,21 +15,22 @@ define([
 
     function buildCachedImageUrl(imagePath, cfg) {
         const path = String(imagePath || '').replace(/^\/+/, '');
-        if (!path) return '';
+        const prefix = cfg && cfg.urlPrefix;
 
-        const mediaBase = String(meilisearchConfig.mediaBaseUrl || '').replace(/\/+$/, '');
-        const hash = cfg && cfg.hash;
+        // No prefix means the config provider could not build a resized URL. Render nothing rather
+        // than falling back to the original file, which is many times heavier than the resized one.
+        if (!path || !prefix) return '';
 
-        if (hash) {
-            return mediaBase + '/cache/' + hash + '/' + path;
-        }
-
-        return mediaBase + '/' + path;
+        return prefix + path + (cfg.urlSuffix || '');
     }
 
     return {
         getImageConfig() {
-            return meilisearchConfig.images['category_page_' + viewMode.currentViewMode()];
+            const images = meilisearchConfig.images || {};
+
+            // The view mode is an unvalidated request parameter, so fall back to the grid config
+            // rather than leaving the tile with no image config at all.
+            return images['category_page_' + viewMode.currentViewMode()] || images.category_page_grid;
         },
 
         getProductImage: function(imagePath) {
