@@ -31,4 +31,20 @@
             </argument>
         </arguments>
     </type>
+
+    <!-- from testing on mageos 3.1 -->
+    <type name="Magento\AdvancedSearch\Model\Client\ClientResolver">
+        <arguments>
+            <argument name="clientFactories" xsi:type="array">
+                <item name="meilisearch" xsi:type="string">
+                    Walkwizus\MeilisearchBase\Model\Client\MeilisearchFactory
+                </item>
+            </argument>
+            <argument name="clientOptions" xsi:type="array">
+                <item name="meilisearch" xsi:type="string">
+                    Walkwizus\MeilisearchBase\Model\Config
+                </item>
+            </argument>
+        </arguments>
+    </type>
 </config>
