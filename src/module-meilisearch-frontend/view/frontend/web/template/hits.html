@@ -23,8 +23,8 @@
         <li class="item product product-item">
             <div class="product-item-info">
                 <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }" class="product photo product-item-photo">
-                    <span class="product-image-container" style="width: 240px;">
-                        <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                    <span class="product-image-container" data-bind="style: { width: $parent.productModel.getImageConfig().width + 'px' }">
+                        <span class="product-image-wrapper" data-bind="style: { paddingBottom: ($parent.productModel.getImageConfig().height / $parent.productModel.getImageConfig().width * 100) + '%' }">
                             <img class="product-image-photo"
                                  data-bind="attr: {
                                     src: $parent.productModel.getProductImageByContext($data),
