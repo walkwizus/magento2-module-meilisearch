@@ -57,7 +57,8 @@
             "Walkwizus\\MeilisearchCatalog\\": "src/module-meilisearch-catalog",
             "Walkwizus\\MeilisearchFrontend\\": "src/module-meilisearch-frontend",
             "Walkwizus\\MeilisearchIndices\\": "src/module-meilisearch-indices",
-            "Walkwizus\\MeilisearchMerchandising\\": "src/module-meilisearch-merchandising"
+            "Walkwizus\\MeilisearchMerchandising\\": "src/module-meilisearch-merchandising",
+            "BA\\MeilisearchFrontendMinimal\\": "src/module-meilisearch-frontend-minimal"
         }
     },
     "autoload-dev": {

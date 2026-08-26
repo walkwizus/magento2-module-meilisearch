@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Walkwizus\MeilisearchFrontend\ViewModel\Ssr"
+                type="BA\MeilisearchFrontendMinimal\ViewModel\Ssr"/>
+    <type name="BA\MeilisearchFrontendMinimal\Model\Layer\FacetRendererPool">
+        <arguments>
+            <argument name="defaultRenderer" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\FacetRenderer\CheckboxRenderer</argument>
+            <argument name="renderers" xsi:type="array">
+                <item name="checkbox" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\FacetRenderer\CheckboxRenderer</item>
+                <item name="swatch" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\FacetRenderer\SwatchRenderer</item>
+                <item name="price" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\FacetRenderer\PriceRenderer</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="BA\MeilisearchFrontendMinimal\Model\Layer\StateItemRendererPool">
+        <arguments>
+            <argument name="defaultRenderer" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\StateItemRenderer\CheckboxRenderer</argument>
+            <argument name="renderers" xsi:type="array">
+                <item name="checkbox" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\StateItemRenderer\CheckboxRenderer</item>
+                <item name="swatch" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\StateItemRenderer\SwatchRenderer</item>
+                <item name="price" xsi:type="object">BA\MeilisearchFrontendMinimal\Model\Layer\StateItemRenderer\PriceRenderer</item>
+            </argument>
+        </arguments>
+    </type>
+
+
+    
+    <type name="Magento\GoogleTagManager\Block\ListJson">
+        <plugin name="walkwizus_meilisearch_gtm_list_json" type="BA\MeilisearchFrontendMinimal\Plugin\GoogleTagManager\Block\ListJson" />
+    </type>
+</config>
