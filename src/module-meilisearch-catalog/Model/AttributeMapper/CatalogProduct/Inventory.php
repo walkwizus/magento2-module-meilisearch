@@ -11,6 +11,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\InventorySalesApi\Api\StockResolverInterface;
 use Magento\InventoryIndexer\Model\StockIndexTableNameResolverInterface;
 use Magento\InventoryIndexer\Indexer\IndexStructure;
+use Magento\InventoryCatalogApi\Api\DefaultStockProviderInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 
@@ -26,12 +27,14 @@ class Inventory implements AttributeMapperInterface
      * @param StoreManagerInterface $storeManager
      * @param StockResolverInterface $stockResolver
      * @param StockIndexTableNameResolverInterface $stockIndexTableNameResolver
+     * @param DefaultStockProviderInterface $defaultStockProvider
      */
     public function __construct(
         private readonly ResourceConnection $resource,
         private readonly StoreManagerInterface $storeManager,
         private readonly StockResolverInterface $stockResolver,
-        private readonly StockIndexTableNameResolverInterface $stockIndexTableNameResolver
+        private readonly StockIndexTableNameResolverInterface $stockIndexTableNameResolver,
+        private readonly DefaultStockProviderInterface $defaultStockProvider
     ) { }
 
     /**
@@ -69,6 +72,11 @@ class Inventory implements AttributeMapperInterface
     {
         $websiteId = $this->getWebsiteId($storeId);
         $stockId = $this->getStockId($websiteId);
+
+        if ($stockId === $this->defaultStockProvider->getId()) {
+            return $this->loadDefaultStockData($productIds);
+        }
+
         $tableName = $this->stockIndexTableNameResolver->execute($stockId);
         $connection = $this->resource->getConnection();
 
@@ -85,6 +93,25 @@ class Inventory implements AttributeMapperInterface
             )
             ->where('product.entity_id IN (?)', $productIds)
             ->group('product.entity_id');
+
+        return $connection->fetchAll($select);
+    }
+
+    /**
+     * @param array $productIds
+     * @return array
+     */
+    private function loadDefaultStockData(array $productIds): array
+    {
+        $connection = $this->resource->getConnection();
+
+        $select = $connection->select()
+            ->from(
+                ['legacy_stock_status' => $connection->getTableName('cataloginventory_stock_status')],
+                ['product_id', 'stock_status', 'qty']
+            )
+            ->where('legacy_stock_status.product_id IN (?)', $productIds)
+            ->group('legacy_stock_status.product_id');
 
         return $connection->fetchAll($select);
     }
