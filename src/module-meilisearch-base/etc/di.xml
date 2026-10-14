@@ -24,6 +24,21 @@
             <argument name="defaultEngine" xsi:type="string">meilisearch</argument>
         </arguments>
     </type>
+    <preference for="Magento\Setup\Model\SearchConfigOptionsList" type="Walkwizus\MeilisearchBase\Setup\SearchConfigOptionsList"/>
+    <type name="Magento\Search\Setup\CompositeInstallConfig">
+        <arguments>
+            <argument name="installConfigList" xsi:type="array">
+                <item name="meilisearch" xsi:type="object">Walkwizus\MeilisearchBase\Setup\InstallConfig</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Search\Model\SearchEngine\Validator">
+        <arguments>
+            <argument name="engineValidators" xsi:type="array">
+                <item name="meilisearch" xsi:type="object">Walkwizus\MeilisearchBase\Setup\Validator</item>
+            </argument>
+        </arguments>
+    </type>
     <type name="Magento\CatalogSearch\Model\ResourceModel\EngineProvider">
         <arguments>
             <argument name="engines" xsi:type="array">

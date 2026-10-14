@@ -46,6 +46,7 @@
         "files": [
             "src/module-meilisearch-ai/registration.php",
             "src/module-meilisearch-base/registration.php",
+            "src/module-meilisearch-base/cli_commands.php",
             "src/module-meilisearch-catalog/registration.php",
             "src/module-meilisearch-frontend/registration.php",
             "src/module-meilisearch-indices/registration.php",
