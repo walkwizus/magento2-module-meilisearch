@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchBase\Console;
 
 use Magento\Framework\Console\CommandListInterface;
+use Magento\Framework\ObjectManagerInterface;
 use Magento\Setup\Application as SetupApplication;
 use Magento\Setup\Console\Command\AdminUserCreateCommand;
 use Magento\Setup\Console\Command\InstallCommand;
@@ -12,6 +13,7 @@ use Magento\Setup\Console\Command\InstallCommandFactory;
 use Magento\Setup\Console\Command\InstallStoreConfigurationCommand;
 use Magento\Setup\Model\ConfigModel;
 use Magento\Setup\Model\InstallerFactory;
+use Magento\Setup\Model\ObjectManagerProvider;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\LazyCommand;
 use Walkwizus\MeilisearchBase\Setup\SearchConfigOptionsList;
@@ -19,11 +21,13 @@ use Walkwizus\MeilisearchBase\Setup\SearchConfigOptionsList;
 class SetupCommandList implements CommandListInterface
 {
     /**
+     * @param ObjectManagerInterface $objectManager
      * @param SetupApplication $setupApplication
      * @param SearchConfigOptionsList $searchConfigOptionsList
      * @param InstallCommandFactory $installCommandFactory
      */
     public function __construct(
+        private readonly ObjectManagerInterface $objectManager,
         private readonly SetupApplication $setupApplication,
         private readonly SearchConfigOptionsList $searchConfigOptionsList,
         private readonly InstallCommandFactory $installCommandFactory
@@ -62,6 +66,7 @@ class SetupCommandList implements CommandListInterface
     {
         $configuration = require BP . '/setup/config/application.config.php';
         $serviceManager = $this->setupApplication->bootstrap($configuration)->getServiceManager();
+        $serviceManager->get(ObjectManagerProvider::class)->setObjectManager($this->objectManager);
         $serviceManager->setService(Application::class, $application);
 
         return $this->installCommandFactory->create([
