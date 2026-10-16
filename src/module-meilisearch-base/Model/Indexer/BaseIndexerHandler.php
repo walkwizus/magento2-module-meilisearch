@@ -19,6 +19,7 @@ use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\Link as EmbedderLinkRes
 use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\CollectionFactory as EmbedderCollectionFactory;
 use Magento\Framework\Search\Request\Dimension;
 use Walkwizus\MeilisearchBase\Model\ResourceModel\Engine;
+use Psr\Log\LoggerInterface;
 
 class BaseIndexerHandler implements IndexerInterface
 {
@@ -50,6 +51,7 @@ class BaseIndexerHandler implements IndexerInterface
      * @param int $batchSize
      * @param string $indexPrimaryKey
      * @param array $preProcessors
+     * @param LoggerInterface|null $logger
      */
     public function __construct(
         private readonly EngineResolver $engineResolver,
@@ -66,7 +68,8 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly EmbedderCollectionFactory $embedderCollectionFactory,
         private readonly int $batchSize = 10000,
         private readonly string $indexPrimaryKey = 'id',
-        private readonly array $preProcessors = []
+        private readonly array $preProcessors = [],
+        private readonly ?LoggerInterface $logger = null
     ) { }
 
     /**
@@ -112,6 +115,15 @@ class BaseIndexerHandler implements IndexerInterface
                     $this->settingsManager->resetEmbedders($targetIndexName);
                 }
             } catch (\Exception $exception) {
+                $this->logger?->error(
+                    sprintf(
+                        'Meilisearch: failed to configure index "%s": %s',
+                        $targetIndexName,
+                        $exception->getMessage()
+                    ),
+                    ['exception' => $exception]
+                );
+
                 return $this;
             }
 
@@ -126,6 +138,15 @@ class BaseIndexerHandler implements IndexerInterface
                 try {
                     $this->documentsManager->addDocumentsInBatches($targetIndexName, $batchDocuments, $this->indexPrimaryKey);
                 } catch (\Exception $e) {
+                    $this->logger?->error(
+                        sprintf(
+                            'Meilisearch: failed to add documents to index "%s": %s',
+                            $targetIndexName,
+                            $e->getMessage()
+                        ),
+                        ['exception' => $e, 'documents' => count($batchDocuments)]
+                    );
+
                     return $this;
                 }
             }
@@ -198,6 +219,11 @@ class BaseIndexerHandler implements IndexerInterface
         try {
             return $this->healthManager->isHealthy();
         } catch (\Exception $e) {
+            $this->logger?->error(
+                sprintf('Meilisearch: health check failed, indexer reported unavailable: %s', $e->getMessage()),
+                ['exception' => $e]
+            );
+
             return false;
         }
     }
@@ -227,7 +253,12 @@ class BaseIndexerHandler implements IndexerInterface
                 $this->indexesManager->deleteIndex($tmpIndex);
             }
         } catch (\Exception $e) {
-
+            // A failed swap leaves the live index holding the previous, stale documents while
+            // the reindex still reports success, so this must never stay silent.
+            $this->logger?->error(
+                sprintf('Meilisearch: index swap failed, live indexes keep stale data: %s', $e->getMessage()),
+                ['exception' => $e, 'swaps' => $swaps]
+            );
         } finally {
             $this->isFullReindex = false;
             $this->temporaryIndexes = [];
