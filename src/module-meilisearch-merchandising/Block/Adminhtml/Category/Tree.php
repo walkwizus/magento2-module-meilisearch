@@ -8,6 +8,7 @@ use Magento\Backend\Block\Template;
 use Magento\Catalog\Api\CategoryManagementInterface;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
+use Walkwizus\MeilisearchMerchandising\Model\ResourceModel\Category\CollectionFactory;
 
 class Tree extends Template
 {
@@ -16,6 +17,7 @@ class Tree extends Template
     /**
      * @param Template\Context $context
      * @param CategoryManagementInterface $categoryManagement
+     * @param CollectionFactory $ruleCollectionFactory
      * @param array $data
      * @param JsonHelper|null $jsonHelper
      * @param DirectoryHelper|null $directoryHelper
@@ -23,6 +25,7 @@ class Tree extends Template
     public function __construct(
         Template\Context $context,
         private readonly CategoryManagementInterface $categoryManagement,
+        private readonly CollectionFactory $ruleCollectionFactory,
         array $data = [],
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null
@@ -38,6 +41,7 @@ class Tree extends Template
     {
         $this->jsLayout['components'][self::COMPONENT_NAME]['config']['categoryTree'] = $this->getCategoryTree();
         $this->jsLayout['components'][self::COMPONENT_NAME]['config']['loadRuleUrl'] = $this->getLoadRuleUrl();
+        $this->jsLayout['components'][self::COMPONENT_NAME]['config']['ruleCategoryIds'] = $this->getRuleCategoryIds();
 
         return parent::getJsLayout();
     }
@@ -91,6 +95,16 @@ class Tree extends Template
         }
 
         return $jsTreeFormat;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRuleCategoryIds(): array
+    {
+        $categoryIds = $this->ruleCollectionFactory->create()->getColumnValues('category_id');
+
+        return array_values(array_unique(array_map('strval', $categoryIds)));
     }
 
     /**

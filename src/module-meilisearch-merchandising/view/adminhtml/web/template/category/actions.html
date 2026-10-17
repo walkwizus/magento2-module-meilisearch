@@ -1,0 +1,23 @@
+<div class="page-actions-buttons">
+    <!-- ko if: moves().length -->
+    <button type="button" class="action-default scalable reset" data-bind="click: resetPositions">
+        <span data-bind="i18n: 'Reset Positions'"></span>
+    </button>
+    <!-- /ko -->
+    <!-- ko if: merchandising.currentRule() -->
+    <button type="button" class="action-default scalable delete" data-bind="click: deleteRule">
+        <span data-bind="i18n: 'Delete Rule'"></span>
+    </button>
+    <!-- /ko -->
+    <button type="button"
+            class="action-default scalable"
+            data-bind="click: preview, enable: merchandising.currentCategoryId()">
+        <span data-bind="i18n: 'Preview'"></span>
+    </button>
+    <button type="button"
+            id="save-rule"
+            class="action-default scalable save primary"
+            data-bind="click: saveRule, enable: merchandising.currentCategoryId()">
+        <span data-bind="i18n: 'Save Rule'"></span>
+    </button>
+</div>

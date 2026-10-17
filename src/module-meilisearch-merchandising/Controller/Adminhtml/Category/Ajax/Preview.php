@@ -7,26 +7,25 @@ namespace Walkwizus\MeilisearchMerchandising\Controller\Adminhtml\Category\Ajax;
 use Magento\Backend\App\Action;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Backend\App\Action\Context;
-use Walkwizus\MeilisearchBase\Service\SearchManager;
-use Walkwizus\MeilisearchMerchandising\Service\QueryBuilderService;
-use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
+use Walkwizus\MeilisearchMerchandising\Service\CategoryProductPreview;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 
 class Preview extends Action implements HttpPostActionInterface
 {
+    const ADMIN_RESOURCE = 'Walkwizus_MeilisearchMerchandising::merchandising_category';
+
+    private const DEFAULT_PAGE_SIZE = 20;
+    private const MAX_PAGE_SIZE = 200;
+
     /**
      * @param Context $context
-     * @param SearchManager $searchManager
-     * @param QueryBuilderService $queryBuilderService
-     * @param SearchIndexNameResolver $searchIndexNameResolver
+     * @param CategoryProductPreview $categoryProductPreview
      * @param JsonFactory $jsonFactory
      */
     public function __construct(
         Context $context,
-        private readonly SearchManager $searchManager,
-        private readonly QueryBuilderService $queryBuilderService,
-        private readonly SearchIndexNameResolver $searchIndexNameResolver,
+        private readonly CategoryProductPreview $categoryProductPreview,
         private readonly JsonFactory $jsonFactory
     ) {
         parent::__construct($context);
@@ -34,30 +33,33 @@ class Preview extends Action implements HttpPostActionInterface
 
     /**
      * @return ResultInterface
-     * @throws \Exception
      */
     public function execute(): ResultInterface
     {
-        $rules = $this->getRequest()->getParam('rules', false);
         $json = $this->jsonFactory->create();
+        $rules = json_decode((string) $this->getRequest()->getParam('rules', ''), true);
 
-        if (!$rules) {
-            return $json->setData([]);
+        if (!is_array($rules)) {
+            return $json->setData(['success' => false, 'message' => __('Invalid rules')]);
         }
 
-        $rules = json_decode($rules, true);
-        $storeId = $this->getRequest()->getParam('storeId');
-        $categoryId = $this->getRequest()->getParam('categoryId');
+        $moves = json_decode((string) $this->getRequest()->getParam('moves', '[]'), true);
+        $pageSize = (int) $this->getRequest()->getParam('pageSize', self::DEFAULT_PAGE_SIZE);
 
-        $filters = $this->queryBuilderService->convertRulesToMeilisearchQuery($rules, $storeId);
-        $indexName = $this->searchIndexNameResolver->getIndexName($storeId, 'catalog_product');
+        try {
+            $result = $this->categoryProductPreview->getPage(
+                $rules,
+                (int) $this->getRequest()->getParam('storeId'),
+                (int) $this->getRequest()->getParam('categoryId'),
+                is_array($moves) ? $moves : [],
+                max(1, (int) $this->getRequest()->getParam('page', 1)),
+                min(self::MAX_PAGE_SIZE, max(1, $pageSize)),
+                trim((string) $this->getRequest()->getParam('query', ''))
+            );
+        } catch (\Exception $e) {
+            return $json->setData(['success' => false, 'message' => $e->getMessage()]);
+        }
 
-        $result = $this->searchManager->search($indexName, '', [
-            'filter' => $filters,
-            'sort' => ["category_promote.{$categoryId}:asc"],
-            'limit' => 10000
-        ]);
-
-        return $json->setData($result->getHits());
+        return $json->setData(['success' => true] + $result);
     }
 }

@@ -2,209 +2,531 @@ define([
     'jquery',
     'uiComponent',
     'ko',
-    'queryBuilder',
     'Walkwizus_MeilisearchMerchandising/js/category/model/merchandising',
     'Magento_Catalog/js/price-utils',
-    'jquery/ui'
-], function ($, Component, ko, queryBuilder, merchandising, priceUtils) {
+    'Magento_Ui/js/modal/confirm',
+    'mage/translate',
+    'Walkwizus_MeilisearchMerchandising/js/category/query-builder/templates',
+    'sortablejs',
+    'queryBuilder'
+], function ($, Component, ko, merchandising, priceUtils, confirm, $t, templates, Sortable) {
     'use strict';
+
+    const VIEW_MODE_STORAGE_KEY = 'meilisearch_merchandising_view_mode';
 
     return Component.extend({
         defaults: {
             qb: null,
             merchandising: merchandising,
+            pageSizes: [20, 50, 100, 200],
+            pageSize: 20,
+            page: 1,
+            total: 0,
+            pageableCount: 0,
+            sortableCount: 0,
+            truncated: false,
+            previewLoaded: false,
+            searchQuery: '',
+            appliedQuery: '',
+            viewMode: 'grid',
+            moves: [],
+            ruleOpened: true,
+            productsOpened: true,
+            message: null,
+            messageTimeout: null,
             imports: {
-                priceFormat: "${ $.provider }:priceFormat",
+                priceFormat: '${ $.provider }:priceFormat'
             }
         },
 
         initialize: function() {
             this._super();
             this.filters = JSON.parse(this.filters);
-            this.initQueryBuilder();
+            this.initBindings();
 
-            merchandising.currentCategoryId.subscribe(this.loadRules.bind(this));
-            merchandising.docs.subscribe(this.sortPreview.bind(this));
+            this.pages = ko.pureComputed(function() {
+                return Math.max(1, Math.ceil(this.pageableCount() / this.pageSize()));
+            }, this);
+            this.offset = ko.pureComputed(function() {
+                return (this.page() - 1) * this.pageSize();
+            }, this);
+            this.isSearching = ko.pureComputed(function() {
+                return this.appliedQuery() !== '';
+            }, this);
+
+            this.moves.subscribe(function(moves) {
+                merchandising.hasUnsavedChanges(moves.length > 0);
+            });
+            merchandising.hasUnsavedChanges.subscribe(function(hasChanges) {
+                if (!hasChanges && this.moves().length) {
+                    this.moves([]);
+                }
+            }, this);
+            this.initViewMode();
+            this.pageSize.subscribe(this.onPageSizeChange.bind(this));
+            merchandising.currentCategoryId.subscribe(this.onCategoryChange.bind(this));
 
             return this;
         },
 
-        initQueryBuilder: function() {
+        initObservable: function() {
+            this._super().observe([
+                'pageSize', 'page', 'total', 'pageableCount', 'sortableCount', 'truncated', 'previewLoaded',
+                'searchQuery', 'appliedQuery', 'viewMode', 'moves', 'ruleOpened', 'productsOpened', 'message'
+            ]);
+
+            return this;
+        },
+
+        initBindings: function() {
             let self = this;
 
             ko.bindingHandlers.initQueryBuilder = {
-                init: function (element) {
-                    self.qb = $(element).queryBuilder({
-                        filters: self.filters
+                init: function(element) {
+                    self.qb = $(element).on('afterCreateRuleInput.queryBuilder', function(event, rule) {
+                        rule.$el.find('.rule-value-container input[type=text], .rule-value-container input[type=number]')
+                            .addClass('admin__control-text');
+                        rule.$el.find('.rule-value-container textarea').addClass('admin__control-textarea');
+                    }).queryBuilder({
+                        filters: self.filters,
+                        templates: templates,
+                        select_placeholder: $t('Select an attribute'),
+                        inputs_separator: '<span class="merch-qb-separator">' + $t('and') + '</span>',
+                        lang: self.getQueryBuilderLang()
                     });
+                }
+            };
+
+            ko.bindingHandlers.merchandisingSortable = {
+                init: function(element) {
+                    let sortable = Sortable.create(element, {
+                        draggable: '.merch-product',
+                        filter: 'input, button, a, select, label',
+                        preventOnFilter: false,
+                        animation: 150,
+                        forceFallback: true,
+                        fallbackOnBody: true,
+                        fallbackTolerance: 4,
+                        ghostClass: 'merch-product-ghost',
+                        chosenClass: 'merch-product-chosen',
+                        dragClass: 'merch-product-drag',
+                        onEnd: function(event) {
+                            if (event.oldDraggableIndex !== event.newDraggableIndex) {
+                                self.onDrop(event.item.getAttribute('data-product-id'), event.newDraggableIndex);
+                            }
+                        }
+                    });
+
+                    ko.utils.domData.set(element, 'merchandisingSortable', sortable);
+                    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+                        sortable.destroy();
+                    });
+                },
+                update: function(element, valueAccessor) {
+                    ko.utils.domData.get(element, 'merchandisingSortable').option('disabled', !ko.unwrap(valueAccessor()));
                 }
             };
         },
 
-        loadRules: function(categoryId) {
-            let self = this;
+        initViewMode: function() {
+            try {
+                this.viewMode(window.localStorage.getItem(VIEW_MODE_STORAGE_KEY) === 'list' ? 'list' : 'grid');
+            } catch (e) {
+                this.viewMode('grid');
+            }
 
-            $.ajax(this.ajaxUrl.loadRule, {
-                type: 'POST',
-                data: {
-                    form_key: window.FORM_KEY,
-                    category_id: categoryId
-                },
-                dataType: 'json',
-                showLoader: true,
-                success: function(r) {
-                    if (r.id > 0) {
-                        merchandising.currentRule(r);
-                        self.qb.queryBuilder('setRules', JSON.parse(r.query));
-                    } else {
-                        merchandising.currentRule(null);
-                        self.qb.queryBuilder('setRules', [{empty: true}]);
-                    }
+            this.viewMode.subscribe(function(mode) {
+                try {
+                    window.localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+                } catch (e) {
+                    return;
                 }
             });
+        },
+
+        setGridView: function() {
+            this.viewMode('grid');
+        },
+
+        setListView: function() {
+            this.viewMode('list');
+        },
+
+        getQueryBuilderLang: function() {
+            return {
+                add_rule: $t('Add Condition'),
+                add_group: $t('Add Group'),
+                delete_rule: $t('Delete'),
+                delete_group: $t('Delete Group'),
+                conditions: {
+                    AND: $t('all'),
+                    OR: $t('any')
+                },
+                operators: {
+                    equal: $t('is'),
+                    not_equal: $t('is not'),
+                    in: $t('is one of'),
+                    not_in: $t('is not one of'),
+                    less: $t('less than'),
+                    less_or_equal: $t('equals or less than'),
+                    greater: $t('greater than'),
+                    greater_or_equal: $t('equals or greater than'),
+                    between: $t('between'),
+                    is_null: $t('is undefined'),
+                    is_not_null: $t('is defined')
+                },
+                errors: {
+                    no_filter: $t('Select an attribute.'),
+                    empty_group: $t('Add at least one condition.'),
+                    radio_empty: $t('Select a value.'),
+                    checkbox_empty: $t('Select a value.'),
+                    select_empty: $t('Select a value.'),
+                    string_empty: $t('Enter a value.'),
+                    number_nan: $t('Enter a valid number.'),
+                    number_between_invalid: $t('Invalid values, {0} is greater than {1}.')
+                }
+            };
+        },
+
+        onCategoryChange: function(categoryId) {
+            this.moves([]);
+            this.page(1);
+            this.searchQuery('');
+            this.appliedQuery('');
+            this.total(0);
+            this.previewLoaded(false);
+            this.clearMessage();
+            merchandising.docs([]);
+
+            if (categoryId) {
+                this.loadRule(categoryId);
+            }
+        },
+
+        loadRule: function(categoryId) {
+            let self = this;
+
+            this.request(this.ajaxUrl.loadRule, {category_id: categoryId}).done(function(r) {
+                if (r.id > 0) {
+                    merchandising.currentRule(r);
+                    self.qb.queryBuilder('setRules', JSON.parse(r.query));
+                    self.loadPreview();
+                } else {
+                    merchandising.currentRule(null);
+                    self.qb.queryBuilder('reset');
+                }
+            });
+        },
+
+        getRules: function() {
+            let rules = this.qb.queryBuilder('getRules');
+
+            if (!rules) {
+                this.ruleOpened(true);
+            }
+
+            return rules;
+        },
+
+        preview: function() {
+            this.page(1);
+            this.loadPreview();
+        },
+
+        loadPreview: function(scrollToProducts) {
+            let self = this;
+            let rules = this.getRules();
+
+            if (!rules) {
+                return;
+            }
+
+            if (this.previewRequest) {
+                this.previewRequest.abort();
+            }
+
+            this.previewRequest = this.request(this.ajaxUrl.preview, {
+                rules: JSON.stringify(rules),
+                storeId: this.storeId,
+                categoryId: merchandising.currentCategoryId(),
+                moves: JSON.stringify(this.moves()),
+                page: this.page(),
+                pageSize: this.pageSize(),
+                query: this.appliedQuery()
+            }).done(function(r) {
+                if (!r.success) {
+                    self.showMessage('error', r.message);
+                    return;
+                }
+
+                merchandising.docs(r.items);
+                self.total(r.total);
+                self.pageableCount(r.pageable);
+                self.sortableCount(r.sortable);
+                self.truncated(r.truncated);
+                self.previewLoaded(true);
+                self.productsOpened(true);
+
+                if (scrollToProducts) {
+                    self.scrollToProducts();
+                }
+            }).always(function() {
+                self.previewRequest = null;
+            });
+        },
+
+        scrollToProducts: function() {
+            let toolbar = $('.merch-toolbar').closest('.merch-section');
+            let header = $('.page-actions').first();
+            let offset = (header.length ? Math.max(header[0].getBoundingClientRect().bottom, header.outerHeight()) : 0) + 20;
+
+            if (toolbar.length && toolbar.offset().top - offset < $(window).scrollTop()) {
+                $('html, body').scrollTop(toolbar.offset().top - offset);
+            }
         },
 
         saveRule: function() {
             let self = this;
-            let rules = self.qb.queryBuilder('getRules');
+            let rules = this.getRules();
+            let categoryId = merchandising.currentCategoryId();
 
-            if (rules) {
-                $.ajax(this.ajaxUrl.saveRule, {
-                    type: 'POST',
-                    data: {
-                        form_key: window.FORM_KEY,
-                        storeId: self.storeId,
-                        categoryId: merchandising.currentCategoryId(),
-                        rules: JSON.stringify(rules),
-                        docPositions: JSON.stringify(merchandising.docPositions())
-                    },
-                    dataType: 'json',
-                    showLoader: true,
-                    success: function(r) {
-                        merchandising.message(r.message);
-                        setTimeout(function() {
-                            $('#messages').addClass('hide');
-                            setTimeout(function() {
-                                merchandising.message('');
-                                $('#messages').removeClass('hide');
-                            }, 500);
-                        }, 2000);
-                    }
-                });
+            if (!rules || !categoryId) {
+                return;
             }
+
+            this.request(this.ajaxUrl.saveRule, {
+                storeId: this.storeId,
+                categoryId: categoryId,
+                rules: JSON.stringify(rules),
+                moves: JSON.stringify(this.moves())
+            }).done(function(r) {
+                if (!r.success) {
+                    self.showMessage('error', r.message);
+                    return;
+                }
+
+                self.moves([]);
+                merchandising.currentRule({category_id: categoryId});
+
+                if (merchandising.ruleCategoryIds.indexOf(String(categoryId)) === -1) {
+                    merchandising.ruleCategoryIds.push(String(categoryId));
+                }
+
+                self.showMessage('success', r.message);
+            });
         },
 
         deleteRule: function() {
-            $.ajax(this.ajaxUrl.deleteRule, {
-                type: 'POST',
-                data: {
-                    form_key: window.FORM_KEY,
-                    categoryId: merchandising.currentCategoryId()
-                },
-                dataType: 'json',
-                showLoader: true,
-                success: function(r) {
-                    merchandising.message(r.message);
-                    setTimeout(function() {
-                        $('#messages').addClass('hide');
-                        setTimeout(function() {
-                            merchandising.message('');
-                            $('#messages').removeClass('hide');
-                        }, 500);
-                    }, 2000);
+            let self = this;
+            let categoryId = merchandising.currentCategoryId();
+
+            confirm({
+                title: $t('Delete Rule'),
+                content: $t('Are you sure you want to delete the rule of "%1"?').replace('%1', merchandising.currentCategoryName()),
+                actions: {
+                    confirm: function() {
+                        self.request(self.ajaxUrl.deleteRule, {categoryId: categoryId}).done(function(r) {
+                            if (!r.success) {
+                                self.showMessage('error', r.message);
+                                return;
+                            }
+
+                            merchandising.currentRule(null);
+                            merchandising.ruleCategoryIds.remove(String(categoryId));
+                            merchandising.docs([]);
+                            self.moves([]);
+                            self.total(0);
+                            self.previewLoaded(false);
+                            self.qb.queryBuilder('reset');
+                            self.showMessage('success', r.message);
+                        });
+                    }
                 }
             });
         },
 
-        preview: function() {
-            let self = this;
-            let rules = self.qb.queryBuilder('getRules');
+        resetPositions: function() {
+            this.moves([]);
+            this.loadPreview();
+        },
 
-            if (rules) {
-                $.ajax(this.ajaxUrl.preview, {
-                    type: 'POST',
-                    data: {
-                        form_key: window.FORM_KEY,
-                        rules: JSON.stringify(rules),
-                        storeId: self.storeId,
-                        categoryId: merchandising.currentCategoryId()
-                    },
-                    dataType: 'json',
-                    showLoader: true,
-                    success: function(r) {
-                        const currentCategoryId = merchandising.currentCategoryId();
-                        const positionField = `position_category_${currentCategoryId}`;
+        onDrop: function(productId, index) {
+            let docs = merchandising.docs().slice();
+            let currentIndex = docs.findIndex(function(doc) {
+                return String(doc.id) === String(productId);
+            });
 
-                        r.sort(function(a, b) {
-                            return a[positionField] - b[positionField];
-                        });
+            if (currentIndex === -1 || currentIndex === index) {
+                return;
+            }
 
-                        merchandising.docs(r);
-                        self.initializePositions(r);
-                    }
-                });
+            let product = docs.splice(currentIndex, 1)[0];
+
+            docs.splice(index, 0, product);
+            merchandising.docs([]);
+            merchandising.docs(docs);
+            this.moves.push({id: product.id, position: this.offset() + index + 1});
+        },
+
+        moveTo: function(product, position) {
+            position = parseInt(position, 10);
+
+            if (!position || position < 1 || position === this.getPosition(product)) {
+                return;
+            }
+
+            this.moves.push({id: product.id, position: Math.min(position, this.sortableCount())});
+            this.loadPreview();
+        },
+
+        onPositionChange: function(product, event) {
+            this.moveTo(product, event.target.value);
+        },
+
+        onPositionKeyDown: function(product, event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                event.target.blur();
+
+                return false;
+            }
+
+            return true;
+        },
+
+        moveToTop: function(product) {
+            this.moveTo(product, 1);
+        },
+
+        moveToBottom: function(product) {
+            this.moveTo(product, this.sortableCount());
+        },
+
+        getPosition: function(product) {
+            if (this.isSearching()) {
+                return product.merchandising_position;
+            }
+
+            return this.offset() + merchandising.docs.indexOf(product) + 1;
+        },
+
+        search: function() {
+            this.appliedQuery(this.searchQuery().trim());
+            this.page(1);
+            this.loadPreview();
+        },
+
+        clearSearch: function() {
+            this.searchQuery('');
+            this.search();
+        },
+
+        goToPage: function(page) {
+            page = Math.min(Math.max(1, parseInt(page, 10) || 1), this.pages());
+
+            if (page !== this.page()) {
+                this.page(page);
+                this.loadPreview(true);
             }
         },
 
-        initializePositions: function(docs) {
-            let docPositions = docs.map(function(doc, index) {
-                return {
-                    id: doc.id,
-                    position: index + 1
-                };
-            });
-            merchandising.docPositions(docPositions);
+        previousPage: function() {
+            this.goToPage(this.page() - 1);
         },
 
-        sortPreview: function() {
-            $('#category-merchandising-preview .product-grid').sortable({
-                placeholder: 'sortable-placeholder',
-                forcePlaceholderSize: true,
-                items: '.product-card',
-                update: function(event, ui) {
-                    let sortedIds = $(this).children('.product-card').map(function() {
-                        return $(this).data('product-id');
-                    }).get();
+        nextPage: function() {
+            this.goToPage(this.page() + 1);
+        },
 
-                    let sortedArray = [];
-                    let docPositions = [];
+        onPageInputChange: function(data, event) {
+            this.goToPage(event.target.value);
+            event.target.value = this.page();
+        },
 
-                    sortedIds.forEach(function(id, index) {
-                        let item = ko.utils.arrayFirst(merchandising.docs(), function(product) {
-                            return product.id === id;
-                        });
-                        if (item) {
-                            sortedArray.push(item);
-                            docPositions.push({
-                                id: id,
-                                position: index + 1
-                            });
-                        }
-                    });
+        onPageSizeChange: function() {
+            this.page(1);
 
-                    merchandising.docs(sortedArray);
-                    merchandising.docPositions(docPositions);
+            if (this.previewLoaded()) {
+                this.loadPreview(true);
+            }
+        },
+
+        toggleRule: function() {
+            this.ruleOpened(!this.ruleOpened());
+        },
+
+        toggleProducts: function() {
+            this.productsOpened(!this.productsOpened());
+        },
+
+        showMessage: function(type, text) {
+            let self = this;
+
+            clearTimeout(this.messageTimeout);
+            this.message({type: type, text: text});
+
+            if (type === 'success') {
+                this.messageTimeout = setTimeout(function() {
+                    self.clearMessage();
+                }, 5000);
+            }
+        },
+
+        clearMessage: function() {
+            clearTimeout(this.messageTimeout);
+            this.message(null);
+        },
+
+        request: function(url, data) {
+            let self = this;
+
+            return $.ajax(url, {
+                type: 'POST',
+                data: $.extend({form_key: window.FORM_KEY}, data),
+                dataType: 'json',
+                showLoader: true
+            }).fail(function(xhr, status) {
+                if (status !== 'abort') {
+                    self.showMessage('error', $t('Something went wrong while processing the request.'));
                 }
             });
         },
 
-        copySku: function (item, event) {
-            const btn = event.currentTarget;
-            const sku = btn.getAttribute('data-sku');
-            if (!sku) return;
+        getImageUrl: function(product) {
+            let image = product.small_image || product.thumbnail || product.image;
 
-            navigator.clipboard.writeText(sku).then(() => {
-                const tooltip = btn.querySelector('.copy-tooltip');
-                btn.classList.add('show-tooltip');
+            if (!image || image === 'no_selection') {
+                return null;
+            }
 
-                setTimeout(() => {
-                    btn.classList.remove('show-tooltip');
+            return this.productMediaUrl + image;
+        },
+
+        getEditUrl: function(product) {
+            return this.productEditUrl.replace('__id__', product.id);
+        },
+
+        getQty: function(product) {
+            return product.stock && product.stock.qty !== undefined ? product.stock.qty : null;
+        },
+
+        isInStock: function(product) {
+            return !product.stock || product.stock.is_in_stock !== false;
+        },
+
+        copySku: function(product, event) {
+            let button = event.currentTarget;
+
+            navigator.clipboard.writeText(product.sku).then(function() {
+                button.classList.add('_copied');
+                setTimeout(function() {
+                    button.classList.remove('_copied');
                 }, 1500);
             });
         },
 
         formatPrice: function(price) {
-            return priceUtils.formatPriceLocale(price, this.priceFormat, false);
+            return price === undefined || price === null ? '' : priceUtils.formatPriceLocale(price, this.priceFormat, false);
         }
     });
 });

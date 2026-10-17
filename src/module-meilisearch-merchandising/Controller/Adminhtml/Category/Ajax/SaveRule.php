@@ -13,22 +13,27 @@ use Walkwizus\MeilisearchMerchandising\Api\CategoryRepositoryInterface;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Walkwizus\MeilisearchMerchandising\Service\SaveProductPosition;
+use Walkwizus\MeilisearchMerchandising\Service\CategoryProductPreview;
 
 class SaveRule extends Action implements HttpPostActionInterface
 {
+    const ADMIN_RESOURCE = 'Walkwizus_MeilisearchMerchandising::merchandising_category';
+
     /**
      * @param Context $context
      * @param JsonFactory $jsonFactory
      * @param CategoryFactory $categoryFactory
      * @param CategoryRepositoryInterface $categoryRepository
      * @param SaveProductPosition $saveProductPosition
+     * @param CategoryProductPreview $categoryProductPreview
      */
     public function __construct(
         Context $context,
         private readonly JsonFactory $jsonFactory,
         private readonly CategoryFactory $categoryFactory,
         private readonly CategoryRepositoryInterface $categoryRepository,
-        private readonly SaveProductPosition $saveProductPosition
+        private readonly SaveProductPosition $saveProductPosition,
+        private readonly CategoryProductPreview $categoryProductPreview
     ) {
         parent::__construct($context);
     }
@@ -43,7 +48,7 @@ class SaveRule extends Action implements HttpPostActionInterface
         $storeId = $this->getRequest()->getParam('storeId');
         $categoryId = $this->getRequest()->getParam('categoryId', false);
         $rules = $this->getRequest()->getParam('rules', false);
-        $documentPositions = $this->getRequest()->getParam('docPositions', false);
+        $moves = json_decode((string) $this->getRequest()->getParam('moves', '[]'), true);
 
         if (!$rules) {
             return $json->setData(['success' => false, 'message' => __('Invalid rules')]);
@@ -67,11 +72,15 @@ class SaveRule extends Action implements HttpPostActionInterface
             return $json->setData(['success'=> false, 'message' => __($e->getMessage())]);
         }
 
-        $this->categoryRepository->save($categoryRule);
+        try {
+            $this->categoryRepository->save($categoryRule);
 
-        if ($documentPositions) {
-            $documentPositions = json_decode($documentPositions, true);
-            $this->saveProductPosition->execute($documentPositions, $categoryId, $storeId);
+            if (is_array($moves) && $moves !== []) {
+                $positions = $this->categoryProductPreview->getPositions($rules, (int) $storeId, (int) $categoryId, $moves);
+                $this->saveProductPosition->execute($positions, $categoryId, $storeId);
+            }
+        } catch (\Exception $e) {
+            return $json->setData(['success'=> false, 'message' => __($e->getMessage())]);
         }
 
         return $json->setData(['success'=> true, 'message' => __('Category was saved')]);

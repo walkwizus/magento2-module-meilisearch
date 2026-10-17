@@ -12,6 +12,7 @@ use Magento\Framework\Locale\Format;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\UrlInterface;
+use Magento\Store\Model\Store;
 
 class Builder extends Template
 {
@@ -55,7 +56,8 @@ class Builder extends Template
         $this->jsLayout['components'][self::COMPONENT_NAME]['config']['filters'] = $this->getFilters();
         $this->jsLayout['components'][self::COMPONENT_NAME]['config']['storeId'] = $this->getStoreId();
         $this->jsLayout['components'][self::COMPONENT_NAME]['config']['productMediaUrl'] = $this->getProductMediaUrl();
-        $this->jsLayout['components'][self::COMPONENT_NAME]['config']['priceFormat'] = $this->format->getPriceFormat();
+        $this->jsLayout['components'][self::COMPONENT_NAME]['config']['priceFormat'] = $this->getPriceFormat();
+        $this->jsLayout['components'][self::COMPONENT_NAME]['config']['productEditUrl'] = $this->getProductEditUrl();
 
         foreach ($this->ajaxUrls as $key => $value) {
             $this->jsLayout['components'][self::COMPONENT_NAME]['config']['ajaxUrl'][$key] = $this->getUrl($value);
@@ -95,5 +97,27 @@ class Builder extends Template
         } catch (\Exception $e) {
             return '';
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getPriceFormat(): array
+    {
+        try {
+            /** @var Store $store */
+            $store = $this->_storeManager->getStore($this->getStoreId());
+            return $this->format->getPriceFormat(null, $store->getBaseCurrencyCode());
+        } catch (\Exception $e) {
+            return $this->format->getPriceFormat();
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductEditUrl(): string
+    {
+        return $this->getUrl('catalog/product/edit', ['id' => '__id__']);
     }
 }
