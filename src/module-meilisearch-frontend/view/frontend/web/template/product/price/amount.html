@@ -1,0 +1,22 @@
+<span class="price-container" data-bind="css: containerClass">
+    <!-- ko if: label -->
+    <span class="price-label" data-bind="text: label"></span>
+    <!-- /ko -->
+    <span class="price-wrapper" data-bind="
+        css: { 'price-including-tax': amount.exclTax },
+        attr: {
+            id: amount.id,
+            'data-label': amount.exclTax ? $t('Incl. Tax') : null,
+            'data-price-amount': amount.value,
+            'data-price-type': amount.type
+        }"><!-- ko if: includeContainer --><span class="price" data-bind="text: amount.price"></span><!-- /ko --><!-- ko ifnot: includeContainer --><!-- ko text: amount.price --><!-- /ko --><!-- /ko --></span>
+    <!-- ko if: amount.exclTax -->
+    <span class="price-wrapper price-excluding-tax" data-bind="
+        attr: {
+            id: amount.exclTax.id,
+            'data-label': $t('Excl. Tax'),
+            'data-price-amount': amount.exclTax.value,
+            'data-price-type': amount.exclTax.type
+        }"><span class="price" data-bind="text: amount.exclTax.price"></span></span>
+    <!-- /ko -->
+</span>

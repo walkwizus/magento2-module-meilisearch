@@ -55,8 +55,13 @@
                     <item name="image" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Image</item>
                     <item name="inventory" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Inventory</item>
                     <item name="price" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\Price</item>
+                    <item name="priceRender" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\PriceRender</item>
+                    <item name="configurableRender" xsi:type="object">Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct\ConfigurableRender</item>
                 </item>
             </argument>
         </arguments>
+    </type>
+    <type name="Magento\Directory\Model\Currency">
+        <plugin name="invalidate_meilisearch_product_index_on_rates_save" type="Walkwizus\MeilisearchCatalog\Plugin\Directory\InvalidateProductIndexOnRatesSave"/>
     </type>
 </config>

@@ -11,6 +11,7 @@ use Meilisearch\Contracts\SearchQueryFactory;
 use Meilisearch\Contracts\HybridSearchOptions;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
+use Walkwizus\MeilisearchFrontend\Model\ConfigProvider\SearchConfigProvider;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 
 class Ssr implements ArgumentInterface
@@ -58,7 +59,7 @@ class Ssr implements ArgumentInterface
         $currentPageParam = (int)$this->request->getParam('page', 1);
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
 
-        $defaultSortBy = $this->config['defaultSortBy'] ?? null;
+        $defaultSortBy = (string)($this->config['defaultSortBy'] ?? '');
         $sortBy = $this->getSortBy();
         $sortDirection = $this->isDescending() ? 'desc' : 'asc';
         $indexName = $this->config['indexName'];
@@ -103,10 +104,9 @@ class Ssr implements ArgumentInterface
             $mainQuery->setFilter($mainFilters);
         }
 
-        if ($sortBy !== '') {
-            $mainQuery->setSort([$sortBy . ':' . $sortDirection]);
-        } elseif ($defaultSortBy !== '') {
-            $mainQuery->setSort([$defaultSortBy . ':asc']);
+        $sort = $this->buildSort($sortBy, $sortDirection, $defaultSortBy);
+        if ($sort !== null) {
+            $mainQuery->setSort([$sort]);
         }
 
         $queries[] = $mainQuery;
@@ -142,6 +142,29 @@ class Ssr implements ArgumentInterface
         $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
 
         return $this->searchResultCache;
+    }
+
+    /**
+     * @param string $sortBy
+     * @param string $sortDirection
+     * @param string $defaultSortBy
+     * @return string|null
+     */
+    private function buildSort(string $sortBy, string $sortDirection, string $defaultSortBy): ?string
+    {
+        if ($sortBy === SearchConfigProvider::SORT_RELEVANCE) {
+            return null;
+        }
+
+        if ($sortBy !== '') {
+            return $sortBy . ':' . $sortDirection;
+        }
+
+        if ($defaultSortBy !== '' && $defaultSortBy !== SearchConfigProvider::SORT_RELEVANCE) {
+            return $defaultSortBy . ':asc';
+        }
+
+        return null;
     }
 
     /**
@@ -246,10 +269,8 @@ class Ssr implements ArgumentInterface
     }
 
     /**
-     * Accepts both "from_to" and "from-to" numeric formats.
-     *
      * @param string $value
-     * @return array{0: string, 1: string}|null
+     * @return array|null
      */
     private function extractRangeBounds(string $value): ?array
     {
@@ -433,6 +454,7 @@ class Ssr implements ArgumentInterface
     /**
      * @param string $urlKey
      * @return string
+     * @throws LocalizedException
      */
     public function getProductUrl(string $urlKey): string
     {

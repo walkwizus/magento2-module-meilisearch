@@ -3,10 +3,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <type name="Walkwizus\MeilisearchFrontend\Model\FragmentAggregator">
         <arguments>
-            <argument name="renderers" xsi:type="array">
-                <item name="prices" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\FragmentRenderer\PriceFragmentRenderer</item>
-                <item name="swatches" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\FragmentRenderer\SwatchFragmentRenderer</item>
-            </argument>
+            <argument name="renderers" xsi:type="array"/>
         </arguments>
     </type>
     <type name="Walkwizus\MeilisearchFrontend\Observer\AddMeilisearchHandle">
