@@ -38,7 +38,8 @@ class UrlConfigProvider implements ConfigProviderInterface
             'baseUrl' => $baseUrl,
             'productUrlSuffix' => $this->searchEngineOptimization->getProductUrlSuffix(),
             'productUseCategories' => $this->searchEngineOptimization->getProductUseCategories(),
-            'mediaBaseUrl' => $mediaBaseUrl . $baseMediaPath
+            'mediaBaseUrl' => $mediaBaseUrl . $baseMediaPath,
+            'mediaUrl' => $mediaBaseUrl
         ];
     }
 }

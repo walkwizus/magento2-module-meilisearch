@@ -1,0 +1,81 @@
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Walkwizus\MeilisearchFrontend\ViewModel\ProductRender $viewModel
+ */
+$viewModel = $block->getData('view_model');
+$hit = (array)$block->getData('hit');
+$price = $viewModel->getPriceView($hit);
+$amountBlock = $block->getChildBlock('amount');
+
+if ($price === null || !$amountBlock) {
+    return;
+}
+
+$renderAmount = static fn (
+    ?array $amount,
+    string $label = '',
+    string $containerClass = 'price-final_price tax weee',
+    bool $includeContainer = true
+): string => $amount === null ? '' : $amountBlock->addData([
+    'amount' => $amount,
+    'label' => $label,
+    'container_class' => $containerClass,
+    'include_container' => $includeContainer,
+])->toHtml();
+?>
+<div class="price-box price-final_price"
+     data-role="priceBox"
+     data-product-id="<?= (int)$price['productId'] ?>"
+     data-price-box="product-id-<?= (int)$price['productId'] ?>"
+>
+    <?php if ($price['type'] === 'grouped'): ?>
+        <div class="price-box">
+            <p class="minimal-price">
+                <span class="price-label"><?= $escaper->escapeHtml(__('Starting at')) ?></span>
+                <?= /* @noEscape */ $renderAmount($price['minPrice'], '', 'tax weee') ?>
+            </p>
+        </div>
+    <?php elseif ($price['type'] === 'bundle'): ?>
+        <?php if ($price['bundleView'] === 'as_low_as'): ?>
+            <p class="minimal-price">
+                <?= /* @noEscape */ $renderAmount($price['minPrice'], (string)__('As low as')) ?>
+            </p>
+        <?php elseif ($price['bundleView'] === 'range'): ?>
+            <p class="price-from">
+                <?= /* @noEscape */ $renderAmount($price['minPrice'], (string)__('From')) ?>
+            </p>
+            <p class="price-to">
+                <?= /* @noEscape */ $renderAmount($price['maxPrice'], (string)__('To')) ?>
+            </p>
+        <?php else: ?>
+            <?= /* @noEscape */ $renderAmount($price['minPrice']) ?>
+        <?php endif; ?>
+    <?php elseif ($price['type'] === 'configurable'): ?>
+        <span class="normal-price<?= $price['hasSpecialPrice'] ? ' special-price' : '' ?>">
+            <?= /* @noEscape */ $renderAmount($price['finalPrice'], $price['isRange'] ? (string)__('As low as') : '') ?>
+        </span>
+        <?php if ($price['oldPrice'] !== null): ?>
+            <span class="old-price sly-old-price<?= $price['hasSpecialPrice'] ? '' : ' no-display' ?>">
+                <?= /* @noEscape */ $renderAmount($price['oldPrice'], (string)__('Regular Price')) ?>
+            </span>
+        <?php endif; ?>
+    <?php else: ?>
+        <?php if ($price['hasSpecialPrice']): ?>
+            <span class="special-price">
+                <?= /* @noEscape */ $renderAmount($price['finalPrice'], (string)__('Special Price')) ?>
+            </span>
+            <span class="old-price">
+                <?= /* @noEscape */ $renderAmount($price['oldPrice'], (string)__('Regular Price')) ?>
+            </span>
+        <?php else: ?>
+            <?= /* @noEscape */ $renderAmount($price['finalPrice']) ?>
+        <?php endif; ?>
+        <?php if ($price['minimalPrice'] !== null): ?>
+            <a href="<?= $escaper->escapeUrl((string)$block->getData('product_url')) ?>" class="minimal-price-link">
+                <?= /* @noEscape */ $renderAmount($price['minimalPrice'], (string)__('As low as'), 'price-final_price tax weee', false) ?>
+            </a>
+        <?php endif; ?>
+    <?php endif; ?>
+</div>

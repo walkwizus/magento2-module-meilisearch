@@ -1,0 +1,56 @@
+<div class="price-box price-final_price" data-role="priceBox" data-bind="attr: { 'data-product-id': productId, 'data-price-box': 'product-id-' + productId }">
+    <!-- ko if: type === 'grouped' -->
+    <div class="price-box">
+        <p class="minimal-price">
+            <span class="price-label"><!-- ko i18n: 'Starting at' --><!-- /ko --></span>
+            <!-- ko template: { name: amountTemplate, data: { amount: minPrice, label: '', containerClass: 'tax weee', includeContainer: true } } --><!-- /ko -->
+        </p>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: type === 'bundle' -->
+    <!-- ko if: bundleView === 'as_low_as' -->
+    <p class="minimal-price">
+        <!-- ko template: { name: amountTemplate, data: { amount: minPrice, label: $t('As low as'), containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    </p>
+    <!-- /ko -->
+    <!-- ko if: bundleView === 'range' -->
+    <p class="price-from">
+        <!-- ko template: { name: amountTemplate, data: { amount: minPrice, label: $t('From'), containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    </p>
+    <p class="price-to">
+        <!-- ko template: { name: amountTemplate, data: { amount: maxPrice, label: $t('To'), containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    </p>
+    <!-- /ko -->
+    <!-- ko if: bundleView === 'single' -->
+    <!-- ko template: { name: amountTemplate, data: { amount: minPrice, label: '', containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: type === 'configurable' -->
+    <span class="normal-price" data-bind="css: { 'special-price': hasSpecialPrice }">
+        <!-- ko template: { name: amountTemplate, data: { amount: finalPrice, label: isRange ? $t('As low as') : '', containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    </span>
+    <!-- ko if: oldPrice -->
+    <span class="old-price sly-old-price" data-bind="css: { 'no-display': !hasSpecialPrice }">
+        <!-- ko template: { name: amountTemplate, data: { amount: oldPrice, label: $t('Regular Price'), containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    </span>
+    <!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: type === 'default' -->
+    <!-- ko if: hasSpecialPrice -->
+    <span class="special-price">
+        <!-- ko template: { name: amountTemplate, data: { amount: finalPrice, label: $t('Special Price'), containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    </span>
+    <span class="old-price">
+        <!-- ko template: { name: amountTemplate, data: { amount: oldPrice, label: $t('Regular Price'), containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    </span>
+    <!-- /ko -->
+    <!-- ko ifnot: hasSpecialPrice -->
+    <!-- ko template: { name: amountTemplate, data: { amount: finalPrice, label: '', containerClass: 'price-final_price tax weee', includeContainer: true } } --><!-- /ko -->
+    <!-- /ko -->
+    <!-- ko if: minimalPrice -->
+    <a class="minimal-price-link" data-bind="attr: { href: productUrl }">
+        <!-- ko template: { name: amountTemplate, data: { amount: minimalPrice, label: $t('As low as'), containerClass: 'price-final_price tax weee', includeContainer: false } } --><!-- /ko -->
+    </a>
+    <!-- /ko -->
+    <!-- /ko -->
+</div>

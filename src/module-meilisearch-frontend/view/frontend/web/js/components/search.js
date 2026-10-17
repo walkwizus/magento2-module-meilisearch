@@ -21,6 +21,7 @@ define([
 
     const meilisearchConfig = window.meilisearchFrontendConfig;
     const hybridConfig = meilisearchConfig.hybridSearch || {};
+    const SORT_RELEVANCE = 'relevance';
     let searchService;
 
     function getHybridParams(searchQuery) {
@@ -97,7 +98,9 @@ define([
         const searchQuery = facetsState.searchQuery();
         const sortField = sorterState.sortBy() ?? meilisearchConfig.defaultSortBy;
         const sortDirection = sorterState.isDescending() ? 'desc' : 'asc';
-        const sortParams = sortField ? [`${sortField}:${sortDirection}`] : undefined;
+        const sortParams = sortField && sortField !== SORT_RELEVANCE
+            ? [`${sortField}:${sortDirection}`]
+            : undefined;
         const selectedFilters = facetsState.selectedFacets();
         const activeFacetCodes = Object.keys(selectedFilters);
         const currentPage = facetsState.currentPage();

@@ -1,0 +1,44 @@
+<!-- ko let: { render: $data } -->
+<!-- ko if: render.attributes.length -->
+<div class="swatch-opt" data-bind="attr: { 'data-product-id': render.productId }">
+    <!-- ko foreach: { data: render.attributes, as: 'attribute' } -->
+    <div class="swatch-attribute" data-bind="
+        css: attribute.attribute_code,
+        attr: {
+            'data-attribute-code': attribute.attribute_code,
+            'data-attribute-id': attribute.attribute_id,
+            'data-option-selected': render.selectedLabel(attribute)
+        }">
+        <div class="swatch-attribute-options clearfix" role="listbox" data-bind="attr: { 'aria-label': attribute.label }">
+            <!-- ko foreach: { data: attribute.options, as: 'option' } -->
+            <div class="swatch-option" role="option" tabindex="0" data-bind="
+                css: {
+                    color: render.swatchKind(option) === 'color',
+                    image: render.swatchKind(option) === 'image',
+                    text: render.swatchKind(option) === 'text',
+                    selected: render.isSelected(attribute, option),
+                    disabled: !render.isAvailable(attribute, option)
+                },
+                attr: {
+                    style: render.swatchStyle(option),
+                    title: option.label,
+                    'aria-label': option.label,
+                    'aria-selected': render.isSelected(attribute, option) ? 'true' : 'false',
+                    'aria-disabled': render.isAvailable(attribute, option) ? 'false' : 'true',
+                    'data-option-id': option.value,
+                    'data-option-label': option.label
+                },
+                text: render.swatchText(option),
+                click: function () { render.select(attribute, option); },
+                event: { keydown: function (data, event) {
+                    if (event.key !== 'Enter' && event.key !== ' ') { return true; }
+                    render.select(attribute, option);
+                    return false;
+                } }"></div>
+            <!-- /ko -->
+        </div>
+    </div>
+    <!-- /ko -->
+</div>
+<!-- /ko -->
+<!-- /ko -->
