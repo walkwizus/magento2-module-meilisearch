@@ -7,9 +7,48 @@
 }(this, function() {
     'use strict';
 
-    const meilisearchConfig = window.meilisearchFrontendConfig;
+    function compareLabels(a, b) {
+        return String(a.label || a.value || '').localeCompare(String(b.label || b.value || ''), undefined, {numeric: true, sensitivity: 'base'});
+    }
 
-    function getAvailableFacets(results) {
+    function sortOptions(options, sortBy) {
+        if (sortBy === 'alpha') {
+            return options.sort(compareLabels);
+        }
+
+        if (sortBy === 'count') {
+            return options.sort((a, b) => b.count - a.count);
+        }
+
+        if (sortBy === 'hidden') {
+            return [];
+        }
+
+        return options;
+    }
+
+    function orderOptions(options, config) {
+        const ordering = config.valueOrdering || null;
+
+        if (!ordering) {
+            return sortOptions(options.slice(), config.sortValuesBy);
+        }
+
+        const hidden = ordering.hidden || [];
+        const pinned = ordering.order || [];
+        const sortBy = ordering.sortRemainingBy && ordering.sortRemainingBy !== 'default' ? ordering.sortRemainingBy : config.sortValuesBy;
+        const visible = options.filter(option => hidden.indexOf(option.value) === -1);
+        const pinnedOptions = pinned
+            .map(value => visible.find(option => option.value === value))
+            .filter(Boolean);
+        const remaining = visible.filter(option => pinned.indexOf(option.value) === -1);
+
+        return pinnedOptions.concat(sortOptions(remaining, sortBy));
+    }
+
+    function getAvailableFacets(results, config) {
+        const meilisearchConfig = config || window.meilisearchFrontendConfig;
+
         if (!results || !results.facetDistribution) {
             return [];
         }
@@ -27,7 +66,7 @@
                     return false;
                 }
 
-                const isUseless = facetConfig[code].hideIfNonDiscriminant && Object.values(values).every(count => count === totalHits);
+                const isUseless = (facetConfig[code] || {}).hideIfNonDiscriminant && Object.values(values).every(count => count === totalHits);
                 return !isUseless;
             })
             .map(function(code) {
@@ -55,14 +94,16 @@
 
                 return Object.assign({}, config, {
                     code: code,
-                    options: options,
+                    options: orderOptions(options, config),
                     isSwatch: config.isSwatch || false
                 });
             })
+            .filter(facet => facet.options.length > 0)
             .sort((a, b) => (a.position || 0) - (b.position || 0));
     }
 
     return {
-        getAvailableFacets
+        getAvailableFacets,
+        orderOptions
     };
 }));

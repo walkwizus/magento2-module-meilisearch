@@ -1,1 +1,19 @@
-<div id="category-merchandising-tree" data-bind="initTree"></div>
+<div class="categories-side-col merch-tree">
+    <div class="merch-tree-search">
+        <input type="search"
+               class="admin__control-text"
+               data-bind="textInput: searchQuery, attr: {placeholder: $t('Search a category'), 'aria-label': $t('Search a category')}"/>
+    </div>
+    <div class="tree-actions">
+        <a href="#" data-bind="click: collapseAll, i18n: 'Collapse All'"></a>
+        <span class="separator">|</span>
+        <a href="#" data-bind="click: expandAll, i18n: 'Expand All'"></a>
+    </div>
+    <div class="merch-tree-legend">
+        <span class="merch-rule-dot"></span>
+        <span data-bind="i18n: 'Category with a merchandising rule'"></span>
+    </div>
+    <div class="tree-holder">
+        <div id="category-merchandising-tree" class="tree-wrapper" data-bind="initTree"></div>
+    </div>
+</div>

@@ -191,6 +191,18 @@ class QueryBuilderService
             $operator = $this->operatorMapper[$rule['operator']];
             $valueType = $rule['type'];
 
+            if (in_array($operator, ['IS NULL', 'IS NOT NULL'])) {
+                return "$field $operator";
+            }
+
+            if ($operator === 'TO') {
+                $values = array_values((array) $rule['value']);
+                $min = $this->formatValue($values[0] ?? null, $valueType, $field, $storeId);
+                $max = $this->formatValue($values[1] ?? null, $valueType, $field, $storeId);
+
+                return "$field $min TO $max";
+            }
+
             if (in_array($operator, ['IN', 'NOT IN'])) {
                 $values = is_array($rule['value']) ? $rule['value'] : [$rule['value']];
                 $formattedValues = array_map(function ($val) use ($valueType, $field, $storeId) {

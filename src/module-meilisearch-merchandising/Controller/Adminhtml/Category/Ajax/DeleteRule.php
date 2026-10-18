@@ -15,6 +15,8 @@ use Magento\Framework\Exception\CouldNotDeleteException;
 
 class DeleteRule extends Action implements HttpPostActionInterface
 {
+    const ADMIN_RESOURCE = 'Walkwizus_MeilisearchMerchandising::merchandising_category';
+
     /**
      * @param Context $context
      * @param JsonFactory $jsonFactory

@@ -1,0 +1,14 @@
+<?php
+/** @var \Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Query\Builder $block */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+<?php if ($block->getStoreId() !== false) : ?>
+<div class="page-actions-placeholder"></div>
+<div class="page-actions" data-mage-init='{"floatingHeader": {}}'>
+    <div class="page-actions-inner" data-title="<?= $escaper->escapeHtmlAttr(__('Category Merchandising')) ?>">
+        <div data-bind="scope: 'meilisearch-merchandising-query-builder'">
+            <!-- ko template: 'Walkwizus_MeilisearchMerchandising/category/actions' --><!-- /ko -->
+        </div>
+    </div>
+</div>
+<?php endif; ?>

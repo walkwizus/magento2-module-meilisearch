@@ -1,12 +1,11 @@
 <?php
 /** @var \Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Query\Builder $block */
+/** @var \Magento\Framework\Escaper $escaper */
 ?>
 <?php if ($block->getStoreId() === false) : ?>
-    <div class="notices-wrapper">
-        <div class="messages">
-            <div class="message">
-                <strong><?= __('To configure category merchandising, please select a store') ?></strong>
-            </div>
+    <div class="messages">
+        <div class="message message-notice notice">
+            <div><?= $escaper->escapeHtml(__('To configure category merchandising, please select a store view in the scope switcher.')) ?></div>
         </div>
     </div>
 <?php else : ?>

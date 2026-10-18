@@ -2,13 +2,12 @@
 
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <css src="Walkwizus_MeilisearchMerchandising::css/query-builder-bt.css"/>
-        <css src="Walkwizus_MeilisearchMerchandising::css/query-builder.css"/>
         <css src="Walkwizus_MeilisearchMerchandising::css/category-merchandising.css"/>
     </head>
     <body>
         <referenceContainer name="page.main.actions">
             <block class="Magento\Backend\Block\Store\Switcher" name="category.store.switcher" template="Magento_Backend::store/switcher.phtml"/>
+            <block class="Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Query\Builder" name="merch.category.actions" template="Walkwizus_MeilisearchMerchandising::category/actions.phtml" after="category.store.switcher"/>
         </referenceContainer>
         <referenceContainer name="left">
             <block name="merch.category.tree" class="Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Tree" template="Walkwizus_MeilisearchMerchandising::category/tree.phtml">
@@ -33,6 +32,9 @@
                                 <item name="config" xsi:type="array">
                                     <item name="template" xsi:type="string">Walkwizus_MeilisearchMerchandising/category/merchandising</item>
                                 </item>
+                            </item>
+                            <item name="meilisearch-merchandising-category-facets" xsi:type="array">
+                                <item name="component" xsi:type="string">Walkwizus_MeilisearchMerchandising/js/category/component/facets</item>
                             </item>
                         </item>
                     </argument>

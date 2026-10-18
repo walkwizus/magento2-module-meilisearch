@@ -9,5 +9,63 @@
         "constraint": {
             "PRIMARY": true
         }
+    },
+    "meilisearch_merchandising_category_facet": {
+        "column": {
+            "id": true,
+            "store_id": true,
+            "category_id": true,
+            "facet_ordering": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MEILISEARCH_MERCHANDISING_CATEGORY_FACET_STORE_ID_CATEGORY_ID": true,
+            "MEILISEARCH_MERCHANDISING_CATEGORY_FACET_STORE_ID_STORE_STORE_ID": true,
+            "MEILISRCH_MERCHANDISING_CTGR_FACET_CTGR_ID_CAT_CTGR_ENTT_ENTT_ID": true
+        }
+    },
+    "catalog_eav_attribute": {
+        "column": {
+            "meilisearch_operator": true,
+            "meilisearch_show_more": true,
+            "meilisearch_show_more_limit": true,
+            "meilisearch_searchable": true,
+            "meilisearch_searchbox_fuzzy_enabled": true,
+            "meilisearch_sort_values_by": true,
+            "meilisearch_hide_if_non_discriminant": true
+        }
+    },
+    "meilisearch_merchandising_category_product": {
+        "column": {
+            "id": true,
+            "store_id": true,
+            "category_id": true,
+            "product_id": true,
+            "position": true,
+            "is_pinned": true,
+            "is_buried": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MEILISRCH_MERCHANDISING_CTGR_PRD_STORE_ID_CTGR_ID_PRD_ID": true,
+            "MEILISRCH_MERCHANDISING_CTGR_PRD_STORE_ID_STORE_STORE_ID": true,
+            "MEILISRCH_MERCHANDISING_CTGR_PRD_CTGR_ID_CAT_CTGR_ENTT_ENTT_ID": true,
+            "MEILISRCH_MERCHANDISING_CTGR_PRD_PRD_ID_CAT_PRD_ENTT_ENTT_ID": true
+        }
+    },
+    "meilisearch_merchandising_category_sort": {
+        "column": {
+            "id": true,
+            "store_id": true,
+            "category_id": true,
+            "sort_by": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MEILISEARCH_MERCHANDISING_CATEGORY_SORT_STORE_ID_CATEGORY_ID": true,
+            "MEILISEARCH_MERCHANDISING_CATEGORY_SORT_STORE_ID_STORE_STORE_ID": true,
+            "MEILISRCH_MERCHANDISING_CTGR_SORT_CTGR_ID_CAT_CTGR_ENTT_ENTT_ID": true
+        }
     }
 }

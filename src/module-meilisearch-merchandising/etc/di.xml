@@ -3,6 +3,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Walkwizus\MeilisearchMerchandising\Api\CategoryRepositoryInterface" type="Walkwizus\MeilisearchMerchandising\Model\CategoryRepository"/>
     <preference for="Walkwizus\MeilisearchMerchandising\Api\Data\CategoryInterface" type="Walkwizus\MeilisearchMerchandising\Model\Category"/>
+    <preference for="Walkwizus\MeilisearchMerchandising\Api\CategoryFacetOrderingResolverInterface" type="Walkwizus\MeilisearchMerchandising\Model\CategoryFacet\OrderingResolver"/>
     <virtualType name="Walkwizus\MeilisearchMerchandising\Model\ResourceModel\MerchandisingCategory\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
             <argument name="mainTable" xsi:type="string">meilisearch_merchandising_category</argument>
@@ -21,6 +22,7 @@
             <argument name="postMappers" xsi:type="array">
                 <item name="catalog_product" xsi:type="array">
                     <item name="merchandisingCategory" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributePostMapper\CatalogProduct\Category</item>
+                    <item name="merchandisingCategoryPosition" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributePostMapper\CatalogProduct\CategoryPosition</item>
                 </item>
             </argument>
         </arguments>
