@@ -6,6 +6,7 @@ namespace Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category\Query;
 
 use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Template\Context;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Walkwizus\MeilisearchMerchandising\Service\QueryBuilderService;
 use Magento\Framework\Locale\Format;
@@ -17,6 +18,7 @@ use Magento\Store\Model\Store;
 class Builder extends Template
 {
     const COMPONENT_NAME = 'meilisearch-merchandising-query-builder';
+    const FACETS_COMPONENT_NAME = 'meilisearch-merchandising-category-facets';
 
     /**
      * @var array|string[]
@@ -26,6 +28,17 @@ class Builder extends Template
         'saveRule' => 'meilisearch_merchandising/category/ajax_saverule',
         'deleteRule' => 'meilisearch_merchandising/category/ajax_deleterule',
         'preview' => 'meilisearch_merchandising/category/ajax_preview'
+    ];
+
+    /**
+     * @var array|string[]
+     */
+    private array $facetAjaxUrls = [
+        'getFacets' => 'meilisearch_merchandising/category/ajax_getfacets',
+        'previewFacets' => 'meilisearch_merchandising/category/ajax_previewfacets',
+        'saveFacets' => 'meilisearch_merchandising/category/ajax_savefacets',
+        'resetFacets' => 'meilisearch_merchandising/category/ajax_resetfacets',
+        'copyFacets' => 'meilisearch_merchandising/category/ajax_copyfacets'
     ];
 
     /**
@@ -61,6 +74,15 @@ class Builder extends Template
 
         foreach ($this->ajaxUrls as $key => $value) {
             $this->jsLayout['components'][self::COMPONENT_NAME]['config']['ajaxUrl'][$key] = $this->getUrl($value);
+        }
+
+        if (isset($this->jsLayout['components'][self::FACETS_COMPONENT_NAME])) {
+            $this->jsLayout['components'][self::FACETS_COMPONENT_NAME]['config']['storeId'] = $this->getStoreId();
+            $this->jsLayout['components'][self::FACETS_COMPONENT_NAME]['config']['stores'] = $this->getStores();
+
+            foreach ($this->facetAjaxUrls as $key => $value) {
+                $this->jsLayout['components'][self::FACETS_COMPONENT_NAME]['config']['ajaxUrl'][$key] = $this->getUrl($value);
+            }
         }
 
         return parent::getJsLayout();
@@ -111,6 +133,25 @@ class Builder extends Template
         } catch (\Exception $e) {
             return $this->format->getPriceFormat();
         }
+    }
+
+    /**
+     * @return array
+     * @throws LocalizedException
+     */
+    public function getStores(): array
+    {
+        $stores = [];
+
+        foreach ($this->_storeManager->getStores() as $store) {
+            $stores[] = [
+                'id' => (int) $store->getId(),
+                'name' => $store->getName(),
+                'website' => $this->_storeManager->getWebsite($store->getWebsiteId())->getName()
+            ];
+        }
+
+        return $stores;
     }
 
     /**

@@ -33,6 +33,9 @@
                                     <item name="template" xsi:type="string">Walkwizus_MeilisearchMerchandising/category/merchandising</item>
                                 </item>
                             </item>
+                            <item name="meilisearch-merchandising-category-facets" xsi:type="array">
+                                <item name="component" xsi:type="string">Walkwizus_MeilisearchMerchandising/js/category/component/facets</item>
+                            </item>
                         </item>
                     </argument>
                 </arguments>

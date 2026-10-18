@@ -12,8 +12,7 @@ use Walkwizus\MeilisearchMerchandising\Model\CategoryFactory;
 use Walkwizus\MeilisearchMerchandising\Api\CategoryRepositoryInterface;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Walkwizus\MeilisearchMerchandising\Service\SaveProductPosition;
-use Walkwizus\MeilisearchMerchandising\Service\CategoryProductPreview;
+use Walkwizus\MeilisearchMerchandising\Service\CategoryProductArrangement;
 
 class SaveRule extends Action implements HttpPostActionInterface
 {
@@ -24,16 +23,14 @@ class SaveRule extends Action implements HttpPostActionInterface
      * @param JsonFactory $jsonFactory
      * @param CategoryFactory $categoryFactory
      * @param CategoryRepositoryInterface $categoryRepository
-     * @param SaveProductPosition $saveProductPosition
-     * @param CategoryProductPreview $categoryProductPreview
+     * @param CategoryProductArrangement $categoryProductArrangement
      */
     public function __construct(
         Context $context,
         private readonly JsonFactory $jsonFactory,
         private readonly CategoryFactory $categoryFactory,
         private readonly CategoryRepositoryInterface $categoryRepository,
-        private readonly SaveProductPosition $saveProductPosition,
-        private readonly CategoryProductPreview $categoryProductPreview
+        private readonly CategoryProductArrangement $categoryProductArrangement
     ) {
         parent::__construct($context);
     }
@@ -44,45 +41,69 @@ class SaveRule extends Action implements HttpPostActionInterface
     public function execute(): ResultInterface
     {
         $json = $this->jsonFactory->create();
+        $storeId = (int) $this->getRequest()->getParam('storeId');
+        $categoryId = (int) $this->getRequest()->getParam('categoryId');
+        $rules = json_decode((string) $this->getRequest()->getParam('rules', ''), true);
+        $arrangement = json_decode((string) $this->getRequest()->getParam('arrangement', ''), true);
+        $hasRules = is_array($rules) && !empty($rules['rules']);
 
-        $storeId = $this->getRequest()->getParam('storeId');
-        $categoryId = $this->getRequest()->getParam('categoryId', false);
-        $rules = $this->getRequest()->getParam('rules', false);
-        $moves = json_decode((string) $this->getRequest()->getParam('moves', '[]'), true);
-
-        if (!$rules) {
-            return $json->setData(['success' => false, 'message' => __('Invalid rules')]);
-        }
-
-        $rules = json_decode($rules, true);
-
-        unset($rules['valid']);
-
-        try {
-            $categoryRule = $this->categoryRepository->getByCategoryId($categoryId);
-            $categoryRule->setCategoryId($categoryId);
-            $categoryRule->setStoreId($storeId);
-            $categoryRule->setQuery(json_encode($rules));
-        } catch (NoSuchEntityException $e) {
-            $categoryRule = $this->categoryFactory->create();
-            $categoryRule->setStoreId($storeId);
-            $categoryRule->setCategoryId($categoryId);
-            $categoryRule->setQuery(json_encode($rules));
-        } catch (\Exception $e) {
-            return $json->setData(['success'=> false, 'message' => __($e->getMessage())]);
+        if (!$categoryId) {
+            return $json->setData(['success' => false, 'message' => __('Invalid category')]);
         }
 
         try {
-            $this->categoryRepository->save($categoryRule);
+            if ($hasRules) {
+                unset($rules['valid']);
+                $this->saveRule($storeId, $categoryId, $rules);
+            } elseif (!$this->hasRule($categoryId) && !is_array($arrangement)) {
+                return $json->setData(['success' => false, 'message' => __('Nothing to save')]);
+            } elseif ($this->hasRule($categoryId)) {
+                return $json->setData(['success' => false, 'message' => __('Invalid rules')]);
+            }
 
-            if (is_array($moves) && $moves !== []) {
-                $positions = $this->categoryProductPreview->getPositions($rules, (int) $storeId, (int) $categoryId, $moves);
-                $this->saveProductPosition->execute($positions, $categoryId, $storeId);
+            if (is_array($arrangement)) {
+                $this->categoryProductArrangement->save($hasRules ? $rules : null, $storeId, $categoryId, $arrangement);
             }
         } catch (\Exception $e) {
-            return $json->setData(['success'=> false, 'message' => __($e->getMessage())]);
+            return $json->setData(['success' => false, 'message' => __($e->getMessage())]);
         }
 
-        return $json->setData(['success'=> true, 'message' => __('Category was saved')]);
+        return $json->setData(['success' => true, 'message' => __('Category merchandising was saved')]);
+    }
+
+    /**
+     * @param int $storeId
+     * @param int $categoryId
+     * @param array $rules
+     * @return void
+     * @throws \Exception
+     */
+    private function saveRule(int $storeId, int $categoryId, array $rules): void
+    {
+        try {
+            $categoryRule = $this->categoryRepository->getByCategoryId($categoryId);
+        } catch (NoSuchEntityException $e) {
+            $categoryRule = $this->categoryFactory->create();
+        }
+
+        $categoryRule->setCategoryId($categoryId);
+        $categoryRule->setStoreId($storeId);
+        $categoryRule->setQuery(json_encode($rules));
+        $this->categoryRepository->save($categoryRule);
+    }
+
+    /**
+     * @param int $categoryId
+     * @return bool
+     */
+    private function hasRule(int $categoryId): bool
+    {
+        try {
+            $this->categoryRepository->getByCategoryId($categoryId);
+
+            return true;
+        } catch (NoSuchEntityException $e) {
+            return false;
+        }
     }
 }

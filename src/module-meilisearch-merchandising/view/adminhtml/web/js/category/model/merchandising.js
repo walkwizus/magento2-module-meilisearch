@@ -10,6 +10,8 @@ define([
         currentRule: ko.observable(null),
         ruleCategoryIds: ko.observableArray(),
         hasUnsavedChanges: ko.observable(false),
+        facetsDirty: ko.observable(false),
+        facetFilters: ko.observable({}),
         docs: ko.observableArray()
     };
 });

@@ -1,7 +1,7 @@
 <div class="page-actions-buttons">
-    <!-- ko if: moves().length -->
+    <!-- ko if: isArrangementDirty() -->
     <button type="button" class="action-default scalable reset" data-bind="click: resetPositions">
-        <span data-bind="i18n: 'Reset Positions'"></span>
+        <span data-bind="i18n: 'Discard Changes'"></span>
     </button>
     <!-- /ko -->
     <!-- ko if: merchandising.currentRule() -->
@@ -18,6 +18,6 @@
             id="save-rule"
             class="action-default scalable save primary"
             data-bind="click: saveRule, enable: merchandising.currentCategoryId()">
-        <span data-bind="i18n: 'Save Rule'"></span>
+        <span data-bind="i18n: 'Save'"></span>
     </button>
 </div>

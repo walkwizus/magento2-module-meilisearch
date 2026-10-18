@@ -1,0 +1,256 @@
+<div class="merch-facets-panel">
+    <div class="merch-facets-panel-header">
+        <strong class="merch-facets-panel-title" data-bind="i18n: 'Facets'"></strong>
+        <!-- ko if: loaded() -->
+        <span class="merch-badge" data-bind="css: {_active: hasOwnConfig()}, text: hasOwnConfig() ? $t('Category') : $t('Global')"></span>
+        <!-- /ko -->
+        <!-- ko if: isDirty() -->
+        <span class="merch-badge _changed" data-bind="i18n: 'Unsaved'"></span>
+        <!-- /ko -->
+    </div>
+
+    <!-- ko if: loaded() && isAnchor() -->
+    <div class="merch-facets-panel-actions">
+        <button type="button" class="action-secondary" data-bind="click: save, enable: isDirty()">
+            <span data-bind="i18n: 'Save Facets'"></span>
+        </button>
+        <!-- ko if: isDirty() -->
+        <button type="button" class="action-default" data-bind="click: discard">
+            <span data-bind="i18n: 'Discard'"></span>
+        </button>
+        <!-- /ko -->
+        <!-- ko if: hasOwnConfig() && !isDirty() -->
+        <button type="button" class="action-default" data-bind="click: reset">
+            <span data-bind="i18n: 'Use Global'"></span>
+        </button>
+        <!-- /ko -->
+        <!-- ko if: hasOwnConfig() && !isDirty() -->
+        <button type="button" class="action-default" data-bind="click: openCopy">
+            <span data-bind="i18n: 'Copy to...'"></span>
+        </button>
+        <!-- /ko -->
+    </div>
+    <!-- /ko -->
+
+    <!-- ko if: loaded() && !isAnchor() -->
+    <div class="message message-notice notice merch-message">
+        <div data-bind="i18n: 'This category is not an anchor: as in Magento, no attribute filter is displayed on the storefront. Set &quot;Anchor&quot; to &quot;Yes&quot; in the category display settings to configure its facets.'"></div>
+    </div>
+    <!-- /ko -->
+
+    <!-- ko if: loaded() && isAnchor() -->
+    <!-- ko if: activeFilters().length -->
+    <div class="merch-active-filters">
+        <div class="merch-active-filters-title">
+            <strong data-bind="i18n: 'Now filtering by'"></strong>
+            <button type="button" class="action-link" data-bind="click: clearFilters, i18n: 'Clear All'"></button>
+        </div>
+        <ul data-bind="foreach: activeFilters">
+            <li>
+                <span class="merch-active-filter-label" data-bind="text: facetLabel + ': ' + label"></span>
+                <button type="button" class="merch-remove" data-bind="click: $parent.removeFilter.bind($parent), attr: {title: $t('Remove')}">
+                    <span data-bind="i18n: 'Remove'"></span>
+                </button>
+            </li>
+        </ul>
+    </div>
+    <!-- /ko -->
+
+    <ol class="merch-facet-list"
+        data-bind="merchandisingFacetSortable: {draggable: '.merch-facet', handle: '.merch-facet-handle', onSort: onFacetSort.bind($data)}, foreach: renderedFacets">
+        <li class="merch-facet" data-bind="css: {_hidden: view().isHidden, _collapsed: view().isCollapsed, _settings: $parent.isSettingsOpen(code)}">
+            <div class="merch-facet-row">
+                <span class="merch-facet-handle" data-bind="attr: {title: $t('Drag to reorder')}"></span>
+                <button type="button" class="merch-facet-title" data-bind="click: function() { $parent.toggleCollapsed(code); }, attr: {'aria-expanded': !view().isCollapsed}">
+                    <span data-bind="text: label"></span>
+                </button>
+                <!-- ko if: view().hasOverrides -->
+                <span class="merch-override-dot" data-bind="attr: {title: $t('Settings customized for this category')}"></span>
+                <!-- /ko -->
+                <button type="button"
+                        class="merch-icon-button _settings"
+                        data-bind="click: function() { $parent.toggleSettings(code); }, css: {_active: $parent.isSettingsOpen(code)}, attr: {title: $t('Facet settings')}">
+                    <span data-bind="i18n: 'Facet settings'"></span>
+                </button>
+                <button type="button"
+                        class="merch-icon-button"
+                        data-bind="click: function() { $parent.toggleFacetVisibility(code); }, css: {_off: view().isHidden}, attr: {title: view().isHidden ? $t('Show facet') : $t('Hide facet')}">
+                    <span data-bind="text: view().isHidden ? $t('Show facet') : $t('Hide facet')"></span>
+                </button>
+            </div>
+
+            <!-- ko if: $parent.isSettingsOpen(code) -->
+            <div class="merch-facet-settings">
+                <label class="merch-setting">
+                    <span class="merch-setting-label" data-bind="i18n: 'Show more'"></span>
+                    <select class="admin__control-select" data-bind="options: $parent.booleanOptions, optionsText: 'label', optionsValue: 'value', value: $parent.getSettingState(code).showMore"></select>
+                    <span class="merch-setting-hint" data-bind="text: $parent.getGlobalLabel(facet, 'showMore')"></span>
+                </label>
+                <label class="merch-setting">
+                    <span class="merch-setting-label" data-bind="i18n: 'Values displayed before Show more'"></span>
+                    <input type="number" min="1" class="admin__control-text" data-bind="value: $parent.getSettingState(code).showMoreLimit, attr: {placeholder: facet.showMoreLimit}"/>
+                    <span class="merch-setting-hint" data-bind="text: $parent.getGlobalLabel(facet, 'showMoreLimit')"></span>
+                </label>
+                <!-- ko ifnot: view().isPrice -->
+                <label class="merch-setting">
+                    <span class="merch-setting-label" data-bind="i18n: 'Sort values by'"></span>
+                    <select class="admin__control-select" data-bind="options: $parent.sortOptions, optionsText: 'label', optionsValue: 'value', value: $parent.getValueState(code).sortRemainingBy"></select>
+                    <span class="merch-setting-hint" data-bind="text: $parent.getGlobalLabel(facet, 'sortValuesBy')"></span>
+                </label>
+                <label class="merch-setting">
+                    <span class="merch-setting-label" data-bind="i18n: 'Search in values'"></span>
+                    <select class="admin__control-select" data-bind="options: $parent.booleanOptions, optionsText: 'label', optionsValue: 'value', value: $parent.getSettingState(code).searchable"></select>
+                    <span class="merch-setting-hint" data-bind="text: $parent.getGlobalLabel(facet, 'searchable')"></span>
+                </label>
+                <label class="merch-setting">
+                    <span class="merch-setting-label" data-bind="i18n: 'Approximate search in values'"></span>
+                    <select class="admin__control-select" data-bind="options: $parent.booleanOptions, optionsText: 'label', optionsValue: 'value', value: $parent.getSettingState(code).searchboxFuzzyEnabled"></select>
+                    <span class="merch-setting-hint" data-bind="text: $parent.getGlobalLabel(facet, 'searchboxFuzzyEnabled')"></span>
+                </label>
+                <label class="merch-setting">
+                    <span class="merch-setting-label" data-bind="i18n: 'Hide if non-discriminant'"></span>
+                    <select class="admin__control-select" data-bind="options: $parent.booleanOptions, optionsText: 'label', optionsValue: 'value', value: $parent.getSettingState(code).hideIfNonDiscriminant"></select>
+                    <span class="merch-setting-hint" data-bind="text: $parent.getGlobalLabel(facet, 'hideIfNonDiscriminant')"></span>
+                </label>
+                <!-- /ko -->
+                <!-- ko if: view().hasOverrides -->
+                <button type="button" class="action-link merch-setting-reset" data-bind="click: function() { $parent.resetSettings(code); }, i18n: 'Use global settings for this facet'"></button>
+                <!-- /ko -->
+            </div>
+            <!-- /ko -->
+
+            <!-- ko ifnot: view().isCollapsed -->
+            <div class="merch-facet-body">
+                <!-- ko if: view().isHidden -->
+                <p class="merch-facet-hint" data-bind="i18n: 'Hidden: this facet is not displayed on the storefront.'"></p>
+                <!-- /ko -->
+                <!-- ko if: !view().isHidden && view().isNonDiscriminant -->
+                <p class="merch-facet-hint _warning" data-bind="i18n: 'All products share the same value: the facet is hidden on the storefront.'"></p>
+                <!-- /ko -->
+                <!-- ko if: view().isEmpty -->
+                <p class="merch-facet-hint" data-bind="i18n: 'No value for the products of this category.'"></p>
+                <!-- /ko -->
+
+                <!-- ko if: view().isPrice -->
+                <div class="merch-facet-range" data-bind="text: $parent.getPriceRange(code)"></div>
+                <!-- /ko -->
+
+                <!-- ko if: !view().isPrice && !view().isEmpty -->
+                <!-- ko if: view().config.searchable -->
+                <input type="search"
+                       class="admin__control-text merch-facet-search"
+                       data-bind="textInput: $parent.getValueSearch(code), attr: {placeholder: $t('Search for %1').replace('%1', label)}"/>
+                <!-- /ko -->
+
+                <ol class="merch-fv-list _pinned"
+                    data-bind="merchandisingFacetSortable: {draggable: '.merch-fv', handle: '.merch-fv-handle', onSort: $parent.onPinnedSort.bind($parent, code)},
+                               foreach: {data: view().pinnedOptions, as: 'option'}">
+                    <li class="merch-fv _pinned" data-bind="css: {_selected: option.selected}">
+                        <span class="merch-fv-handle" data-bind="attr: {title: $t('Drag to reorder')}"></span>
+                        <label class="merch-fv-main">
+                            <input type="checkbox" data-bind="checked: option.selected, click: function() { $parents[1].toggleFilter($parent.code, option.value); return true; }"/>
+                            <!-- ko if: option.swatch -->
+                            <span class="merch-swatch" data-bind="style: {backgroundColor: option.swatch}"></span>
+                            <!-- /ko -->
+                            <span class="merch-fv-label" data-bind="text: option.label"></span>
+                            <span class="merch-fv-count" data-bind="text: option.count"></span>
+                        </label>
+                        <span class="merch-fv-actions">
+                            <button type="button" class="merch-fv-action _pin _active" data-bind="click: function() { $parents[1].togglePin($parent.code, option.value); }, attr: {title: $t('Unpin')}">
+                                <span data-bind="i18n: 'Unpin'"></span>
+                            </button>
+                            <button type="button" class="merch-fv-action _hide" data-bind="click: function() { $parents[1].toggleValueVisibility($parent.code, option.value); }, attr: {title: $t('Hide value')}">
+                                <span data-bind="i18n: 'Hide value'"></span>
+                            </button>
+                        </span>
+                    </li>
+                </ol>
+
+                <ul class="merch-fv-list" data-bind="foreach: {data: view().options, as: 'option'}">
+                    <li class="merch-fv" data-bind="css: {_selected: option.selected}">
+                        <label class="merch-fv-main">
+                            <input type="checkbox" data-bind="checked: option.selected, click: function() { $parents[1].toggleFilter($parent.code, option.value); return true; }"/>
+                            <!-- ko if: option.swatch -->
+                            <span class="merch-swatch" data-bind="style: {backgroundColor: option.swatch}"></span>
+                            <!-- /ko -->
+                            <span class="merch-fv-label" data-bind="text: option.label"></span>
+                            <span class="merch-fv-count" data-bind="text: option.count"></span>
+                        </label>
+                        <span class="merch-fv-actions">
+                            <button type="button" class="merch-fv-action _pin" data-bind="click: function() { $parents[1].togglePin($parent.code, option.value); }, attr: {title: $t('Pin to top')}">
+                                <span data-bind="i18n: 'Pin to top'"></span>
+                            </button>
+                            <button type="button" class="merch-fv-action _hide" data-bind="click: function() { $parents[1].toggleValueVisibility($parent.code, option.value); }, attr: {title: $t('Hide value')}">
+                                <span data-bind="i18n: 'Hide value'"></span>
+                            </button>
+                        </span>
+                    </li>
+                </ul>
+
+                <!-- ko if: view().canCollapse -->
+                <button type="button"
+                        class="action-link merch-show-more"
+                        data-bind="click: function() { $parent.toggleExpandedValues(code); },
+                                   text: view().isExpanded ? $t('Show less') : $t('Show more (%1)').replace('%1', view().moreCount)"></button>
+                <!-- /ko -->
+
+                <!-- ko if: view().hiddenOptions.length -->
+                <details class="merch-hidden-values">
+                    <summary data-bind="text: $t('Hidden values (%1)').replace('%1', view().hiddenOptions.length)"></summary>
+                    <ul class="merch-fv-list" data-bind="foreach: {data: view().hiddenOptions, as: 'option'}">
+                        <li class="merch-fv _hidden">
+                            <span class="merch-fv-main">
+                                <!-- ko if: option.swatch -->
+                                <span class="merch-swatch" data-bind="style: {backgroundColor: option.swatch}"></span>
+                                <!-- /ko -->
+                                <span class="merch-fv-label" data-bind="text: option.label"></span>
+                                <span class="merch-fv-count" data-bind="text: option.count"></span>
+                            </span>
+                            <span class="merch-fv-actions _visible">
+                                <button type="button" class="merch-fv-action _pin" data-bind="click: function() { $parents[1].togglePin($parent.code, option.value); }, attr: {title: $t('Pin to top')}">
+                                    <span data-bind="i18n: 'Pin to top'"></span>
+                                </button>
+                                <button type="button" class="merch-fv-action _hide _active" data-bind="click: function() { $parents[1].toggleValueVisibility($parent.code, option.value); }, attr: {title: $t('Show value')}">
+                                    <span data-bind="i18n: 'Show value'"></span>
+                                </button>
+                            </span>
+                        </li>
+                    </ul>
+                </details>
+                <!-- /ko -->
+                <!-- /ko -->
+            </div>
+            <!-- /ko -->
+        </li>
+    </ol>
+    <!-- /ko -->
+
+    <div id="merch-facets-copy" class="merch-facets-copy" style="display: none;">
+        <p class="merch-note" data-bind="i18n: 'Copy the saved facet configuration of this category to other categories.'"></p>
+        <div class="merch-copy-grid">
+            <div class="merch-copy-categories">
+                <strong class="merch-values-title" data-bind="i18n: 'Categories'"></strong>
+                <input type="search" id="merch-facets-copy-search" class="admin__control-text" data-bind="attr: {placeholder: $t('Search a category')}"/>
+                <div id="merch-facets-copy-tree" class="merch-copy-tree"></div>
+            </div>
+            <div class="merch-copy-options">
+                <strong class="merch-values-title" data-bind="i18n: 'Store Views'"></strong>
+                <ul class="merch-copy-stores" data-bind="foreach: stores">
+                    <li class="admin__field-option">
+                        <input type="checkbox" class="admin__control-checkbox" data-bind="checkedValue: String(id), checked: $parent.copyStoreIds, attr: {id: 'merch-copy-store-' + id}"/>
+                        <label class="admin__field-label" data-bind="attr: {for: 'merch-copy-store-' + id}, text: website + ' / ' + name"></label>
+                    </li>
+                </ul>
+                <strong class="merch-values-title" data-bind="i18n: 'Options'"></strong>
+                <div class="admin__field-option">
+                    <input type="checkbox" class="admin__control-checkbox" id="merch-copy-children" data-bind="checked: copyIncludeChildren"/>
+                    <label class="admin__field-label" for="merch-copy-children" data-bind="i18n: 'Include subcategories'"></label>
+                </div>
+                <div class="admin__field-option">
+                    <input type="checkbox" class="admin__control-checkbox" id="merch-copy-overwrite" data-bind="checked: copyOverwrite"/>
+                    <label class="admin__field-label" for="merch-copy-overwrite" data-bind="i18n: 'Overwrite existing configurations'"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -81,16 +81,17 @@ define([
         canSelect: function(node) {
             let instance = this.tree.jstree(true);
 
-            if (!merchandising.hasUnsavedChanges()) {
+            if (!merchandising.hasUnsavedChanges() && !merchandising.facetsDirty()) {
                 return true;
             }
 
             confirm({
                 title: $t('Unsaved changes'),
-                content: $t('Product positions have not been saved. Do you want to discard them?'),
+                content: $t('Some changes have not been saved. Do you want to discard them?'),
                 actions: {
                     confirm: function() {
                         merchandising.hasUnsavedChanges(false);
+                        merchandising.facetsDirty(false);
                         instance.deselect_all(true);
                         instance.select_node(node);
                     }

@@ -30,6 +30,10 @@ define([
             appliedQuery: '',
             viewMode: 'grid',
             moves: [],
+            pins: {},
+            buried: [],
+            sortBy: 'position',
+            savedArrangement: '',
             ruleOpened: true,
             productsOpened: true,
             message: null,
@@ -42,6 +46,14 @@ define([
         initialize: function() {
             this._super();
             this.filters = JSON.parse(this.filters);
+            this.sortByOptions = [
+                {value: 'position', label: $t('Manual order')},
+                {value: 'newest', label: $t('Newest first')},
+                {value: 'name', label: $t('Name')},
+                {value: 'price_asc', label: $t('Price: low to high')},
+                {value: 'price_desc', label: $t('Price: high to low')},
+                {value: 'stock', label: $t('Stock')}
+            ];
             this.initBindings();
 
             this.pages = ko.pureComputed(function() {
@@ -53,18 +65,40 @@ define([
             this.isSearching = ko.pureComputed(function() {
                 return this.appliedQuery() !== '';
             }, this);
+            this.isFiltered = ko.pureComputed(function() {
+                return this.isSearching() || Object.keys(merchandising.facetFilters()).length > 0;
+            }, this);
+            this.canArrange = ko.pureComputed(function() {
+                return this.previewLoaded();
+            }, this);
+            this.isAutoSort = ko.pureComputed(function() {
+                return this.sortBy() !== 'position';
+            }, this);
+            this.isArrangementDirty = ko.pureComputed(function() {
+                return this.previewLoaded() && this.serializeArrangement() !== this.savedArrangement();
+            }, this);
+            this.canSort = ko.pureComputed(function() {
+                return this.canArrange() && !this.isFiltered();
+            }, this);
 
-            this.moves.subscribe(function(moves) {
-                merchandising.hasUnsavedChanges(moves.length > 0);
+            this.isArrangementDirty.subscribe(function(dirty) {
+                merchandising.hasUnsavedChanges(dirty);
             });
-            merchandising.hasUnsavedChanges.subscribe(function(hasChanges) {
-                if (!hasChanges && this.moves().length) {
-                    this.moves([]);
+            this.sortBy.subscribe(function() {
+                if (this.previewLoaded() && !this.applyingSaved) {
+                    this.page(1);
+                    this.loadPreview();
                 }
             }, this);
             this.initViewMode();
             this.pageSize.subscribe(this.onPageSizeChange.bind(this));
             merchandising.currentCategoryId.subscribe(this.onCategoryChange.bind(this));
+            merchandising.facetFilters.subscribe(function() {
+                if (this.previewLoaded()) {
+                    this.page(1);
+                    this.loadPreview();
+                }
+            }, this);
 
             return this;
         },
@@ -72,7 +106,7 @@ define([
         initObservable: function() {
             this._super().observe([
                 'pageSize', 'page', 'total', 'pageableCount', 'sortableCount', 'truncated', 'previewLoaded',
-                'searchQuery', 'appliedQuery', 'viewMode', 'moves', 'ruleOpened', 'productsOpened', 'message'
+                'searchQuery', 'appliedQuery', 'viewMode', 'moves', 'pins', 'buried', 'sortBy', 'savedArrangement', 'ruleOpened', 'productsOpened', 'message'
             ]);
 
             return this;
@@ -189,12 +223,13 @@ define([
         },
 
         onCategoryChange: function(categoryId) {
+            this.previewLoaded(false);
+            merchandising.facetFilters({});
             this.moves([]);
             this.page(1);
             this.searchQuery('');
             this.appliedQuery('');
             this.total(0);
-            this.previewLoaded(false);
             this.clearMessage();
             merchandising.docs([]);
 
@@ -210,11 +245,12 @@ define([
                 if (r.id > 0) {
                     merchandising.currentRule(r);
                     self.qb.queryBuilder('setRules', JSON.parse(r.query));
-                    self.loadPreview();
                 } else {
                     merchandising.currentRule(null);
                     self.qb.queryBuilder('reset');
                 }
+
+                self.loadPreview(false, true);
             });
         },
 
@@ -229,27 +265,73 @@ define([
         },
 
         preview: function() {
+            if (!this.getRules()) {
+                return;
+            }
+
             this.page(1);
             this.loadPreview();
         },
 
-        loadPreview: function(scrollToProducts) {
-            let self = this;
-            let rules = this.getRules();
+        getPreviewRules: function() {
+            return this.qb ? this.qb.queryBuilder('getRules', {allow_invalid: true}) : null;
+        },
 
-            if (!rules) {
-                return;
-            }
+        hasRuleConditions: function(rules) {
+            let hasCondition = function(group) {
+                return (group.rules || []).some(function(rule) {
+                    return rule.rules ? hasCondition(rule) : !!rule.id;
+                });
+            };
+
+            return !!rules && hasCondition(rules);
+        },
+
+        getArrangement: function() {
+            return {
+                moves: this.moves(),
+                pins: this.pins(),
+                buried: this.buried(),
+                sortBy: this.sortBy()
+            };
+        },
+
+        serializeArrangement: function() {
+            let pins = this.pins();
+
+            return JSON.stringify({
+                moves: this.moves(),
+                pins: Object.keys(pins).sort().map(function(id) {
+                    return [id, pins[id]];
+                }),
+                buried: this.buried(),
+                sortBy: this.sortBy()
+            });
+        },
+
+        applySavedArrangement: function(saved) {
+            this.moves([]);
+            this.pins($.extend({}, saved.pins || {}));
+            this.buried((saved.buried || []).map(Number));
+            this.sortBy(saved.sortBy || 'position');
+            this.savedArrangement(this.serializeArrangement());
+        },
+
+        loadPreview: function(scrollToProducts, withSaved) {
+            let self = this;
+            let rules = this.getPreviewRules();
 
             if (this.previewRequest) {
                 this.previewRequest.abort();
             }
 
             this.previewRequest = this.request(this.ajaxUrl.preview, {
-                rules: JSON.stringify(rules),
+                rules: rules ? JSON.stringify(rules) : '',
+                filters: JSON.stringify(merchandising.facetFilters()),
                 storeId: this.storeId,
                 categoryId: merchandising.currentCategoryId(),
-                moves: JSON.stringify(this.moves()),
+                arrangement: JSON.stringify(this.getArrangement()),
+                withSaved: withSaved ? 1 : 0,
                 page: this.page(),
                 pageSize: this.pageSize(),
                 query: this.appliedQuery()
@@ -257,6 +339,12 @@ define([
                 if (!r.success) {
                     self.showMessage('error', r.message);
                     return;
+                }
+
+                if (r.saved) {
+                    self.applyingSaved = true;
+                    self.applySavedArrangement(r.saved);
+                    self.applyingSaved = false;
                 }
 
                 merchandising.docs(r.items);
@@ -287,31 +375,50 @@ define([
 
         saveRule: function() {
             let self = this;
-            let rules = this.getRules();
+            let previewRules = this.getPreviewRules();
             let categoryId = merchandising.currentCategoryId();
+            let data = {storeId: this.storeId, categoryId: categoryId};
+            let rules = null;
 
-            if (!rules || !categoryId) {
+            if (!categoryId) {
                 return;
             }
 
-            this.request(this.ajaxUrl.saveRule, {
-                storeId: this.storeId,
-                categoryId: categoryId,
-                rules: JSON.stringify(rules),
-                moves: JSON.stringify(this.moves())
-            }).done(function(r) {
+            if (this.hasRuleConditions(previewRules)) {
+                rules = this.getRules();
+
+                if (!rules) {
+                    return;
+                }
+
+                data.rules = JSON.stringify(rules);
+            }
+
+            if (this.isArrangementDirty()) {
+                data.arrangement = JSON.stringify(this.getArrangement());
+            }
+
+            if (!data.rules && !data.arrangement) {
+                this.showMessage('success', $t('There is nothing to save.'));
+                return;
+            }
+
+            this.request(this.ajaxUrl.saveRule, data).done(function(r) {
                 if (!r.success) {
                     self.showMessage('error', r.message);
                     return;
                 }
 
-                self.moves([]);
-                merchandising.currentRule({category_id: categoryId});
+                if (rules) {
+                    merchandising.currentRule({category_id: categoryId});
 
-                if (merchandising.ruleCategoryIds.indexOf(String(categoryId)) === -1) {
-                    merchandising.ruleCategoryIds.push(String(categoryId));
+                    if (merchandising.ruleCategoryIds.indexOf(String(categoryId)) === -1) {
+                        merchandising.ruleCategoryIds.push(String(categoryId));
+                    }
                 }
 
+                self.moves([]);
+                self.savedArrangement(self.serializeArrangement());
                 self.showMessage('success', r.message);
             });
         },
@@ -333,11 +440,9 @@ define([
 
                             merchandising.currentRule(null);
                             merchandising.ruleCategoryIds.remove(String(categoryId));
-                            merchandising.docs([]);
-                            self.moves([]);
-                            self.total(0);
-                            self.previewLoaded(false);
                             self.qb.queryBuilder('reset');
+                            self.page(1);
+                            self.loadPreview(false, true);
                             self.showMessage('success', r.message);
                         });
                     }
@@ -346,8 +451,8 @@ define([
         },
 
         resetPositions: function() {
-            this.moves([]);
-            this.loadPreview();
+            this.page(1);
+            this.loadPreview(false, true);
         },
 
         onDrop: function(productId, index) {
@@ -362,10 +467,68 @@ define([
 
             let product = docs.splice(currentIndex, 1)[0];
 
+            if (this.isAutoSort()) {
+                this.pinAt(product, this.offset() + index + 1);
+                return;
+            }
+
             docs.splice(index, 0, product);
             merchandising.docs([]);
             merchandising.docs(docs);
             this.moves.push({id: product.id, position: this.offset() + index + 1});
+        },
+
+        pinAt: function(product, position) {
+            let pins = $.extend({}, this.pins());
+
+            pins[product.id] = position;
+            this.buried.remove(Number(product.id));
+            this.pins(pins);
+            this.loadPreview();
+        },
+
+        isPinned: function(product) {
+            return this.pins()[product.id] !== undefined;
+        },
+
+        isBuried: function(product) {
+            return this.buried().indexOf(Number(product.id)) !== -1;
+        },
+
+        togglePin: function(product) {
+            let pins = $.extend({}, this.pins());
+            let position = this.getPosition(product);
+
+            if (this.isPinned(product)) {
+                delete pins[product.id];
+
+                if (!this.isAutoSort() && position) {
+                    this.moves.push({id: product.id, position: position});
+                }
+
+                this.pins(pins);
+                this.loadPreview();
+                return;
+            }
+
+            if (position) {
+                this.pinAt(product, position);
+            }
+        },
+
+        toggleBury: function(product) {
+            let pins = $.extend({}, this.pins());
+            let id = Number(product.id);
+
+            if (this.isBuried(product)) {
+                this.buried.remove(id);
+            } else {
+                delete pins[product.id];
+                this.pins(pins);
+                this.buried.push(id);
+            }
+
+            this.loadPreview();
         },
 
         moveTo: function(product, position) {
@@ -375,7 +538,14 @@ define([
                 return;
             }
 
-            this.moves.push({id: product.id, position: Math.min(position, this.sortableCount())});
+            position = Math.min(position, this.sortableCount());
+
+            if (this.isAutoSort() || this.isPinned(product)) {
+                this.pinAt(product, position);
+                return;
+            }
+
+            this.moves.push({id: product.id, position: position});
             this.loadPreview();
         },
 
@@ -398,12 +568,9 @@ define([
             this.moveTo(product, 1);
         },
 
-        moveToBottom: function(product) {
-            this.moveTo(product, this.sortableCount());
-        },
 
         getPosition: function(product) {
-            if (this.isSearching()) {
+            if (this.isFiltered()) {
                 return product.merchandising_position;
             }
 
