@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchFrontend\ViewModel;
 
-use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
-use Meilisearch\Contracts\SearchQueryFactory;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Meilisearch\Contracts\HybridSearchOptions;
+use Meilisearch\Contracts\MultiSearchQueryFactory;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider\SearchConfigProvider;
-use Magento\Framework\Pricing\PriceCurrencyInterface;
 
 class Ssr implements ArgumentInterface
 {
@@ -28,7 +28,7 @@ class Ssr implements ArgumentInterface
 
     /**
      * @param RequestInterface $request
-     * @param SearchQueryFactory $searchQueryFactory
+     * @param MultiSearchQueryFactory $multiSearchQueryFactory
      * @param HybridSearchOptions $hybridSearchOptions
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
@@ -36,7 +36,7 @@ class Ssr implements ArgumentInterface
      */
     public function __construct(
         private readonly RequestInterface $request,
-        private readonly SearchQueryFactory $searchQueryFactory,
+        private readonly MultiSearchQueryFactory $multiSearchQueryFactory,
         private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
@@ -86,7 +86,7 @@ class Ssr implements ArgumentInterface
         $queries = [];
         $mainFilters = $this->buildFilters($selectedFacets);
 
-        $mainQuery = $this->searchQueryFactory->create()
+        $mainQuery = $this->multiSearchQueryFactory->create()
             ->setIndexUid($indexName)
             ->setQuery($query)
             ->setFacets($facets)
@@ -117,7 +117,7 @@ class Ssr implements ArgumentInterface
 
             $filters = $this->buildFilters($excludeFilters);
 
-            $disjunctiveQuery = $this->searchQueryFactory->create()
+            $disjunctiveQuery = $this->multiSearchQueryFactory->create()
                 ->setIndexUid($indexName)
                 ->setQuery($query)
                 ->setFacets([$code])
@@ -348,7 +348,7 @@ class Ssr implements ArgumentInterface
 
         $priceFacetCodes = array_values(array_filter(
             $facetList,
-            static fn($facetCode): bool => is_string($facetCode) && preg_match('/^price_\d+(?:_\d+)*$/', $facetCode) === 1
+            static fn ($facetCode): bool => is_string($facetCode) && preg_match('/^price_\d+(?:_\d+)*$/', $facetCode) === 1
         ));
 
         foreach ($priceFacetCodes as $facetCode) {
@@ -376,13 +376,13 @@ class Ssr implements ArgumentInterface
 
         $facets = array_filter(
             $facetConfig,
-            static fn(array $cfg, string $code): bool => isset($facetDistribution[$code]),
+            static fn (array $cfg, string $code): bool => isset($facetDistribution[$code]),
             ARRAY_FILTER_USE_BOTH
         );
 
         uasort(
             $facets,
-            static fn(array $a, array $b): int => (int)($a['position'] ?? 0) <=> (int)($b['position'] ?? 0)
+            static fn (array $a, array $b): int => (int)($a['position'] ?? 0) <=> (int)($b['position'] ?? 0)
         );
 
         return array_values($facets);
