@@ -1,0 +1,14 @@
+{
+  "name": "walkwizus-meilisearch-js-bundle",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "meilisearch": "0.62.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

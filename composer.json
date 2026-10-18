@@ -74,6 +74,7 @@
     "scripts": {
         "test:unit": "vendor/bin/phpunit -c phpunit.xml.dist",
         "phpstan": "vendor/bin/phpstan analyse",
+        "build:js-sdk": "npm --prefix build/meilisearch-js ci && npm --prefix build/meilisearch-js run build",
         "test:coverage": [
             "@putenv XDEBUG_MODE=coverage",
             "phpunit --coverage-html tmp/report/"
