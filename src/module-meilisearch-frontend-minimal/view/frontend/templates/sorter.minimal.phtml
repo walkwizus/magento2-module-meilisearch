@@ -1,0 +1,60 @@
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Walkwizus\MeilisearchFrontend\ViewModel\Ssr|null $viewModel
+ */
+$config = $block->getData('config') ?? [];
+$viewModel = $block->getData('view_model');
+$availableSortBy = $config['availableSortBy'] ?? [];
+
+if (!is_array($availableSortBy) || !$availableSortBy) {
+    return;
+}
+
+$currentSort = $viewModel ? $viewModel->getSortBy() : (string)array_key_first($availableSortBy);
+$isDescending = $viewModel ? $viewModel->isDescending() : false;
+$currentDir = $isDescending ? 'desc' : 'asc';
+$toggleDir = $isDescending ? 'asc' : 'desc';
+
+$buildUrl = static function (array $query) use ($block): string {
+    return $block->getUrl('*/*/*', [
+        '_current' => true,
+        '_use_rewrite' => true,
+        '_query' => $query,
+    ]);
+};
+?>
+<div class="toolbar-sorter sorter">
+    <label class="sorter-label" for="sorter">
+        <?= $escaper->escapeHtml(__('Sort By')) ?>
+    </label>
+    <select id="sorter"
+            data-role="sorter"
+            class="sorter-options"
+            onchange="window.location.href = this.value;">
+        <?php foreach ($availableSortBy as $value => $label): ?>
+            <?php
+            $optionUrl = $buildUrl([
+                'product_list_order' => (string)$value,
+                'product_list_dir' => $currentDir,
+                'page' => null,
+            ]);
+            ?>
+            <option value="<?= $escaper->escapeUrl($optionUrl) ?>"
+                <?= $value === $currentSort ? ' selected="selected"' : '' ?>>
+                <?= $escaper->escapeHtml((string)$label) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+    <?php
+    $directionUrl = $buildUrl([
+        'product_list_order' => (string)$currentSort,
+        'product_list_dir' => $toggleDir,
+        'page' => null,
+    ]);
+    ?>
+    <a class="action sorter-action <?= $isDescending ? 'sort-desc' : 'sort-asc' ?>"
+       href="<?= $escaper->escapeUrl($directionUrl) ?>">
+    </a>
+</div>
