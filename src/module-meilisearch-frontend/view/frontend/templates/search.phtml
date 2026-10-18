@@ -13,6 +13,7 @@ $imageAttribute = $config['images']['category_page_' . $productListMode]['type']
 $imageWidth = $config['images']['category_page_' . $productListMode]['width'];
 $imageHeight = $config['images']['category_page_' . $productListMode]['height'];
 $imageRatio = ((int)$imageHeight / (int)$imageWidth) * 100;
+$priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price');
 ?>
 <?php if ($totalHits === 0): ?>
     <div id="meilisearch-frontend-search-ssr">
@@ -52,7 +53,13 @@ $imageRatio = ((int)$imageHeight / (int)$imageWidth) * 100;
                                     <?= $escaper->escapeHtml($hit['name']) ?>
                                 </a>
                             </strong>
-                            <?= $viewModel->getProductPrice($hit[$config['priceAttributeCode']]) ?>
+                            <?php $priceHtml = trim((string)$priceBlock
+                                ->setData('hit', $hit)
+                                ->setData('product_url', $viewModel->getProductUrl($hit['url_key']))
+                                ->toHtml()); ?>
+                            <?= /* @noEscape */ $priceHtml !== ''
+                                ? $priceHtml
+                                : $viewModel->getProductPrice($hit[$config['priceAttributeCode']] ?? 0) ?>
                         </div>
                     </div>
                 </li>

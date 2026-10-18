@@ -16,7 +16,16 @@
             click: toggleSortDirection,
             css: {
                 'sort-asc': !isDescending(),
-                'sort-desc': isDescending()
+                'sort-desc': isDescending(),
+                'disabled': isDirectionDisabled()
+            },
+            attr: {
+                'aria-disabled': isDirectionDisabled() ? 'true' : 'false',
+                tabindex: isDirectionDisabled() ? '-1' : '0'
+            },
+            style: {
+                opacity: isDirectionDisabled() ? '0.4' : '',
+                cursor: isDirectionDisabled() ? 'not-allowed' : ''
             }">
     </a>
 </div>

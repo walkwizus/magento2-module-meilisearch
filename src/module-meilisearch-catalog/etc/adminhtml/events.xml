@@ -4,4 +4,7 @@
     <event name="catalog_entity_attribute_save_after">
         <observer name="add_meilisearch_attribute_settings" instance="Walkwizus\MeilisearchCatalog\Observer\AddAttributeSettings" />
     </event>
+    <event name="admin_system_config_changed_section_currency">
+        <observer name="invalidate_meilisearch_product_index_on_currency_change" instance="Walkwizus\MeilisearchCatalog\Observer\InvalidateProductIndexOnCurrencyConfigChange" />
+    </event>
 </config>
