@@ -9,9 +9,9 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Meilisearch\Contracts\HybridSearchOptions;
-use Meilisearch\Contracts\MultiSearchQueryFactory;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
+use Walkwizus\MeilisearchFrontend\Model\MultiSearchQueryCreator;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider\SearchConfigProvider;
 
 class Ssr implements ArgumentInterface
@@ -28,7 +28,7 @@ class Ssr implements ArgumentInterface
 
     /**
      * @param RequestInterface $request
-     * @param MultiSearchQueryFactory $multiSearchQueryFactory
+     * @param MultiSearchQueryCreator $multiSearchQueryFactory
      * @param HybridSearchOptions $hybridSearchOptions
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
@@ -36,7 +36,7 @@ class Ssr implements ArgumentInterface
      */
     public function __construct(
         private readonly RequestInterface $request,
-        private readonly MultiSearchQueryFactory $multiSearchQueryFactory,
+        private readonly MultiSearchQueryCreator $multiSearchQueryFactory,
         private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
