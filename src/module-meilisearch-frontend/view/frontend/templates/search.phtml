@@ -78,7 +78,7 @@ $priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price')
     </div>
 <?php endif; ?>
 <div id="meilisearch-frontend-search" data-bind="scope: 'meilisearch-frontend-search'">
-    <!-- ko template: getTemplate() --><!-- /ko -->
+    <!-- ko template: { name: getTemplate(), afterRender: $data.afterRenderTemplate } --><!-- /ko -->
 </div>
 <script type="text/x-magento-init">
     {
