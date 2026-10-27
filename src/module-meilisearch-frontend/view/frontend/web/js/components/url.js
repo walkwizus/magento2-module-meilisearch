@@ -4,8 +4,9 @@ define([
     'Walkwizus_MeilisearchFrontend/js/model/facets-state',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
     'Walkwizus_MeilisearchFrontend/js/model/limiter-state',
-    'Walkwizus_MeilisearchFrontend/js/service/url-manager'
-], function(Element, ko, facetsState, viewModeState, limiterState, urlManager) {
+    'Walkwizus_MeilisearchFrontend/js/service/url-manager',
+    'Walkwizus_MeilisearchFrontend/js/model/search-state'
+], function(Element, ko, facetsState, viewModeState, limiterState, urlManager, searchState) {
     'use strict';
 
     const meilisearchConfig = window.meilisearchFrontendConfig;
@@ -22,7 +23,10 @@ define([
             const restored = urlManager.getStateFromUrl();
 
             facetsState.selectedFacets(restored.facets);
-            facetsState.currentPage(restored.page);
+            // Once search has booted, its page comes from the server's result
+            if (searchState.isInitializing()) {
+                facetsState.currentPage(restored.page);
+            }
             facetsState.searchQuery(restored.q);
             viewModeState.currentViewMode(restored.product_list_mode);
             limiterState.currentLimit(restored.product_list_limit);
@@ -37,7 +41,7 @@ define([
 
             const syncUrl = () => {
                 const state = getCurrentState();
-                urlManager.updateUrl(state);
+                urlManager.updateUrl(state, searchState.isInitializing());
             };
 
             facetsState.selectedFacets.subscribe(syncUrl);
@@ -45,6 +49,10 @@ define([
             facetsState.searchQuery.subscribe(syncUrl);
             this.currentViewMode.subscribe(syncUrl);
             this.currentLimit.subscribe(syncUrl);
+
+            if (!searchState.isInitializing()) {
+                urlManager.updateUrl(getCurrentState(), true);
+            }
 
             window.addEventListener('popstate', () => {
                 const s = urlManager.getStateFromUrl();

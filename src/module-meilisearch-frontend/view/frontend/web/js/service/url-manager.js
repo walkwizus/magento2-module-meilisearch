@@ -52,7 +52,7 @@
             }
 
             if (key === 'product_list_limit') {
-                restoredLimit = parseInt(value, 10) || null;
+                restoredLimit = /^\d+$/.test(value) ? parseInt(value, 10) : null;
                 return;
             }
 
@@ -85,8 +85,10 @@
             }
         });
 
-        const mode = restoredMode || meilisearchConfig.defaultViewMode;
-        const limit = restoredLimit != null
+        const modes = Object.keys(meilisearchConfig.availableViewMode || { grid: '', list: '' });
+        const mode = modes.includes(restoredMode) ? restoredMode : meilisearchConfig.defaultViewMode;
+        const limits = meilisearchConfig[mode + 'PerPageValues'] || [];
+        const limit = limits.includes(restoredLimit)
             ? restoredLimit
             : getDefaultLimitForMode(mode);
 
@@ -164,12 +166,12 @@
         return window.location.pathname + (query ? '?' + query : '');
     }
 
-    function updateUrl(state) {
+    function updateUrl(state, replace) {
         const newUrl = buildUrlFromState(state);
         const currentUrl = window.location.pathname + window.location.search;
 
         if (newUrl !== currentUrl) {
-            window.history.pushState(null, '', newUrl);
+            window.history[replace ? 'replaceState' : 'pushState'](null, '', newUrl);
         }
     }
 
