@@ -25,6 +25,7 @@
         </arguments>
     </type>
     <preference for="Magento\Setup\Model\SearchConfigOptionsList" type="Walkwizus\MeilisearchBase\Setup\SearchConfigOptionsList"/>
+    <preference for="Walkwizus\MeilisearchBase\Api\EmbedderConfigProviderInterface" type="Walkwizus\MeilisearchBase\Model\Indexer\NoEmbedderConfigProvider"/>
     <type name="Magento\Search\Setup\CompositeInstallConfig">
         <arguments>
             <argument name="installConfigList" xsi:type="array">
