@@ -99,10 +99,10 @@ define([
             }
 
             if (typeof value === 'string' && value.includes('|')) {
-                return value.split('|')[0];
+                return FacetsService.decodeLabel(value.split('|')[0]);
             }
 
-            return value;
+            return FacetsService.decodeLabel(value);
         },
 
         removeFacet: function(code, value) {
