@@ -4,6 +4,7 @@
     <preference for="Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface" type="Walkwizus\MeilisearchAi\Model\Embedder" />
     <preference for="Walkwizus\MeilisearchAi\Api\EmbedderRepositoryInterface" type="Walkwizus\MeilisearchAi\Model\EmbedderRepository" />
     <preference for="Walkwizus\MeilisearchAi\Api\Data\LinkInterface" type="Walkwizus\MeilisearchAi\Model\Link" />
+    <preference for="Walkwizus\MeilisearchBase\Api\EmbedderConfigProviderInterface" type="Walkwizus\MeilisearchAi\Model\EmbedderConfigProvider" />
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
