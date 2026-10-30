@@ -78,4 +78,15 @@ class DocumentsManager
         $client = $this->connectionManager->getConnection();
         return $client->index($indexName)->deleteDocuments($documentIds);
     }
+
+    /**
+     * @param $indexName
+     * @param string $filter
+     * @return Task
+     */
+    public function deleteDocumentsByFilter($indexName, string $filter): Task
+    {
+        $client = $this->connectionManager->getConnection();
+        return $client->index($indexName)->deleteDocuments(['filter' => $filter]);
+    }
 }

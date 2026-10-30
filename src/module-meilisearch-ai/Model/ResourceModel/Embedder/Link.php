@@ -32,6 +32,35 @@ class Link extends AbstractDb
     }
 
     /**
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getLinkedIndexUids(): array
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->distinct()
+            ->from($this->getMainTable(), 'index_uid');
+
+        return $connection->fetchCol($select);
+    }
+
+    /**
+     * @param int $embedderId
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function getIndexUidsByEmbedderId(int $embedderId): array
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getMainTable(), 'index_uid')
+            ->where('embedder_id = ?', $embedderId);
+
+        return $connection->fetchCol($select);
+    }
+
+    /**
      * @param string $indexUid
      * @param array $embedderIds
      * @return void

@@ -23,14 +23,17 @@ class EmbedderRepository implements EmbedderRepositoryInterface
      * @param CollectionFactory $collectionFactory
      * @param CollectionProcessorInterface $collectionProcessor
      * @param HydratorInterface $hydrator
+     * @param ApiKeyEncryption $apiKeyEncryption
      */
     public function __construct(
         private readonly EmbedderFactory $embedderFactory,
         private readonly EmbedderResource $resource,
         private readonly CollectionFactory $collectionFactory,
         private readonly CollectionProcessorInterface $collectionProcessor,
-        private readonly HydratorInterface $hydrator
-    ) { }
+        private readonly HydratorInterface $hydrator,
+        private readonly ApiKeyEncryption $apiKeyEncryption
+    ) {
+    }
 
     /**
      * @param EmbedderInterface $embedder
@@ -47,6 +50,7 @@ class EmbedderRepository implements EmbedderRepositoryInterface
                     $this->hydrator->extract($embedder)
                 );
             }
+            $embedder->setApiKey($this->apiKeyEncryption->encrypt($embedder->getApiKey()));
             $this->resource->save($embedder);
         } catch (\Exception $exception) {
             throw new CouldNotSaveException(__($exception->getMessage()));

@@ -6,7 +6,6 @@ namespace Walkwizus\MeilisearchBase\Model\Indexer;
 
 use Magento\Framework\Indexer\SaveHandler\IndexerInterface;
 use Magento\Search\Model\EngineResolver;
-use Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface;
 use Walkwizus\MeilisearchBase\Service\SettingsManager;
 use Walkwizus\MeilisearchBase\Service\IndexesManager;
 use Walkwizus\MeilisearchBase\Service\DocumentsManager;
@@ -15,14 +14,16 @@ use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Indexer\SaveHandler\Batch;
 use Walkwizus\MeilisearchBase\Model\AttributeMapper;
 use Walkwizus\MeilisearchBase\Model\AttributeProvider;
-use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\Link as EmbedderLinkResource;
-use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\CollectionFactory as EmbedderCollectionFactory;
+use Walkwizus\MeilisearchAi\Model\EmbedderSynchronizer;
 use Magento\Framework\Search\Request\Dimension;
+use Magento\Framework\Exception\LocalizedException;
+use Psr\Log\LoggerInterface;
 use Walkwizus\MeilisearchBase\Model\ResourceModel\Engine;
 
 class BaseIndexerHandler implements IndexerInterface
 {
     const INDEX_SWAP_SUFFIX = 'tmp';
+    const REINDEX_RUN_ATTRIBUTE = 'meilisearch_reindex_run';
 
     /**
      * @var bool
@@ -35,6 +36,11 @@ class BaseIndexerHandler implements IndexerInterface
     private array $temporaryIndexes = [];
 
     /**
+     * @var array
+     */
+    private array $inPlaceRuns = [];
+
+    /**
      * @param EngineResolver $engineResolver
      * @param SettingsManager $settingsManager
      * @param IndexesManager $indexesManager
@@ -45,8 +51,8 @@ class BaseIndexerHandler implements IndexerInterface
      * @param string $indexerId
      * @param AttributeMapper $attributeMapper
      * @param AttributeProvider $attributeProvider
-     * @param EmbedderLinkResource $embedderLinkResource
-     * @param EmbedderCollectionFactory $embedderCollectionFactory
+     * @param EmbedderSynchronizer $embedderSynchronizer
+     * @param LoggerInterface $logger
      * @param int $batchSize
      * @param string $indexPrimaryKey
      * @param array $preProcessors
@@ -62,8 +68,8 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly string $indexerId,
         private readonly AttributeMapper $attributeMapper,
         private readonly AttributeProvider $attributeProvider,
-        private readonly EmbedderLinkResource $embedderLinkResource,
-        private readonly EmbedderCollectionFactory $embedderCollectionFactory,
+        private readonly EmbedderSynchronizer $embedderSynchronizer,
+        private readonly LoggerInterface $logger,
         private readonly int $batchSize = 10000,
         private readonly string $indexPrimaryKey = 'id',
         private readonly array $preProcessors = []
@@ -81,38 +87,21 @@ class BaseIndexerHandler implements IndexerInterface
             $storeId = (int)$dimension->getValue();
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
-            $targetIndexName = $this->isFullReindex ? $indexName . '_' . self::INDEX_SWAP_SUFFIX : $indexName;
+            $runId = $this->inPlaceRuns[$indexName] ?? null;
+            $targetIndexName = $this->isFullReindex && $runId === null ? $indexName . '_' . self::INDEX_SWAP_SUFFIX : $indexName;
+            $filterableAttributes = $this->attributeProvider->getFilterableAttributes($indexerId, 'index');
+
+            if ($runId !== null) {
+                $filterableAttributes[] = self::REINDEX_RUN_ATTRIBUTE;
+            }
 
             try {
-                $this->settingsManager->updateFilterableAttributes($targetIndexName, $this->attributeProvider->getFilterableAttributes($indexerId, 'index'));
+                $this->settingsManager->updateFilterableAttributes($targetIndexName, $filterableAttributes);
                 $this->settingsManager->updateSortableAttributes($targetIndexName, $this->attributeProvider->getSortableAttributes($indexerId, 'index'));
                 $this->settingsManager->updateSearchableAttributes($targetIndexName, $this->attributeProvider->getSearchableAttributes($indexerId, 'index'));
-
-                $embedderIds = $this->embedderLinkResource->getEmbedderIdsByUid($indexName);
-
-                if (!empty($embedderIds)) {
-                    $embedders = $this->embedderCollectionFactory
-                        ->create()
-                        ->addFieldToFilter('embedder_id', ['in' => $embedderIds]);
-
-                    $embeddersConfig = [];
-
-                    /** @var EmbedderInterface $embedder */
-                    foreach ($embedders as $embedder) {
-                        $embeddersConfig[$embedder->getIdentifier()] = [
-                            'source' => $embedder->getSource(),
-                            'model' => $embedder->getModel(),
-                            'apiKey' => $embedder->getApiKey(),
-                            'documentTemplate' => $embedder->getDocumentTemplate(),
-                        ];
-                    }
-
-                    $this->settingsManager->updateEmbedders($targetIndexName, $embeddersConfig);
-                } else {
-                    $this->settingsManager->resetEmbedders($targetIndexName);
-                }
-            } catch (\Exception $exception) {
-                return $this;
+                $this->embedderSynchronizer->sync($indexName, $targetIndexName);
+            } catch (\Exception $e) {
+                throw $this->failure('Unable to prepare the settings of Meilisearch index %1: %2', $targetIndexName, $e);
             }
 
             foreach ($this->batch->getItems($documents, $this->batchSize) as $batchDocuments) {
@@ -123,16 +112,31 @@ class BaseIndexerHandler implements IndexerInterface
                 }
 
                 $batchDocuments = $this->attributeMapper->map($indexerId, $batchDocuments, $storeId, $context);
+
+                if ($runId !== null) {
+                    foreach ($batchDocuments as $key => $document) {
+                        $batchDocuments[$key][self::REINDEX_RUN_ATTRIBUTE] = $runId;
+                    }
+                }
+
                 try {
                     $this->documentsManager->addDocumentsInBatches($targetIndexName, $batchDocuments, $this->indexPrimaryKey);
                 } catch (\Exception $e) {
-                    return $this;
+                    throw $this->failure('Unable to send documents to Meilisearch index %1: %2', $targetIndexName, $e);
                 }
+            }
+
+            if ($runId !== null) {
+                $this->deleteStaleDocuments($indexName, $runId);
             }
         }
 
         if ($this->isFullReindex && !empty($this->temporaryIndexes)) {
             $this->performSwap();
+        }
+
+        if ($this->temporaryIndexes === [] && $this->inPlaceRuns === []) {
+            $this->isFullReindex = false;
         }
 
         return $this;
@@ -150,6 +154,10 @@ class BaseIndexerHandler implements IndexerInterface
             $storeId = $dimension->getValue();
             $indexerId = $this->getIndexerId();
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
+
+            if (!$this->indexesManager->indexExists($indexName)) {
+                continue;
+            }
 
             $this->documentsManager->deleteDocuments($indexName, (array)$documents);
         }
@@ -172,13 +180,19 @@ class BaseIndexerHandler implements IndexerInterface
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
             $tmpIndexName = $indexName . '_' . self::INDEX_SWAP_SUFFIX;
 
-            $this->temporaryIndexes[$indexName] = $tmpIndexName;
+            if ($this->embedderSynchronizer->hasEmbedders($indexName)) {
+                $this->inPlaceRuns[$indexName] = bin2hex(random_bytes(8));
+            } else {
+                $this->temporaryIndexes[$indexName] = $tmpIndexName;
+            }
 
             if (!$this->indexesManager->indexExists($indexName)) {
                 $this->indexesManager->createIndex($indexName, $this->indexPrimaryKey);
             }
 
-            $this->indexesManager->deleteIndex($tmpIndexName);
+            if ($this->indexesManager->indexExists($tmpIndexName)) {
+                $this->indexesManager->deleteIndex($tmpIndexName);
+            }
         }
 
         return $this;
@@ -223,14 +237,51 @@ class BaseIndexerHandler implements IndexerInterface
         try {
             $this->indexesManager->swapIndexes($swaps);
 
-            foreach ($this->temporaryIndexes as $tmpIndex) {
+            foreach ($this->temporaryIndexes as $realIndex => $tmpIndex) {
                 $this->indexesManager->deleteIndex($tmpIndex);
+                $this->embedderSynchronizer->moveState($tmpIndex, $realIndex);
             }
         } catch (\Exception $e) {
-
+            throw $this->failure('Unable to swap Meilisearch indexes %1: %2', implode(', ', array_keys($this->temporaryIndexes)), $e);
         } finally {
             $this->isFullReindex = false;
             $this->temporaryIndexes = [];
         }
+    }
+
+    /**
+     * @param string $indexName
+     * @param string $runId
+     * @return void
+     * @throws LocalizedException
+     */
+    private function deleteStaleDocuments(string $indexName, string $runId): void
+    {
+        try {
+            $this->documentsManager->deleteDocumentsByFilter(
+                $indexName,
+                self::REINDEX_RUN_ATTRIBUTE . ' != "' . $runId . '"'
+            );
+        } catch (\Exception $e) {
+            throw $this->failure('Unable to delete stale documents from Meilisearch index %1: %2', $indexName, $e);
+        } finally {
+            unset($this->inPlaceRuns[$indexName]);
+        }
+    }
+
+    /**
+     * @param string $message
+     * @param string $indexName
+     * @param \Exception $exception
+     * @return LocalizedException
+     */
+    private function failure(string $message, string $indexName, \Exception $exception): LocalizedException
+    {
+        $this->logger->error(
+            str_replace(['%1', '%2'], [$indexName, $exception->getMessage()], $message),
+            ['exception' => $exception]
+        );
+
+        return new LocalizedException(__($message, $indexName, $exception->getMessage()), $exception);
     }
 }
