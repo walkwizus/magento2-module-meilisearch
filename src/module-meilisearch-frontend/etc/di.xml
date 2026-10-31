@@ -33,6 +33,7 @@
                 <item name="server_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\ServerConfigProvider</item>
                 <item name="url_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\UrlConfigProvider</item>
                 <item name="swatch_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\SwatchConfigProvider</item>
+                <item name="product_actions_config" xsi:type="object">Walkwizus\MeilisearchFrontend\Model\ConfigProvider\ProductActionsConfigProvider</item>
             </argument>
         </arguments>
     </type>

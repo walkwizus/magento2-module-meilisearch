@@ -14,6 +14,7 @@ $imageWidth = $config['images']['category_page_' . $productListMode]['width'];
 $imageHeight = $config['images']['category_page_' . $productListMode]['height'];
 $imageRatio = ((int)$imageHeight / (int)$imageWidth) * 100;
 $priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price');
+$actionsBlock = $block->getChildBlock('meilisearch.frontend.search.product.actions');
 $eagerImageCount = (int)($block->getData('eager_image_count') ?? 4);
 ?>
 <?php if ($totalHits === 0): ?>
@@ -61,6 +62,9 @@ $eagerImageCount = (int)($block->getData('eager_image_count') ?? 4);
                             <?= /* @noEscape */ $priceHtml !== ''
                                 ? $priceHtml
                                 : $viewModel->getProductPrice($hit[$config['priceAttributeCode']] ?? 0) ?>
+                            <?php if ($actionsBlock): ?>
+                                <?= $actionsBlock->setData('hit', $hit)->toHtml() ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </li>

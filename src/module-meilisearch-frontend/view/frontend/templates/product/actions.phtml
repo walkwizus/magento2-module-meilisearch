@@ -1,0 +1,62 @@
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Walkwizus\MeilisearchFrontend\ViewModel\ProductActions $viewModel
+ * @var \Magento\Framework\Escaper $escaper
+ */
+use Magento\Framework\App\ActionInterface;
+
+$viewModel = $block->getViewModel();
+$hit = (array)$block->getData('hit');
+?>
+<div class="product-item-inner">
+    <div class="product actions product-item-actions">
+        <div class="actions-primary">
+            <?php if ($viewModel->isSaleable($hit)): ?>
+                <?php $postParams = $viewModel->getAddToCartPostParams($hit); ?>
+                <form data-role="tocart-form"
+                      data-product-sku="<?= $escaper->escapeHtmlAttr($hit['sku'] ?? '') ?>"
+                      action="<?= $escaper->escapeUrl($postParams['action']) ?>"
+                      data-mage-init='{"catalogAddToCart": {}}'
+                      method="post">
+                    <input type="hidden" name="product" value="<?= (int)$postParams['data']['product'] ?>">
+                    <input type="hidden"
+                           name="<?= /* @noEscape */ ActionInterface::PARAM_NAME_URL_ENCODED ?>"
+                           value="<?= $escaper->escapeHtmlAttr(
+                               $postParams['data'][ActionInterface::PARAM_NAME_URL_ENCODED]
+                           ) ?>">
+                    <?= $block->getBlockHtml('formkey') ?>
+                    <button type="submit"
+                            title="<?= $escaper->escapeHtmlAttr(__('Add to Cart')) ?>"
+                            class="action tocart primary"
+                            disabled>
+                        <span><?= $escaper->escapeHtml(__('Add to Cart')) ?></span>
+                    </button>
+                </form>
+            <?php else: ?>
+                <div class="stock unavailable"><span><?= $escaper->escapeHtml(__('Out of stock')) ?></span></div>
+            <?php endif; ?>
+        </div>
+        <div data-role="add-to-links" class="actions-secondary">
+            <?php if ($viewModel->isWishlistEnabled()): ?>
+                <a href="#"
+                   class="action towishlist"
+                   title="<?= $escaper->escapeHtmlAttr(__('Add to Wish List')) ?>"
+                   aria-label="<?= $escaper->escapeHtmlAttr(__('Add to Wish List')) ?>"
+                   data-post='<?= /* @noEscape */ $viewModel->getAddToWishlistPostData($hit) ?>'
+                   data-action="add-to-wishlist"
+                   role="button">
+                    <span><?= $escaper->escapeHtml(__('Add to Wish List')) ?></span>
+                </a>
+            <?php endif; ?>
+            <a href="#"
+               class="action tocompare"
+               title="<?= $escaper->escapeHtmlAttr(__('Add to Compare')) ?>"
+               aria-label="<?= $escaper->escapeHtmlAttr(__('Add to Compare')) ?>"
+               data-post='<?= /* @noEscape */ $viewModel->getAddToComparePostData($hit) ?>'
+               role="button">
+                <span><?= $escaper->escapeHtml(__('Add to Compare')) ?></span>
+            </a>
+        </div>
+    </div>
+</div>

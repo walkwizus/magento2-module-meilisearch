@@ -58,6 +58,8 @@
                     <!-- ko foreach: $parent.fragments -->
                     <div data-bind="attr: {'data-fragment': $data, 'data-sku': $parent.sku}"></div>
                     <!-- /ko -->
+
+                    <!-- ko template: { name: $parent.actionsTemplate, data: $parent.productActions.getActions($data, render) } --><!-- /ko -->
                 </div>
             </div>
             <!-- /ko -->
