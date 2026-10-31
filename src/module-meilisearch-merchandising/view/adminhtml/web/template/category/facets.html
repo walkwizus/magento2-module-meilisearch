@@ -88,7 +88,7 @@
                 </label>
                 <label class="merch-setting">
                     <span class="merch-setting-label" data-bind="i18n: 'Values displayed before Show more'"></span>
-                    <input type="number" min="1" class="admin__control-text" data-bind="value: $parent.getSettingState(code).showMoreLimit, attr: {placeholder: facet.showMoreLimit}"/>
+                    <input type="number" min="1" class="admin__control-text" data-bind="value: $parent.getSettingState(code).showMoreLimit, attr: {placeholder: facet.showMoreLimit}">
                     <span class="merch-setting-hint" data-bind="text: $parent.getGlobalLabel(facet, 'showMoreLimit')"></span>
                 </label>
                 <!-- ko ifnot: view().isPrice -->
@@ -139,7 +139,7 @@
                 <!-- ko if: view().config.searchable -->
                 <input type="search"
                        class="admin__control-text merch-facet-search"
-                       data-bind="textInput: $parent.getValueSearch(code), attr: {placeholder: $t('Search for %1').replace('%1', label)}"/>
+                       data-bind="textInput: $parent.getValueSearch(code), attr: {placeholder: $t('Search for %1').replace('%1', label)}">
                 <!-- /ko -->
 
                 <ol class="merch-fv-list _pinned"
@@ -148,7 +148,7 @@
                     <li class="merch-fv _pinned" data-bind="css: {_selected: option.selected}">
                         <span class="merch-fv-handle" data-bind="attr: {title: $t('Drag to reorder')}"></span>
                         <label class="merch-fv-main">
-                            <input type="checkbox" data-bind="checked: option.selected, click: function() { $parents[1].toggleFilter($parent.code, option.value); return true; }"/>
+                            <input type="checkbox" data-bind="checked: option.selected, click: function() { $parents[1].toggleFilter($parent.code, option.value); return true; }">
                             <!-- ko if: option.swatch -->
                             <span class="merch-swatch" data-bind="style: {backgroundColor: option.swatch}"></span>
                             <!-- /ko -->
@@ -169,7 +169,7 @@
                 <ul class="merch-fv-list" data-bind="foreach: {data: view().options, as: 'option'}">
                     <li class="merch-fv" data-bind="css: {_selected: option.selected}">
                         <label class="merch-fv-main">
-                            <input type="checkbox" data-bind="checked: option.selected, click: function() { $parents[1].toggleFilter($parent.code, option.value); return true; }"/>
+                            <input type="checkbox" data-bind="checked: option.selected, click: function() { $parents[1].toggleFilter($parent.code, option.value); return true; }">
                             <!-- ko if: option.swatch -->
                             <span class="merch-swatch" data-bind="style: {backgroundColor: option.swatch}"></span>
                             <!-- /ko -->
@@ -230,24 +230,24 @@
         <div class="merch-copy-grid">
             <div class="merch-copy-categories">
                 <strong class="merch-values-title" data-bind="i18n: 'Categories'"></strong>
-                <input type="search" id="merch-facets-copy-search" class="admin__control-text" data-bind="attr: {placeholder: $t('Search a category')}"/>
+                <input type="search" id="merch-facets-copy-search" class="admin__control-text" data-bind="attr: {placeholder: $t('Search a category')}">
                 <div id="merch-facets-copy-tree" class="merch-copy-tree"></div>
             </div>
             <div class="merch-copy-options">
                 <strong class="merch-values-title" data-bind="i18n: 'Store Views'"></strong>
                 <ul class="merch-copy-stores" data-bind="foreach: stores">
                     <li class="admin__field-option">
-                        <input type="checkbox" class="admin__control-checkbox" data-bind="checkedValue: String(id), checked: $parent.copyStoreIds, attr: {id: 'merch-copy-store-' + id}"/>
+                        <input type="checkbox" class="admin__control-checkbox" data-bind="checkedValue: String(id), checked: $parent.copyStoreIds, attr: {id: 'merch-copy-store-' + id}">
                         <label class="admin__field-label" data-bind="attr: {for: 'merch-copy-store-' + id}, text: website + ' / ' + name"></label>
                     </li>
                 </ul>
                 <strong class="merch-values-title" data-bind="i18n: 'Options'"></strong>
                 <div class="admin__field-option">
-                    <input type="checkbox" class="admin__control-checkbox" id="merch-copy-children" data-bind="checked: copyIncludeChildren"/>
+                    <input type="checkbox" class="admin__control-checkbox" id="merch-copy-children" data-bind="checked: copyIncludeChildren">
                     <label class="admin__field-label" for="merch-copy-children" data-bind="i18n: 'Include subcategories'"></label>
                 </div>
                 <div class="admin__field-option">
-                    <input type="checkbox" class="admin__control-checkbox" id="merch-copy-overwrite" data-bind="checked: copyOverwrite"/>
+                    <input type="checkbox" class="admin__control-checkbox" id="merch-copy-overwrite" data-bind="checked: copyOverwrite">
                     <label class="admin__field-label" for="merch-copy-overwrite" data-bind="i18n: 'Overwrite existing configurations'"></label>
                 </div>
             </div>

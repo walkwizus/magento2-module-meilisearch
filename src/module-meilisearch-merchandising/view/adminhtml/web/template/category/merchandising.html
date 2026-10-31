@@ -98,7 +98,7 @@
                             </label>
                             <input type="text"
                                    class="admin__control-text data-grid-search-control"
-                                   data-bind="textInput: searchQuery, attr: {placeholder: $t('Search by name or SKU')}"/>
+                                   data-bind="textInput: searchQuery, attr: {placeholder: $t('Search by name or SKU')}">
                             <button type="submit" class="action-submit" data-bind="attr: {title: $t('Search')}">
                                 <span data-bind="i18n: 'Search'"></span>
                             </button>
@@ -155,7 +155,7 @@
                                        data-bind="value: $parent.getPosition($data),
                                                   enable: $parent.canArrange(),
                                                   attr: {max: $parent.sortableCount(), title: $t('Position')},
-                                                  event: {change: $parent.onPositionChange.bind($parent), keydown: $parent.onPositionKeyDown.bind($parent)}"/>
+                                                  event: {change: $parent.onPositionChange.bind($parent), keydown: $parent.onPositionKeyDown.bind($parent)}">
                             </label>
                             <div class="merch-product-moves">
                                 <button type="button" class="merch-product-move _top" data-bind="enable: $parent.canArrange(), click: $parent.moveToTop.bind($parent), attr: {title: $t('Move to top')}">
