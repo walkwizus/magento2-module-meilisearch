@@ -79,7 +79,7 @@ $eagerImageCount = (int)($block->getData('eager_image_count') ?? 4);
     </div>
 <?php endif; ?>
 <div id="meilisearch-frontend-search" data-bind="scope: 'meilisearch-frontend-search'">
-    <!-- ko template: getTemplate() --><!-- /ko -->
+    <!-- ko template: { name: getTemplate(), afterRender: $data.afterRenderTemplate } --><!-- /ko -->
 </div>
 <script type="text/x-magento-init">
     {
