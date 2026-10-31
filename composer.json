@@ -48,6 +48,9 @@
         "phpunit/phpunit": "^10.5",
         "shipmonk/composer-dependency-analyser": "^1.8"
     },
+    "conflict": {
+        "meilisearch/meilisearch-php": "<2.0.0-beta.8"
+    },
     "suggest": {
         "meilisearch/meilisearch-php": "Required to interact with Meilisearch API from PHP.",
         "walkwizus/magento2-module-meilisearch-breeze": "Provides optimized frontend support for Breeze-based themes.",
