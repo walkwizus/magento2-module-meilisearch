@@ -24,7 +24,7 @@ class ApiKeyEncryption
      */
     public function encrypt(?string $apiKey): ?string
     {
-        if ($apiKey === null || $apiKey === '' || self::isEncrypted($apiKey)) {
+        if ($apiKey === null || $apiKey === '' || $this->isEncrypted($apiKey)) {
             return $apiKey;
         }
 
@@ -32,10 +32,19 @@ class ApiKeyEncryption
     }
 
     /**
+     * @param string $apiKey
+     * @return string
+     */
+    public function decrypt(string $apiKey): string
+    {
+        return $this->isEncrypted($apiKey) ? $this->encryptor->decrypt($apiKey) : $apiKey;
+    }
+
+    /**
      * @param string $value
      * @return bool
      */
-    public static function isEncrypted(string $value): bool
+    public function isEncrypted(string $value): bool
     {
         return (bool) preg_match(self::ENCRYPTED_PATTERN, $value);
     }
