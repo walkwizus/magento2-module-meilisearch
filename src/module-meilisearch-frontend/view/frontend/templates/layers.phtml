@@ -3,6 +3,9 @@
 ?>
 <div id="meilisearch-frontend-layers" data-bind="scope: 'meilisearch-frontend-layers'">
     <!-- ko template: getTemplate() --><!-- /ko -->
+    <div class="block filter meilisearch-layers-placeholder">
+        <div class="block-title filter-title"><strong><?= $block->escapeHtml(__('Shop By')) ?></strong></div>
+    </div>
 </div>
 <script type="text/x-magento-init">
     {
