@@ -223,18 +223,6 @@ parameters:
 			path: src/module-meilisearch-frontend/Model/LayoutHandle/AddMeilisearchResultHandle.php
 
 		-
-			message: '#^Parameter \#1 \$product of method Magento\\Catalog\\Helper\\Image\:\:init\(\) expects Magento\\Catalog\\Model\\Product, Magento\\Framework\\DataObject given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/module-meilisearch-frontend/Model/Media/ImageCacheHashResolver.php
-
-		-
-			message: '#^Parameter \#2 \$condition of method Magento\\Catalog\\Model\\ResourceModel\\Product\\Collection\:\:addAttributeToFilter\(\) expects array\|null, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/module-meilisearch-frontend/Model/Media/ImageCacheHashResolver.php
-
-		-
 			message: '#^Call to an undefined method Magento\\Framework\\View\\Result\\Page\:\:setActiveMenu\(\)\.$#'
 			identifier: method.notFound
 			count: 1
