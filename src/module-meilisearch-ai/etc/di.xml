@@ -27,6 +27,13 @@
             </argument>
         </arguments>
     </type>
+    <type name="Walkwizus\MeilisearchBase\Model\Indexer\IndexLifecyclePool">
+        <arguments>
+            <argument name="lifecycles" xsi:type="array">
+                <item name="embedders" xsi:type="object">Walkwizus\MeilisearchAi\Model\Indexer\EmbedderIndexLifecycle</item>
+            </argument>
+        </arguments>
+    </type>
     <type name="Walkwizus\MeilisearchFrontend\Model\ConfigProvider">
         <arguments>
             <argument name="providers" xsi:type="array">
