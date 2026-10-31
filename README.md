@@ -27,7 +27,11 @@ Meilisearch is a search engine featuring a blazing fast RESTful search API, typo
 
 > [!IMPORTANT]
 > **Meilisearch PHP SDK Dependency** > This module **no longer includes the Meilisearch PHP SDK automatically**. You must install it manually in your project.  
-> The module requires **Meilisearch PHP SDK version `>= 2.0.0-beta.3`**.
+> The module requires **Meilisearch PHP SDK version `>= 2.0.0-beta.8`**.
+>
+> ```bash
+> composer require "meilisearch/meilisearch-php:^2.0@beta"
+> ```
 
 ## 🧩 Hyvä Compatibility
 
