@@ -62,7 +62,7 @@ class Ssr implements ArgumentInterface
             return $this->searchResultCache;
         }
 
-        $query = (string)$this->request->getParam('q', '');
+        $query = $this->getStringParam('q');
         $currentPageParam = (int)$this->request->getParam('page', 1);
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
 
@@ -102,6 +102,15 @@ class Ssr implements ArgumentInterface
 
             $this->logger->warning('Meilisearch: hybrid search failed, falling back to keyword search', ['exception' => $e]);
             $queries = $this->buildQueries($indexName, $query, $facets, $selectedFacets, $currentPage, $hitsPerPage, $sort, null, null);
+            $results = $this->searchManager->multisearch($queries);
+        }
+
+        $lastPage = (int)($results['results'][0]['totalPages'] ?? 0);
+        if ($currentPage > $lastPage && $lastPage > 0) {
+            // past the last page, show the last page, as core's product collection does
+            foreach ($queries as $pageQuery) {
+                $pageQuery->setPage($lastPage);
+            }
             $results = $this->searchManager->multisearch($queries);
         }
 
@@ -439,16 +448,14 @@ class Ssr implements ArgumentInterface
      */
     public function getHitsPerPage(): int
     {
-        $currentHitsPerPage = $this->request->getParam('product_list_limit');
+        $mode = $this->getProductListMode();
+        $limit = $this->getStringParam('product_list_limit');
+        $limit = ctype_digit($limit) ? (int)$limit : 0;
 
-        if ($currentHitsPerPage) {
-            return (int)$currentHitsPerPage;
-        }
-
-        $defaultViewMode = $this->config['defaultViewMode'];
-        $currentViewMode = $this->request->getParam('product_list_mode', $defaultViewMode);
-
-        return (int)$this->config[$currentViewMode . 'PerPage'];
+        // only the configured limits, as core's toolbar does
+        return in_array($limit, $this->config[$mode . 'PerPageValues'] ?? [], true)
+            ? $limit
+            : (int)$this->config[$mode . 'PerPage'];
     }
 
     /**
@@ -464,8 +471,10 @@ class Ssr implements ArgumentInterface
      */
     public function getProductListMode(): string
     {
-        $defaultViewMode = $this->config['defaultViewMode'] ?? 'grid';
-        return (string)$this->request->getParam('product_list_mode', $defaultViewMode);
+        $mode = $this->getStringParam('product_list_mode');
+        $modes = array_keys($this->config['availableViewMode'] ?? ['grid' => '', 'list' => '']);
+
+        return in_array($mode, $modes, true) ? $mode : ($this->config['defaultViewMode'] ?? 'grid');
     }
 
     /**
@@ -475,7 +484,7 @@ class Ssr implements ArgumentInterface
     {
         $available = $this->config['availableSortBy'] ?? [];
 
-        $sort = (string)$this->request->getParam('product_list_order', '');
+        $sort = $this->getStringParam('product_list_order');
         if ($sort && isset($available[$sort])) {
             return $sort;
         }
@@ -493,7 +502,7 @@ class Ssr implements ArgumentInterface
      */
     public function isDescending(): bool
     {
-        $dir = strtolower((string) $this->request->getParam('product_list_dir', 'asc'));
+        $dir = strtolower($this->getStringParam('product_list_dir'));
         return $dir === 'desc';
     }
 
@@ -543,5 +552,17 @@ class Ssr implements ArgumentInterface
     public function getProductPrice($price): string
     {
         return $this->priceCurrency->convertAndFormat((float)$price);
+    }
+
+    /**
+     * Query params arrive as arrays when written as name[]=, so anything non-scalar is ignored.
+     *
+     * @param string $name
+     * @return string
+     */
+    private function getStringParam(string $name): string
+    {
+        $value = $this->request->getParam($name);
+        return is_scalar($value) ? (string)$value : '';
     }
 }

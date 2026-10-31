@@ -62,6 +62,10 @@ define([
             indexName: meilisearchConfig.indexName
         });
 
+        // The server shows the last page for a page past the end
+        if (initialState.page) {
+            facetsState.currentPage(initialState.page);
+        }
         updateResults(initialState);
         initSubscription();
 

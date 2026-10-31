@@ -20,6 +20,7 @@
     ],
     "require": {
         "php": ">=8.1",
+        "ext-ctype": "*",
         "ext-filter": "*",
         "magento/framework": "^103.0.4",
         "magento/module-advanced-search": "^100.4",

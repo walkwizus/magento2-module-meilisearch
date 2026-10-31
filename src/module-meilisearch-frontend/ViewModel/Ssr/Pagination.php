@@ -33,7 +33,8 @@ class Pagination implements ArgumentInterface
      */
     public function getCurrentPage(array $result): int
     {
-        return $result['page'] ?? 1;
+        // Meilisearch echoes any requested page, even past the last one
+        return max(1, min($result['page'] ?? 1, $this->getLastPageNum($result)));
     }
 
     /**
