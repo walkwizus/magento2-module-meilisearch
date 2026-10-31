@@ -35,7 +35,7 @@ class EncryptEmbedderApiKeys implements DataPatchInterface
             ->where('api_key != ?', '');
 
         foreach ($connection->fetchPairs($select) as $embedderId => $apiKey) {
-            if (ApiKeyEncryption::isEncrypted((string) $apiKey)) {
+            if ($this->apiKeyEncryption->isEncrypted((string) $apiKey)) {
                 continue;
             }
 

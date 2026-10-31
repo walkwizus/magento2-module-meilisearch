@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchAi\Model;
 
-use Magento\Framework\Encryption\EncryptorInterface;
 use Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface;
 use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\CollectionFactory as EmbedderCollectionFactory;
 
@@ -12,11 +11,11 @@ class EmbedderConfigBuilder
 {
     /**
      * @param EmbedderCollectionFactory $embedderCollectionFactory
-     * @param EncryptorInterface $encryptor
+     * @param ApiKeyEncryption $apiKeyEncryption
      */
     public function __construct(
         private readonly EmbedderCollectionFactory $embedderCollectionFactory,
-        private readonly EncryptorInterface $encryptor
+        private readonly ApiKeyEncryption $apiKeyEncryption
     ) {
     }
 
@@ -72,6 +71,6 @@ class EmbedderConfigBuilder
             return null;
         }
 
-        return ApiKeyEncryption::isEncrypted($apiKey) ? $this->encryptor->decrypt($apiKey) : $apiKey;
+        return $this->apiKeyEncryption->decrypt($apiKey);
     }
 }

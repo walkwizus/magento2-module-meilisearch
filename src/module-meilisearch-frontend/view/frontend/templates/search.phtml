@@ -33,7 +33,7 @@ $priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price')
                            class="product photo product-item-photo">
                             <span class="product-image-container" style="width: <?= (int)$imageWidth ?>px;">
                                 <span class="product-image-wrapper"
-                                      style="padding-bottom: <?= $imageRatio ?>%;">
+                                      style="padding-bottom: <?= (float)$imageRatio ?>%;">
                                     <img
                                         src="<?= $escaper->escapeUrl(
                                             $viewModel->getProductImage($hit[$imageAttribute])

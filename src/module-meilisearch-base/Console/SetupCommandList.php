@@ -64,6 +64,7 @@ class SetupCommandList implements CommandListInterface
      */
     private function createInstallCommand(Application $application): InstallCommand
     {
+        // phpcs:ignore Magento2.Security.IncludeFile -- same bootstrap as Magento's own setup application
         $configuration = require BP . '/setup/config/application.config.php';
         $serviceManager = $this->setupApplication->bootstrap($configuration)->getServiceManager();
         $serviceManager->get(ObjectManagerProvider::class)->setObjectManager($this->objectManager);

@@ -11,7 +11,7 @@
         <input type="number"
                min="1"
                class="admin__control-text"
-               data-bind="value: page(), attr: {max: pages()}, event: {change: onPageInputChange}"/>
+               data-bind="value: page(), attr: {max: pages()}, event: {change: onPageInputChange}">
         <label class="admin__control-support-text" data-bind="text: $t('of %1').replace('%1', pages())"></label>
         <button type="button" class="action-next" data-bind="click: nextPage, disable: page() >= pages(), attr: {title: $t('Next Page')}">
             <span data-bind="i18n: 'Next Page'"></span>
