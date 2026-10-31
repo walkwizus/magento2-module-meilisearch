@@ -2,12 +2,13 @@ define([
     'ko',
     'uiComponent',
     'Walkwizus_MeilisearchFrontend/js/model/product-model',
+    'Walkwizus_MeilisearchFrontend/js/model/product-actions',
     'Walkwizus_MeilisearchFrontend/js/model/viewmode-state',
     'Walkwizus_MeilisearchFrontend/js/model/search-state',
     'Walkwizus_MeilisearchFrontend/js/service/product-render',
     'Walkwizus_MeilisearchFrontend/js/fragments',
     'Magento_Ui/js/lib/knockout/template/engine'
-], function(ko, Component, productModel, viewModeState, searchState, productRender, fragments, templateEngine) {
+], function(ko, Component, productModel, productActions, viewModeState, searchState, productRender, fragments, templateEngine) {
     'use strict';
 
     const meilisearchConfig = window.meilisearchFrontendConfig;
@@ -17,7 +18,8 @@ define([
         defaults: {
             priceTemplate: 'Walkwizus_MeilisearchFrontend/product/price',
             priceAmountTemplate: 'Walkwizus_MeilisearchFrontend/product/price/amount',
-            swatchesTemplate: 'Walkwizus_MeilisearchFrontend/product/swatches'
+            swatchesTemplate: 'Walkwizus_MeilisearchFrontend/product/swatches',
+            actionsTemplate: 'Walkwizus_MeilisearchFrontend/product/actions'
         },
 
         initialize: function() {
@@ -31,6 +33,7 @@ define([
             this.currentPage = searchState.currentPage;
             this.searchQuery = searchState.searchQuery;
             this.productModel = productModel;
+            this.productActions = productActions;
             this.fragments = meilisearchConfig.fragments || [];
             this.showSwatchesInProductList = meilisearchConfig.showSwatchesInProductList;
             this.hitRenders = {};
@@ -123,9 +126,20 @@ define([
             const selection = ko.observable({});
             const priceAttributeCode = meilisearchConfig.priceAttributeCode;
             const fallbackPrice = hit[priceAttributeCode];
+            const attributes = this.showSwatchesInProductList
+                ? productRender.getSwatchAttributes(hit, meilisearchConfig.swatchOptions)
+                : [];
 
             return {
-                attributes: this.showSwatchesInProductList ? productRender.getSwatchAttributes(hit, meilisearchConfig.swatchOptions) : [],
+                attributes: attributes,
+
+                superAttributes: ko.pureComputed(() => attributes
+                    .filter(attribute => selection()[attribute.attribute_id] !== undefined)
+                    .map(attribute => ({
+                        id: attribute.attribute_id,
+                        code: attribute.attribute_code,
+                        value: selection()[attribute.attribute_id]
+                    }))),
 
                 imageUrl: ko.pureComputed(() => {
                     const imageType = (productModel.getImageConfig() || {}).type || 'small_image';

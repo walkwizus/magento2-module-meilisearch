@@ -1,0 +1,38 @@
+<div class="product-item-inner">
+    <div class="product actions product-item-actions">
+        <div class="actions-primary">
+            <!-- ko if: isSaleable -->
+            <form data-role="tocart-form" method="post" data-bind="
+                attr: { action: addToCartAction, 'data-product-sku': sku },
+                mageInit: { catalogAddToCart: {} }
+            ">
+                <input type="hidden" name="product" data-bind="value: productId">
+                <input type="hidden" name="form_key" data-bind="value: formKey">
+                <!-- ko foreach: superAttributes -->
+                <input type="hidden" data-bind="attr: { name: 'super_attribute[' + id + ']', 'data-attr-name': code }, value: value">
+                <!-- /ko -->
+                <button type="submit" class="action tocart primary" data-bind="attr: { title: $t('Add to Cart') }" disabled>
+                    <span><!-- ko i18n: 'Add to Cart' --><!-- /ko --></span>
+                </button>
+            </form>
+            <!-- /ko -->
+            <!-- ko ifnot: isSaleable -->
+            <div class="stock unavailable"><span><!-- ko i18n: 'Out of stock' --><!-- /ko --></span></div>
+            <!-- /ko -->
+        </div>
+        <div data-role="add-to-links" class="actions-secondary">
+            <!-- ko if: wishlistPost -->
+            <a href="#" class="action towishlist" data-action="add-to-wishlist" role="button" data-bind="
+                attr: { 'data-post': wishlistPost, title: $t('Add to Wish List'), 'aria-label': $t('Add to Wish List') }
+            ">
+                <span><!-- ko i18n: 'Add to Wish List' --><!-- /ko --></span>
+            </a>
+            <!-- /ko -->
+            <a href="#" class="action tocompare" role="button" data-bind="
+                attr: { 'data-post': comparePost, title: $t('Add to Compare'), 'aria-label': $t('Add to Compare') }
+            ">
+                <span><!-- ko i18n: 'Add to Compare' --><!-- /ko --></span>
+            </a>
+        </div>
+    </div>
+</div>

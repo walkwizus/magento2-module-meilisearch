@@ -60,6 +60,11 @@
                     </arguments>
                     <block name="meilisearch.frontend.search.product.price.amount" as="amount" template="Walkwizus_MeilisearchFrontend::product/price/amount.phtml"/>
                 </block>
+                <block name="meilisearch.frontend.search.product.actions" template="Walkwizus_MeilisearchFrontend::product/actions.phtml">
+                    <arguments>
+                        <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\ProductActions</argument>
+                    </arguments>
+                </block>
                 <block name="meilisearch.frontend.search.pagination" template="Walkwizus_MeilisearchFrontend::ssr/pagination.phtml">
                     <arguments>
                         <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr\Pagination</argument>
