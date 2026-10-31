@@ -67,6 +67,7 @@
                 </block>
                 <arguments>
                     <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr</argument>
+                    <argument name="eager_image_count" xsi:type="number">4</argument>
                     <argument name="jsLayout" xsi:type="array">
                         <item name="components" xsi:type="array">
                             <item name="meilisearch-frontend-search" xsi:type="array">

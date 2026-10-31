@@ -14,6 +14,7 @@ $imageWidth = $config['images']['category_page_' . $productListMode]['width'];
 $imageHeight = $config['images']['category_page_' . $productListMode]['height'];
 $imageRatio = ((int)$imageHeight / (int)$imageWidth) * 100;
 $priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price');
+$eagerImageCount = (int)($block->getData('eager_image_count') ?? 4);
 ?>
 <?php if ($totalHits === 0): ?>
     <div id="meilisearch-frontend-search-ssr">
@@ -26,7 +27,7 @@ $priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price')
         <div class="products wrapper <?= $escaper->escapeHtmlAttr($productListMode) ?>
              products-<?= $escaper->escapeHtmlAttr($productListMode) ?>">
             <ol class="products list items product-items">
-                <?php foreach ($searchResult['hits'] as $hit): ?>
+                <?php foreach ($searchResult['hits'] as $index => $hit): ?>
                 <li class="item product product-item">
                     <div class="product-item-info">
                         <a href="<?= $escaper->escapeUrl($viewModel->getProductUrl($hit['url_key'])) ?>"
@@ -40,7 +41,7 @@ $priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price')
                                         ) ?>"
                                          alt="<?= $escaper->escapeHtmlAttr($hit['name']) ?>"
                                          class="product-image-photo"
-                                         loading="lazy"
+                                         <?= $index < $eagerImageCount ? 'fetchpriority="high"' : 'loading="lazy"' ?>
                                          width="<?= (int)$imageWidth ?>"
                                          height="<?= (int)$imageHeight ?>" />
                                 </span>
