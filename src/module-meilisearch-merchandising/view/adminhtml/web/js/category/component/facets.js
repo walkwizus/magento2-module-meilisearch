@@ -101,6 +101,7 @@ define([
             ko.bindingHandlers.merchandisingFacetSortable = {
                 init: function(element, valueAccessor) {
                     let options = valueAccessor();
+                    let nextSibling = null;
                     let sortable = Sortable.create(element, {
                         draggable: options.draggable,
                         handle: options.handle,
@@ -109,7 +110,11 @@ define([
                         fallbackOnBody: true,
                         fallbackTolerance: 4,
                         ghostClass: 'merch-facet-ghost',
+                        onStart: function(event) {
+                            nextSibling = event.item.nextSibling;
+                        },
                         onEnd: function(event) {
+                            event.from.insertBefore(event.item, nextSibling);
                             if (event.oldDraggableIndex !== event.newDraggableIndex) {
                                 options.onSort(event.oldDraggableIndex, event.newDraggableIndex);
                             }
@@ -530,7 +535,6 @@ define([
             let order = this.facetOrder().slice();
 
             order.splice(newIndex, 0, order.splice(oldIndex, 1)[0]);
-            this.facetOrder([]);
             this.facetOrder(order);
         },
 
@@ -539,7 +543,6 @@ define([
             let order = state.order().slice();
 
             order.splice(newIndex, 0, order.splice(oldIndex, 1)[0]);
-            state.order([]);
             state.order(order);
         },
 
