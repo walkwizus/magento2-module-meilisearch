@@ -67,8 +67,18 @@ class ApiKey extends Command
                 $key->getName(),
                 $key->getUid(),
                 $key->getKey(),
-                implode(', ', $key->getActions()),
-                implode(', ', $key->getIndexes()),
+                implode(', ',
+                    array_map(
+                            fn ($action) => $action->value,
+                            $key->getActions()
+                        )
+                    ),
+                implode(', ',
+                    array_map(
+                            fn ($action) => $action->value,
+                            $key->getActions()
+                        )
+                    ),
                 $key->getExpiresAt() ?? 'never',
             ];
         }

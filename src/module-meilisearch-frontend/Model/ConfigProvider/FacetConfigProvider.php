@@ -13,6 +13,12 @@ use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Magento\Swatches\Model\Swatch;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\App\Request\Http as HttpRequest;
+use Magento\Catalog\Model\Layer\Resolver as LayerResolver;
+use Magento\Catalog\Model\Category;
+use Magento\Store\Model\StoreManagerInterface;
+use Walkwizus\MeilisearchMerchandising\Api\CategoryFacetOrderingResolverInterface;
+use Walkwizus\MeilisearchMerchandising\Model\CategoryFacet\OrderingApplier;
 
 class FacetConfigProvider implements ConfigProviderInterface
 {
@@ -33,12 +39,22 @@ class FacetConfigProvider implements ConfigProviderInterface
      * @param AttributeResolver $attributeResolver
      * @param AttributeFactory $attributeFactory
      * @param SwatchHelper $swatchHelper
+     * @param HttpRequest $request
+     * @param LayerResolver $layerResolver
+     * @param StoreManagerInterface $storeManager
+     * @param CategoryFacetOrderingResolverInterface $categoryFacetOrderingResolver
+     * @param OrderingApplier $orderingApplier
      */
     public function __construct(
         private readonly AttributeProvider $attributeProvider,
         private readonly AttributeResolver $attributeResolver,
         private readonly AttributeFactory $attributeFactory,
-        private readonly SwatchHelper $swatchHelper
+        private readonly SwatchHelper $swatchHelper,
+        private readonly HttpRequest $request,
+        private readonly LayerResolver $layerResolver,
+        private readonly StoreManagerInterface $storeManager,
+        private readonly CategoryFacetOrderingResolverInterface $categoryFacetOrderingResolver,
+        private readonly OrderingApplier $orderingApplier
     ) { }
 
     /**
@@ -49,13 +65,46 @@ class FacetConfigProvider implements ConfigProviderInterface
     {
         $attributes = $this->attributeProvider->getFilterableAttributes(SearchIndexNameResolver::DEFAULT_INDEX, 'frontend');
         $processedFacets = $this->getFacetList($attributes);
+        $facetList = array_keys($processedFacets);
+        $category = $this->getCurrentCategory();
+
+        if ($category !== null && !$category->getData('is_anchor')) {
+            $facetList = [];
+        } elseif ($category !== null) {
+            $categoryOrdering = $this->categoryFacetOrderingResolver->resolve(
+                (int) $this->storeManager->getStore()->getId(),
+                (int) $category->getId()
+            );
+
+            if ($categoryOrdering !== null) {
+                [$facetList, $processedFacets] = $this->orderingApplier->apply($facetList, $processedFacets, $categoryOrdering);
+            }
+        }
 
         return [
             'facets' => [
-                'facetList' => array_keys($processedFacets),
+                'facetList' => $facetList,
                 'facetConfig' => $processedFacets
             ]
         ];
+    }
+
+    /**
+     * @return Category|null
+     */
+    private function getCurrentCategory(): ?Category
+    {
+        if ($this->request->getFullActionName() !== 'catalog_category_view') {
+            return null;
+        }
+
+        try {
+            $category = $this->layerResolver->get()->getCurrentCategory();
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return $category->getId() ? $category : null;
     }
 
     /**

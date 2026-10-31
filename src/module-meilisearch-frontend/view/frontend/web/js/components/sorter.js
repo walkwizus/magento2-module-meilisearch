@@ -1,10 +1,12 @@
 define([
+    'ko',
     'uiComponent',
     'Walkwizus_MeilisearchFrontend/js/model/sorter-state'
-], function(Component, sorterState) {
+], function(ko, Component, sorterState) {
     'use strict';
 
     const meilisearchConfig = window.meilisearchFrontendConfig;
+    const SORT_RELEVANCE = 'relevance';
 
     return Component.extend({
         initialize: function() {
@@ -14,6 +16,10 @@ define([
             this.isDescending = sorterState.isDescending;
 
             this.currentSort = meilisearchConfig.defaultSortBy;
+
+            this.isDirectionDisabled = ko.pureComputed(
+                () => (sorterState.sortBy() || meilisearchConfig.defaultSortBy) === SORT_RELEVANCE
+            );
 
             return this;
         },
@@ -36,7 +42,10 @@ define([
         },
 
         toggleSortDirection: function() {
-            this.isDescending(!this.isDescending());
+            if (!this.isDirectionDisabled()) {
+                this.isDescending(!this.isDescending());
+            }
+
             return false;
         }
     });

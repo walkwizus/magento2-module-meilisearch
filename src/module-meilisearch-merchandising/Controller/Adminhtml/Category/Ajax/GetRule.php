@@ -13,6 +13,8 @@ use Magento\Framework\Controller\ResultInterface;
 
 class GetRule extends Action implements HttpPostActionInterface
 {
+    const ADMIN_RESOURCE = 'Walkwizus_MeilisearchMerchandising::merchandising_category';
+
     /**
      * @param Context $context
      * @param CategoryRepositoryInterface $categoryRepository

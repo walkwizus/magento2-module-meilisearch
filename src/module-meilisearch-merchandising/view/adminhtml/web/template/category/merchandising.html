@@ -1,40 +1,224 @@
-<div id="messages" data-bind="visible: merchandising.message(), css: 'fadeout'">
-    <div class="messages">
-        <div class="message message-success success">
-            <div data-bind="text: merchandising.message()"></div>
-        </div>
+<!-- ko if: message() -->
+<div class="messages">
+    <div class="message" data-bind="css: 'message-' + message().type + ' ' + message().type">
+        <div data-bind="text: message().text"></div>
     </div>
 </div>
-<div class="category-merchandising">
-    <button data-bind="click: saveRule" type="button" id="save-rule" class="save primary">
-        <span data-bind="i18n: 'Save Rule'"></span>
-    </button>
-    <button data-bind="click: deleteRule, enable: merchandising.currentRule()" type="button" class="save secondary">
-        <span data-bind="i18n: 'Delete Rule'"></span>
-    </button>
-    <div id="query-builder" data-bind="initQueryBuilder"></div>
-    <button data-bind="click: preview" type="button" class="save secondary">
-        <span data-bind="i18n: 'Preview'"></span>
-    </button>
-    <div id="category-merchandising-preview">
-        <div class="product-grid" data-bind="foreach: merchandising.docs()">
-            <div class="product-card" data-bind="attr: {'data-product-id': id}">
-                <img data-bind="attr: { src: $parent.productMediaUrl + small_image, alt: name }" class="product-image">
-                <div class="product-name" data-bind="text: name"></div>
-                <div class="product-sku">
-                    <span data-bind="text: 'SKU: ' + sku"></span>
-                    <button type="button"
-                            class="copy-sku-button"
-                            data-bind="attr: { 'data-sku': sku }, click: $parent.copySku"
-                            aria-label="Copy SKU">
-                        <svg class="copy-sku-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                            <path d="M208 0L332.1 0c12.7 0 24.9 5.1 33.9 14.1l67.9 67.9c9 9 14.1 21.2 14.1 33.9L448 336c0 26.5-21.5 48-48 48l-192 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48zM48 128l80 0 0 64-64 0 0 256 192 0 0-32 64 0 0 48c0 26.5-21.5 48-48 48L48 512c-26.5 0-48-21.5-48-48L0 176c0-26.5 21.5-48 48-48z"/>
-                        </svg>
-                        <span class="copy-tooltip">Copied!</span>
-                    </button>
+<!-- /ko -->
+
+<!-- ko ifnot: merchandising.currentCategoryId() -->
+<div class="entry-edit form-inline merch-empty">
+    <span class="merch-empty-icon merch-icon-category"></span>
+    <strong class="merch-empty-title" data-bind="i18n: 'Select a category'"></strong>
+    <p data-bind="i18n: 'Choose a category in the tree to define its merchandising rule and arrange its products.'"></p>
+</div>
+<!-- /ko -->
+
+<div class="entry-edit form-inline merch-category" data-bind="visible: merchandising.currentCategoryId()">
+    <div class="merch-category-header">
+        <div class="merch-category-heading">
+            <h2 class="merch-category-name" data-bind="text: merchandising.currentCategoryName()"></h2>
+            <!-- ko if: merchandising.currentRule() -->
+            <span class="merch-badge _active" data-bind="i18n: 'Rule active'"></span>
+            <!-- /ko -->
+            <!-- ko ifnot: merchandising.currentRule() -->
+            <span class="merch-badge" data-bind="i18n: 'No rule'"></span>
+            <!-- /ko -->
+        </div>
+        <div class="merch-category-path">
+            <span data-bind="text: merchandising.currentCategoryPath()"></span>
+            <span class="merch-category-id" data-bind="text: 'ID: ' + merchandising.currentCategoryId()"></span>
+        </div>
+    </div>
+
+    <div class="fieldset-wrapper admin__collapsible-block-wrapper merch-section">
+        <div class="fieldset-wrapper-title"
+             tabindex="0"
+             data-bind="click: toggleRule, attr: {'data-state-collapsible': ruleOpened() ? 'open' : 'closed'}">
+            <strong class="admin__collapsible-title">
+                <span data-bind="i18n: 'Rule'"></span>
+            </strong>
+        </div>
+        <div class="admin__fieldset-wrapper-content admin__collapsible-content" data-bind="css: {_show: ruleOpened(), _hide: !ruleOpened()}">
+            <p class="merch-note" data-bind="i18n: 'Products matching these conditions are displayed in the category, in addition to the products assigned in the catalog.'"></p>
+            <div id="query-builder" class="merch-query-builder" data-bind="initQueryBuilder"></div>
+            <div class="merch-section-actions">
+                <button type="button" class="action-secondary" data-bind="click: preview">
+                    <span data-bind="i18n: 'Preview Products'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="fieldset-wrapper admin__collapsible-block-wrapper merch-section">
+        <div class="fieldset-wrapper-title"
+             tabindex="0"
+             data-bind="click: toggleProducts, attr: {'data-state-collapsible': productsOpened() ? 'open' : 'closed'}">
+            <strong class="admin__collapsible-title">
+                <span data-bind="i18n: 'Products'"></span>
+                <!-- ko if: previewLoaded() -->
+                <span class="merch-count" data-bind="text: total()"></span>
+                <!-- /ko -->
+            </strong>
+        </div>
+        <div class="admin__fieldset-wrapper-content admin__collapsible-content" data-bind="css: {_show: productsOpened(), _hide: !productsOpened()}">
+            <div class="merch-listing">
+                <aside class="merch-listing-facets">
+                    <!-- ko scope: 'meilisearch-merchandising-category-facets' -->
+                    <!-- ko template: getTemplate() --><!-- /ko -->
+                    <!-- /ko -->
+                </aside>
+                <div class="merch-listing-main">
+                <!-- ko ifnot: previewLoaded() -->
+                <div class="merch-empty _inline">
+                    <p data-bind="i18n: 'Loading products...'"></p>
                 </div>
-                <div class="product-qty" data-bind="text: 'QTY: ' + (($data.stock && $data.stock.qty !== undefined) ? $data.stock.qty : 'N/A')"></div>
-                <div class="product-price" data-bind="text: $parent.formatPrice(price_0)"></div>
+                <!-- /ko -->
+
+                <!-- ko if: previewLoaded() -->
+                <!-- ko if: isArrangementDirty() -->
+                <div class="message message-warning warning merch-message">
+                    <div>
+                        <span data-bind="i18n: 'Product order has changed. Click Save to apply it to the storefront.'"></span>
+                        <button type="button" class="action-link" data-bind="click: resetPositions, i18n: 'Discard Changes'"></button>
+                    </div>
+                </div>
+                <!-- /ko -->
+                <!-- ko if: truncated() -->
+                <div class="message message-notice notice merch-message">
+                    <div data-bind="text: $t('Only the first %1 of the %2 matching products can be displayed and arranged.').replace('%1', sortableCount()).replace('%2', total())"></div>
+                </div>
+                <!-- /ko -->
+
+                <div class="admin__data-grid-header merch-toolbar">
+                    <div class="admin__data-grid-header-row">
+                        <form class="data-grid-search-control-wrap" data-bind="submit: search">
+                            <label class="data-grid-search-label" data-bind="attr: {title: $t('Search by keyword')}">
+                                <span data-bind="i18n: 'Search by keyword'"></span>
+                            </label>
+                            <input type="text"
+                                   class="admin__control-text data-grid-search-control"
+                                   data-bind="textInput: searchQuery, attr: {placeholder: $t('Search by name or SKU')}">
+                            <button type="submit" class="action-submit" data-bind="attr: {title: $t('Search')}">
+                                <span data-bind="i18n: 'Search'"></span>
+                            </button>
+                        </form>
+                        <!-- ko if: isSearching() -->
+                        <button type="button" class="action-link merch-clear-search" data-bind="click: clearSearch, i18n: 'Clear search'"></button>
+                        <!-- /ko -->
+                    </div>
+                    <div class="admin__data-grid-header-row row row-gutter">
+                        <div class="col-xs-3">
+                            <div class="admin__control-support-text">
+                                <span data-bind="text: $t('%1 records found').replace('%1', total())"></span>
+                            </div>
+                        </div>
+                        <div class="col-xs-9 merch-toolbar-actions">
+                            <label class="merch-sort-by">
+                                <span data-bind="i18n: 'Then sort by'"></span>
+                                <select class="admin__control-select" data-bind="options: sortByOptions, optionsText: 'label', optionsValue: 'value', value: sortBy"></select>
+                            </label>
+                            <div class="merch-view-switch" role="group" data-bind="attr: {'aria-label': $t('View')}">
+                                <button type="button"
+                                        class="merch-view-button _grid"
+                                        data-bind="click: setGridView, css: {_active: viewMode() === 'grid'}, attr: {'aria-pressed': viewMode() === 'grid', title: $t('Grid')}">
+                                    <span data-bind="i18n: 'Grid'"></span>
+                                </button>
+                                <button type="button"
+                                        class="merch-view-button _list"
+                                        data-bind="click: setListView, css: {_active: viewMode() === 'list'}, attr: {'aria-pressed': viewMode() === 'list', title: $t('List')}">
+                                    <span data-bind="i18n: 'List'"></span>
+                                </button>
+                            </div>
+                            <!-- ko template: 'Walkwizus_MeilisearchMerchandising/category/pager' --><!-- /ko -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ko if: isAutoSort() && !isFiltered() -->
+                <p class="merch-note" data-bind="i18n: 'Products are sorted automatically after the pinned ones. Drag a product to pin it at a position.'"></p>
+                <!-- /ko -->
+                <!-- ko if: isFiltered() -->
+                <p class="merch-note" data-bind="i18n: 'Drag and drop is disabled while searching or filtering. Use the position field to move a product.'"></p>
+                <!-- /ko -->
+
+                <!-- ko if: merchandising.docs().length -->
+                <ol class="merch-products" data-bind="css: {_list: viewMode() === 'list', _sortable: canSort()}, merchandisingSortable: canSort(), foreach: merchandising.docs()">
+                    <li class="merch-product" data-bind="attr: {'data-product-id': id}, css: {_pinned: $parent.isPinned($data), _buried: $parent.isBuried($data)}">
+                        <div class="merch-product-top">
+                            <span class="merch-product-handle" data-bind="visible: $parent.canSort(), attr: {title: $t('Drag to reorder')}"></span>
+                            <label class="merch-product-position">
+                                <span>#</span>
+                                <input type="number"
+                                       min="1"
+                                       class="admin__control-text"
+                                       data-bind="value: $parent.getPosition($data),
+                                                  enable: $parent.canArrange(),
+                                                  attr: {max: $parent.sortableCount(), title: $t('Position')},
+                                                  event: {change: $parent.onPositionChange.bind($parent), keydown: $parent.onPositionKeyDown.bind($parent)}">
+                            </label>
+                            <div class="merch-product-moves">
+                                <button type="button" class="merch-product-move _top" data-bind="enable: $parent.canArrange(), click: $parent.moveToTop.bind($parent), attr: {title: $t('Move to top')}">
+                                    <span data-bind="i18n: 'Move to top'"></span>
+                                </button>
+                                <button type="button"
+                                        class="merch-product-move _pin"
+                                        data-bind="enable: $parent.canArrange(), click: $parent.togglePin.bind($parent), css: {_active: $parent.isPinned($data)}, attr: {title: $parent.isPinned($data) ? $t('Unpin') : $t('Pin at this position')}">
+                                    <span data-bind="text: $parent.isPinned($data) ? $t('Unpin') : $t('Pin at this position')"></span>
+                                </button>
+                                <button type="button"
+                                        class="merch-product-move _bury"
+                                        data-bind="enable: $parent.canArrange(), click: $parent.toggleBury.bind($parent), css: {_active: $parent.isBuried($data)}, attr: {title: $parent.isBuried($data) ? $t('Unbury') : $t('Bury at the end')}">
+                                    <span data-bind="text: $parent.isBuried($data) ? $t('Unbury') : $t('Bury at the end')"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="merch-product-image">
+                            <!-- ko if: $parent.getImageUrl($data) -->
+                            <img loading="lazy" data-bind="attr: {src: $parent.getImageUrl($data), alt: name}"/>
+                            <!-- /ko -->
+                            <!-- ko ifnot: $parent.getImageUrl($data) -->
+                            <span class="merch-product-placeholder"></span>
+                            <!-- /ko -->
+                        </div>
+                        <div class="merch-product-info">
+                            <div class="merch-product-name" data-bind="attr: {title: name}, text: name"></div>
+                            <div class="merch-product-sku">
+                                <span data-bind="text: sku"></span>
+                                <button type="button" class="merch-copy" data-bind="click: $parent.copySku, attr: {title: $t('Copy SKU')}">
+                                    <span class="merch-copy-tooltip" data-bind="i18n: 'Copied!'"></span>
+                                </button>
+                                <a class="merch-edit" target="_blank" data-bind="attr: {href: $parent.getEditUrl($data), title: $t('Edit product')}">
+                                    <span data-bind="i18n: 'Edit product'"></span>
+                                </a>
+                            </div>
+                            <!-- ko if: $parent.isPinned($data) || $parent.isBuried($data) -->
+                            <span class="merch-product-flag" data-bind="css: {_buried: $parent.isBuried($data)}, text: $parent.isBuried($data) ? $t('Buried') : $t('Pinned')"></span>
+                            <!-- /ko -->
+                            <div class="merch-product-meta">
+                                <span class="merch-product-price" data-bind="text: $parent.formatPrice($data.price_0)"></span>
+                                <!-- ko if: $parent.isInStock($data) -->
+                                <span class="merch-stock _in" data-bind="text: $parent.getQty($data) !== null ? $t('Qty: %1').replace('%1', $parent.getQty($data)) : $t('In stock')"></span>
+                                <!-- /ko -->
+                                <!-- ko ifnot: $parent.isInStock($data) -->
+                                <span class="merch-stock _out" data-bind="i18n: 'Out of stock'"></span>
+                                <!-- /ko -->
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+                <div class="merch-footer">
+                    <!-- ko template: 'Walkwizus_MeilisearchMerchandising/category/pager' --><!-- /ko -->
+                </div>
+                <!-- /ko -->
+
+                <!-- ko ifnot: merchandising.docs().length -->
+                <div class="merch-empty _inline">
+                    <p data-bind="i18n: 'We couldn\'t find any records.'"></p>
+                </div>
+                <!-- /ko -->
+                <!-- /ko -->
+                </div>
             </div>
         </div>
     </div>

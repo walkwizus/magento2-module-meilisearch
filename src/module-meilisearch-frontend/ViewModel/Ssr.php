@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchFrontend\ViewModel;
 
-use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
-use Meilisearch\Contracts\SearchQueryFactory;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
+use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Meilisearch\Contracts\HybridSearchOptions;
+use Meilisearch\Exceptions\ApiException;
+use Psr\Log\LoggerInterface;
+use Meilisearch\Contracts\MultiSearchQueryFactory;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
-use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Catalog\Model\Product\Image\UrlBuilder as ImageUrlBuilder;
+use Walkwizus\MeilisearchFrontend\Model\ConfigProvider\SearchConfigProvider;
 
 class Ssr implements ArgumentInterface
 {
@@ -28,20 +31,22 @@ class Ssr implements ArgumentInterface
 
     /**
      * @param RequestInterface $request
-     * @param SearchQueryFactory $searchQueryFactory
+     * @param MultiSearchQueryFactory $multiSearchQueryFactory
      * @param HybridSearchOptions $hybridSearchOptions
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
      * @param PriceCurrencyInterface $priceCurrency
+     * @param LoggerInterface $logger
      * @param ImageUrlBuilder $imageUrlBuilder
      */
     public function __construct(
         private readonly RequestInterface $request,
-        private readonly SearchQueryFactory $searchQueryFactory,
+        private readonly MultiSearchQueryFactory $multiSearchQueryFactory,
         private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
         private readonly PriceCurrencyInterface $priceCurrency,
+        private readonly LoggerInterface $logger,
         private readonly ImageUrlBuilder $imageUrlBuilder
     ) {
         $this->config = $this->configProvider->get();
@@ -57,11 +62,11 @@ class Ssr implements ArgumentInterface
             return $this->searchResultCache;
         }
 
-        $query = $this->request->getParam('q', '');
+        $query = (string)$this->request->getParam('q', '');
         $currentPageParam = (int)$this->request->getParam('page', 1);
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
 
-        $defaultSortBy = $this->config['defaultSortBy'] ?? null;
+        $defaultSortBy = (string)($this->config['defaultSortBy'] ?? '');
         $sortBy = $this->getSortBy();
         $sortDirection = $this->isDescending() ? 'desc' : 'asc';
         $indexName = $this->config['indexName'];
@@ -85,10 +90,53 @@ class Ssr implements ArgumentInterface
             }
         }
 
+        $sort = $this->buildSort($sortBy, $sortDirection, $defaultSortBy);
+        $queries = $this->buildQueries($indexName, $query, $facets, $selectedFacets, $currentPage, $hitsPerPage, $sort, $hybridOptions, $threshold);
+
+        try {
+            $results = $this->searchManager->multisearch($queries);
+        } catch (ApiException $e) {
+            if ($hybridOptions === null) {
+                throw $e;
+            }
+
+            $this->logger->warning('Meilisearch: hybrid search failed, falling back to keyword search', ['exception' => $e]);
+            $queries = $this->buildQueries($indexName, $query, $facets, $selectedFacets, $currentPage, $hitsPerPage, $sort, null, null);
+            $results = $this->searchManager->multisearch($queries);
+        }
+
+        $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
+
+        return $this->searchResultCache;
+    }
+
+    /**
+     * @param string $indexName
+     * @param string $query
+     * @param array $facets
+     * @param array $selectedFacets
+     * @param int $currentPage
+     * @param int $hitsPerPage
+     * @param string|null $sort
+     * @param HybridSearchOptions|null $hybridOptions
+     * @param float|null $threshold
+     * @return array
+     */
+    private function buildQueries(
+        string $indexName,
+        string $query,
+        array $facets,
+        array $selectedFacets,
+        int $currentPage,
+        int $hitsPerPage,
+        ?string $sort,
+        ?HybridSearchOptions $hybridOptions,
+        ?float $threshold
+    ): array {
         $queries = [];
         $mainFilters = $this->buildFilters($selectedFacets);
 
-        $mainQuery = $this->searchQueryFactory->create()
+        $mainQuery = $this->multiSearchQueryFactory->create()
             ->setIndexUid($indexName)
             ->setQuery($query)
             ->setFacets($facets)
@@ -106,21 +154,19 @@ class Ssr implements ArgumentInterface
             $mainQuery->setFilter($mainFilters);
         }
 
-        if ($sortBy !== '') {
-            $mainQuery->setSort([$sortBy . ':' . $sortDirection]);
-        } elseif ($defaultSortBy !== '') {
-            $mainQuery->setSort([$defaultSortBy . ':asc']);
+        if ($sort !== null) {
+            $mainQuery->setSort([$sort]);
         }
 
         $queries[] = $mainQuery;
 
-        foreach ($activeCodes as $code) {
+        foreach (array_keys($selectedFacets) as $code) {
             $excludeFilters = $selectedFacets;
             unset($excludeFilters[$code]);
 
             $filters = $this->buildFilters($excludeFilters);
 
-            $disjunctiveQuery = $this->searchQueryFactory->create()
+            $disjunctiveQuery = $this->multiSearchQueryFactory->create()
                 ->setIndexUid($indexName)
                 ->setQuery($query)
                 ->setFacets([$code])
@@ -141,10 +187,30 @@ class Ssr implements ArgumentInterface
             $queries[] = $disjunctiveQuery;
         }
 
-        $results = $this->searchManager->multisearch($queries);
-        $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
+        return $queries;
+    }
 
-        return $this->searchResultCache;
+    /**
+     * @param string $sortBy
+     * @param string $sortDirection
+     * @param string $defaultSortBy
+     * @return string|null
+     */
+    private function buildSort(string $sortBy, string $sortDirection, string $defaultSortBy): ?string
+    {
+        if ($sortBy === SearchConfigProvider::SORT_RELEVANCE) {
+            return null;
+        }
+
+        if ($sortBy !== '') {
+            return $sortBy . ':' . $sortDirection;
+        }
+
+        if ($defaultSortBy !== '' && $defaultSortBy !== SearchConfigProvider::SORT_RELEVANCE) {
+            return $defaultSortBy . ':asc';
+        }
+
+        return null;
     }
 
     /**
@@ -249,10 +315,8 @@ class Ssr implements ArgumentInterface
     }
 
     /**
-     * Accepts both "from_to" and "from-to" numeric formats.
-     *
      * @param string $value
-     * @return array{0: string, 1: string}|null
+     * @return array|null
      */
     private function extractRangeBounds(string $value): ?array
     {
@@ -330,7 +394,7 @@ class Ssr implements ArgumentInterface
 
         $priceFacetCodes = array_values(array_filter(
             $facetList,
-            static fn($facetCode): bool => is_string($facetCode) && preg_match('/^price_\d+(?:_\d+)*$/', $facetCode) === 1
+            static fn ($facetCode): bool => is_string($facetCode) && preg_match('/^price_\d+(?:_\d+)*$/', $facetCode) === 1
         ));
 
         foreach ($priceFacetCodes as $facetCode) {
@@ -358,13 +422,13 @@ class Ssr implements ArgumentInterface
 
         $facets = array_filter(
             $facetConfig,
-            static fn(array $cfg, string $code): bool => isset($facetDistribution[$code]),
+            static fn (array $cfg, string $code): bool => isset($facetDistribution[$code]),
             ARRAY_FILTER_USE_BOTH
         );
 
         uasort(
             $facets,
-            static fn(array $a, array $b): int => (int)($a['position'] ?? 0) <=> (int)($b['position'] ?? 0)
+            static fn (array $a, array $b): int => (int)($a['position'] ?? 0) <=> (int)($b['position'] ?? 0)
         );
 
         return array_values($facets);
@@ -436,6 +500,7 @@ class Ssr implements ArgumentInterface
     /**
      * @param string $urlKey
      * @return string
+     * @throws LocalizedException
      */
     public function getProductUrl(string $urlKey): string
     {

@@ -1,11 +1,16 @@
+includes:
+  - phpstan-baseline.neon
+
 parameters:
   level: 5
-  phpVersion: 80399
+  phpVersion: 80100
   treatPhpDocTypesAsCertain: false
   parallel:
     maximumNumberOfProcesses: 1
   bootstrapFiles:
     - vendor/bitexpert/phpstan-magento/autoload.php
+  scanFiles:
+    - dev/phpstan/magento-setup.stub.php
   paths:
     - src
   fileExtensions:

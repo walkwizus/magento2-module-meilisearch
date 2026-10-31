@@ -12,6 +12,8 @@ $productListMode = $viewModel->getProductListMode();
 $imageAttribute = $config['images']['category_page_' . $productListMode]['type'];
 $imageWidth = $config['images']['category_page_' . $productListMode]['width'];
 $imageHeight = $config['images']['category_page_' . $productListMode]['height'];
+$imageRatio = ((int)$imageHeight / (int)$imageWidth) * 100;
+$priceBlock = $block->getChildBlock('meilisearch.frontend.search.product.price');
 ?>
 <?php if ($totalHits === 0): ?>
     <div id="meilisearch-frontend-search-ssr">
@@ -21,25 +23,43 @@ $imageHeight = $config['images']['category_page_' . $productListMode]['height'];
     </div>
 <?php else: ?>
     <div id="meilisearch-frontend-search-ssr">
-        <div class="products wrapper <?= $productListMode ?> products-<?= $productListMode ?>">
+        <div class="products wrapper <?= $escaper->escapeHtmlAttr($productListMode) ?>
+             products-<?= $escaper->escapeHtmlAttr($productListMode) ?>">
             <ol class="products list items product-items">
                 <?php foreach ($searchResult['hits'] as $hit): ?>
                 <li class="item product product-item">
                     <div class="product-item-info">
-                        <a href="<?= $viewModel->getProductUrl($hit['url_key']) ?>" class="product photo product-item-photo">
-                            <span class="product-image-container" style="width: 240px;">
-                                <span class="product-image-wrapper" style="padding-bottom: 125%;">
-                                    <img src="<?= $viewModel->getProductImage($hit[$imageAttribute]) ?>" alt="<?= $hit['name'] ?>" class="product-image-photo" loading="lazy" width="<?= $imageWidth ?>>" height="<?= $imageHeight ?>" />
+                        <a href="<?= $escaper->escapeUrl($viewModel->getProductUrl($hit['url_key'])) ?>"
+                           class="product photo product-item-photo">
+                            <span class="product-image-container" style="width: <?= (int)$imageWidth ?>px;">
+                                <span class="product-image-wrapper"
+                                      style="padding-bottom: <?= (float)$imageRatio ?>%;">
+                                    <img
+                                        src="<?= $escaper->escapeUrl(
+                                            $viewModel->getProductImage($hit[$imageAttribute])
+                                        ) ?>"
+                                         alt="<?= $escaper->escapeHtmlAttr($hit['name']) ?>"
+                                         class="product-image-photo"
+                                         loading="lazy"
+                                         width="<?= (int)$imageWidth ?>"
+                                         height="<?= (int)$imageHeight ?>" />
                                 </span>
                             </span>
                         </a>
                         <div class="product details product-item-details">
                             <strong class="product name product-item-name">
-                                <a href="<?= $viewModel->getProductUrl($hit['url_key']) ?>" class="product-item-link">
-                                    <?= $hit['name'] ?>
+                                <a href="<?= $escaper->escapeUrl($viewModel->getProductUrl($hit['url_key'])) ?>"
+                                   class="product-item-link">
+                                    <?= $escaper->escapeHtml($hit['name']) ?>
                                 </a>
                             </strong>
-                            <?= $viewModel->getProductPrice($hit[$config['priceAttributeCode']]) ?>
+                            <?php $priceHtml = trim((string)$priceBlock
+                                ->setData('hit', $hit)
+                                ->setData('product_url', $viewModel->getProductUrl($hit['url_key']))
+                                ->toHtml()); ?>
+                            <?= /* @noEscape */ $priceHtml !== ''
+                                ? $priceHtml
+                                : $viewModel->getProductPrice($hit[$config['priceAttributeCode']] ?? 0) ?>
                         </div>
                     </div>
                 </li>

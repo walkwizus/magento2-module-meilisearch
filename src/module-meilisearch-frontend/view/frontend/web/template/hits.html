@@ -21,13 +21,14 @@
 }">
     <ol class="products list items product-items" data-bind="foreach: { data: searchResults().hits, afterRender: afterRenderHit }">
         <li class="item product product-item">
+            <!-- ko let: { render: $parent.getHitRender($data) } -->
             <div class="product-item-info">
                 <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }" class="product photo product-item-photo">
-                    <span class="product-image-container" style="width: 240px;">
-                        <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                    <span class="product-image-container" data-bind="style: { width: $parent.productModel.getImageConfig().width + 'px' }">
+                        <span class="product-image-wrapper" data-bind="style: { paddingBottom: ($parent.productModel.getImageConfig().height / $parent.productModel.getImageConfig().width * 100) + '%' }">
                             <img class="product-image-photo"
                                  data-bind="attr: {
-                                    src: $parent.productModel.getProductImageByContext($data),
+                                    src: render.imageUrl(),
                                     alt: name,
                                     width: $parent.productModel.getImageConfig().width,
                                     height: $parent.productModel.getImageConfig().height
@@ -41,11 +42,25 @@
                         <a data-bind="attr: { href: $parent.productModel.getProductUrl(url_key) }, text: name" class="product-item-link"></a>
                     </strong>
 
+                    <!-- ko if: render.price() -->
+                    <!-- ko template: { name: $parent.priceTemplate, data: render.price() } --><!-- /ko -->
+                    <!-- /ko -->
+                    <!-- ko ifnot: render.price() -->
+                    <!-- ko if: render.fallbackPrice -->
+                    <div class="price-box price-final_price">
+                        <span class="price" data-bind="text: render.fallbackPrice"></span>
+                    </div>
+                    <!-- /ko -->
+                    <!-- /ko -->
+
+                    <!-- ko template: { name: $parent.swatchesTemplate, data: render } --><!-- /ko -->
+
                     <!-- ko foreach: $parent.fragments -->
                     <div data-bind="attr: {'data-fragment': $data, 'data-sku': $parent.sku}"></div>
                     <!-- /ko -->
                 </div>
             </div>
+            <!-- /ko -->
         </li>
     </ol>
 </div>

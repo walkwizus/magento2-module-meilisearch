@@ -6,7 +6,9 @@ namespace Walkwizus\MeilisearchCatalog\Model\AttributeMapper\CatalogProduct;
 
 use Walkwizus\MeilisearchBase\Api\AttributeMapperInterface;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Store\Model\Store;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Select;
 use Magento\Eav\Model\Config as EavConfig;
 use Magento\Catalog\Api\Data\ProductAttributeInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
@@ -27,6 +29,11 @@ class Image implements AttributeMapperInterface
         'small_image',
         'thumbnail',
     ];
+
+    /**
+     * @var array<int, string>|null
+     */
+    private ?array $imageAttributeCodesById = null;
 
     /**
      * @param ScopeConfigInterface $scopeConfig
@@ -52,13 +59,14 @@ class Image implements AttributeMapperInterface
     {
         $documents = [];
         $storeId = (int) $storeId;
+        $placeholder = $this->getPlaceholder($storeId);
+        $imagesByProduct = $this->getProductsImagesByCode(array_map('intval', array_keys($documentData)), $storeId);
 
         foreach ($documentData as $id => $indexData) {
-            $images = $this->getProductImagesByCode((int) $id);
+            $images = $imagesByProduct[(int) $id] ?? [];
 
             foreach ($this->imagesAttributes as $code) {
-                $value = $images[$code] ?? null;
-                $documents[$id][$code] = $this->normalizeImageValue($value, $storeId);
+                $documents[$id][$code] = $this->normalizeImageValue($images[$code] ?? null, $placeholder);
             }
         }
 
@@ -66,44 +74,36 @@ class Image implements AttributeMapperInterface
     }
 
     /**
-     * @param int $productId
+     * @param array $productIds
+     * @param int $storeId
      * @return array
      * @throws LocalizedException
-     * @throws \Exception
      */
-    protected function getProductImagesByCode(int $productId): array
+    protected function getProductsImagesByCode(array $productIds, int $storeId): array
     {
+        if (empty($productIds)) {
+            return [];
+        }
+
         $connection = $this->resourceConnection->getConnection();
-
-        $entityTypeId = (int) $this->eavConfig
-            ->getEntityType(ProductAttributeInterface::ENTITY_TYPE_CODE)
-            ->getEntityTypeId();
-
+        $attributeCodesById = $this->getImageAttributeCodesById();
         $linkField = $this->metadataPool->getMetadata(ProductInterface::class)->getLinkField();
 
         $select = $connection->select()
             ->from(
                 ['cpev' => $connection->getTableName('catalog_product_entity_varchar')],
-                ['value' => 'cpev.value']
+                ['product_id' => 'cpev.' . $linkField, 'attribute_id' => 'cpev.attribute_id', 'value' => 'cpev.value']
             )
-            ->join(
-                ['ea' => $connection->getTableName('eav_attribute')],
-                'cpev.attribute_id = ea.attribute_id',
-                ['attribute_code' => 'ea.attribute_code']
-            )
-            ->where('cpev.' . $linkField . ' = ?', $productId)
-            ->where('cpev.store_id = ?', 0)
-            ->where('ea.entity_type_id = ?', $entityTypeId)
-            ->where('ea.attribute_code IN (?)', $this->imagesAttributes);
-
-        $rows = $connection->fetchAll($select);
+            ->where('cpev.' . $linkField . ' IN (?)', $productIds)
+            ->where('cpev.attribute_id IN (?)', array_keys($attributeCodesById))
+            ->where('cpev.store_id IN (?)', array_unique([Store::DEFAULT_STORE_ID, $storeId]))
+            ->order('cpev.store_id ' . Select::SQL_ASC);
 
         $result = [];
-        foreach ($rows as $row) {
-            $code = (string) ($row['attribute_code'] ?? '');
-            $val = (string) ($row['value'] ?? '');
-            if ($code !== '') {
-                $result[$code] = $val;
+        foreach ($connection->fetchAll($select) as $row) {
+            $code = $attributeCodesById[(int) $row['attribute_id']] ?? null;
+            if ($code !== null) {
+                $result[(int) $row['product_id']][$code] = (string) $row['value'];
             }
         }
 
@@ -111,16 +111,35 @@ class Image implements AttributeMapperInterface
     }
 
     /**
+     * @return array|string[]
+     * @throws LocalizedException
+     */
+    private function getImageAttributeCodesById(): array
+    {
+        if ($this->imageAttributeCodesById === null) {
+            $this->imageAttributeCodesById = [];
+            foreach ($this->imagesAttributes as $code) {
+                $attribute = $this->eavConfig->getAttribute(ProductAttributeInterface::ENTITY_TYPE_CODE, $code);
+                if ($attribute->getId()) {
+                    $this->imageAttributeCodesById[(int) $attribute->getId()] = $code;
+                }
+            }
+        }
+
+        return $this->imageAttributeCodesById;
+    }
+
+    /**
      * @param string|null $value
-     * @param int $storeId
+     * @param string $placeholder
      * @return string
      */
-    private function normalizeImageValue(?string $value, int $storeId): string
+    private function normalizeImageValue(?string $value, string $placeholder): string
     {
         $value = (string) $value;
 
         if ($value === '' || $value === 'no_selection') {
-            return $this->getPlaceholder($storeId);
+            return $placeholder;
         }
 
         return $value;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Walkwizus\MeilisearchAi\Ui\DataProvider;
 
 use Magento\Ui\DataProvider\AbstractDataProvider;
+use Walkwizus\MeilisearchAi\Api\Data\EmbedderInterface;
 use Walkwizus\MeilisearchAi\Model\ResourceModel\Embedder\CollectionFactory;
 
 class EmbedderForm extends AbstractDataProvider
@@ -45,7 +46,9 @@ class EmbedderForm extends AbstractDataProvider
 
         $items = $this->collection->getItems();
         foreach ($items as $embedder) {
-            $this->loadedData[$embedder->getId()] = $embedder->getData();
+            $data = $embedder->getData();
+            unset($data[EmbedderInterface::API_KEY]);
+            $this->loadedData[$embedder->getId()] = $data;
         }
 
         return $this->loadedData ?? [];

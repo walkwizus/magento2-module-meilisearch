@@ -10,6 +10,57 @@
             <column name="id"/>
         </constraint>
     </table>
+    <table name="meilisearch_merchandising_category_facet" resource="default" engine="innodb" comment="Meilisearch Merchandising Category Facet">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Id"/>
+        <column xsi:type="smallint" name="store_id" padding="5" unsigned="true" nullable="false" comment="Store Id"/>
+        <column xsi:type="int" name="category_id" padding="10" unsigned="true" nullable="false" comment="Category Id"/>
+        <column xsi:type="text" name="facet_ordering" nullable="false" comment="Facet Ordering"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MEILISEARCH_MERCHANDISING_CATEGORY_FACET_STORE_ID_CATEGORY_ID">
+            <column name="store_id"/>
+            <column name="category_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MEILISEARCH_MERCHANDISING_CATEGORY_FACET_STORE_ID_STORE_STORE_ID" table="meilisearch_merchandising_category_facet" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="MEILISEARCH_MERCHANDISING_CATEGORY_FACET_CATEGORY_ID_CATALOG_CATEGORY_ENTITY_ENTITY_ID" table="meilisearch_merchandising_category_facet" column="category_id" referenceTable="catalog_category_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+    <table name="meilisearch_merchandising_category_product" resource="default" engine="innodb" comment="Meilisearch Merchandising Category Product Position">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Id"/>
+        <column xsi:type="smallint" name="store_id" padding="5" unsigned="true" nullable="false" comment="Store Id"/>
+        <column xsi:type="int" name="category_id" padding="10" unsigned="true" nullable="false" comment="Category Id"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" comment="Product Id"/>
+        <column xsi:type="int" name="position" padding="10" unsigned="true" nullable="false" comment="Position"/>
+        <column xsi:type="boolean" name="is_pinned" nullable="false" default="0" comment="Is Pinned"/>
+        <column xsi:type="boolean" name="is_buried" nullable="false" default="0" comment="Is Buried"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MEILISEARCH_MERCH_CATEGORY_PRODUCT_STORE_CATEGORY_PRODUCT">
+            <column name="store_id"/>
+            <column name="category_id"/>
+            <column name="product_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MEILISEARCH_MERCH_CATEGORY_PRODUCT_STORE_ID_STORE_STORE_ID" table="meilisearch_merchandising_category_product" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="MEILISEARCH_MERCH_CATEGORY_PRODUCT_CATEGORY_ID_CATALOG_CATEGORY_ENTITY_ENTITY_ID" table="meilisearch_merchandising_category_product" column="category_id" referenceTable="catalog_category_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="MEILISEARCH_MERCH_CATEGORY_PRODUCT_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID" table="meilisearch_merchandising_category_product" column="product_id" referenceTable="catalog_product_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+    <table name="meilisearch_merchandising_category_sort" resource="default" engine="innodb" comment="Meilisearch Merchandising Category Sort">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Id"/>
+        <column xsi:type="smallint" name="store_id" padding="5" unsigned="true" nullable="false" comment="Store Id"/>
+        <column xsi:type="int" name="category_id" padding="10" unsigned="true" nullable="false" comment="Category Id"/>
+        <column xsi:type="varchar" name="sort_by" length="32" nullable="false" default="position" comment="Sort Remaining Products By"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MEILISEARCH_MERCH_CATEGORY_SORT_STORE_ID_CATEGORY_ID">
+            <column name="store_id"/>
+            <column name="category_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MEILISEARCH_MERCH_CATEGORY_SORT_STORE_ID_STORE_STORE_ID" table="meilisearch_merchandising_category_sort" column="store_id" referenceTable="store" referenceColumn="store_id" onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="MEILISEARCH_MERCH_CATEGORY_SORT_CATEGORY_ID_CATALOG_CATEGORY_ENTITY_ENTITY_ID" table="meilisearch_merchandising_category_sort" column="category_id" referenceTable="catalog_category_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
     <table name="catalog_eav_attribute" resource="default" engine="innodb">
         <column xsi:type="varchar" default="or" name="meilisearch_operator" length="255" nullable="false" comment="Operator"/>
         <column xsi:type="boolean" default="0" name="meilisearch_show_more" nullable="false" comment="Show More"/>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="Walkwizus Meilisearch">
+    <description>Magento 2 coding standard for the Meilisearch module.</description>
+
+    <file>src</file>
+
+    <exclude-pattern>*/Test/bootstrap.php</exclude-pattern>
+
+    <arg name="colors"/>
+    <arg name="parallel" value="8"/>
+    <arg value="sp"/>
+
+    <!-- Only severity 8+ warnings are reported for now; lower to 7, then 6, as the existing warnings get fixed. -->
+    <arg name="warning-severity" value="8"/>
+
+    <config name="testVersion" value="8.1-"/>
+
+    <rule ref="Magento2"/>
+</ruleset>

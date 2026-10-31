@@ -54,6 +54,12 @@
         </referenceContainer>
         <referenceContainer name="content">
             <block name="meilisearch.frontend.search" class="Walkwizus\MeilisearchFrontend\Block\Search" template="Walkwizus_MeilisearchFrontend::search.phtml">
+                <block name="meilisearch.frontend.search.product.price" template="Walkwizus_MeilisearchFrontend::product/price.phtml">
+                    <arguments>
+                        <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\ProductRender</argument>
+                    </arguments>
+                    <block name="meilisearch.frontend.search.product.price.amount" as="amount" template="Walkwizus_MeilisearchFrontend::product/price/amount.phtml"/>
+                </block>
                 <block name="meilisearch.frontend.search.pagination" template="Walkwizus_MeilisearchFrontend::ssr/pagination.phtml">
                     <arguments>
                         <argument name="view_model" xsi:type="object">Walkwizus\MeilisearchFrontend\ViewModel\Ssr\Pagination</argument>
@@ -67,6 +73,9 @@
                                 <item name="component" xsi:type="string">Walkwizus_MeilisearchFrontend/js/components/hits</item>
                                 <item name="config" xsi:type="array">
                                     <item name="template" xsi:type="string">Walkwizus_MeilisearchFrontend/hits</item>
+                                    <item name="priceTemplate" xsi:type="string">Walkwizus_MeilisearchFrontend/product/price</item>
+                                    <item name="priceAmountTemplate" xsi:type="string">Walkwizus_MeilisearchFrontend/product/price/amount</item>
+                                    <item name="swatchesTemplate" xsi:type="string">Walkwizus_MeilisearchFrontend/product/swatches</item>
                                 </item>
                                 <item name="children" xsi:type="array">
                                     <item name="viewmode" xsi:type="array">

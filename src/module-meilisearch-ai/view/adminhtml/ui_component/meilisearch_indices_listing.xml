@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <columns name="meilisearch_indices_columns">
+        <column name="embeddings" sortOrder="30">
+            <settings>
+                <label translate="true">Embeddings</label>
+                <sortable>false</sortable>
+                <draggable>false</draggable>
+            </settings>
+        </column>
+    </columns>
+</listing>

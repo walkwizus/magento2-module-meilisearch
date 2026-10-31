@@ -120,9 +120,17 @@
                 </select>
             </formElements>
         </field>
+        <field name="model" sortOrder="35" formElement="input">
+            <settings>
+                <label translate="true">Model</label>
+                <notice translate="true">Leave empty to use the default model of the source (text-embedding-3-small for OpenAI).</notice>
+            </settings>
+        </field>
         <field name="api_key" sortOrder="40" formElement="input">
             <settings>
                 <label translate="true">API Key</label>
+                <notice translate="true">The key is stored encrypted. Leave empty to keep the current key.</notice>
+                <elementTmpl>Walkwizus_MeilisearchAi/form/element/password</elementTmpl>
             </settings>
         </field>
         <field name="url" sortOrder="50" formElement="input">

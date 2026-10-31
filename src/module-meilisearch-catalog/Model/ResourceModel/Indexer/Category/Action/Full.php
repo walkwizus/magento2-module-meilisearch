@@ -88,7 +88,7 @@ class Full
 
         foreach ($categories as $category) {
             $itemPath = explode('/', $category['path']);
-            $names = array();
+            $names = [];
 
             foreach ($itemPath as $pathId) {
                 if (isset($categories[$pathId]['name'])) {
