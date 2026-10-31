@@ -9,6 +9,10 @@ define([
     const meilisearchConfig = window.meilisearchFrontendConfig;
 
     return Component.extend({
+        defaults: {
+            frameLength: 5
+        },
+
         initialize: function() {
             this._super();
 
@@ -24,11 +28,19 @@ define([
             this.visiblePages = ko.computed(() => {
                 const total = this.totalPages();
 
-                if (!Number.isFinite(total)) {
+                if (!Number.isFinite(total) || total < 1) {
                     return [];
                 }
 
-                return Array.from({ length: total }, (_, i) => i + 1);
+                const half = Math.floor((this.frameLength - 1) / 2);
+                let start = Math.max(1, this.currentPage() - half);
+                const end = Math.min(total, start + this.frameLength - 1);
+
+                if (end - start + 1 < this.frameLength && total >= this.frameLength) {
+                    start = Math.max(1, total - this.frameLength + 1);
+                }
+
+                return Array.from({ length: end - start + 1 }, (_, i) => start + i);
             });
 
             return this;
