@@ -1,0 +1,25 @@
+<?php
+/** @var \Walkwizus\MeilisearchAi\Block\Adminhtml\Index\EmbeddingStatus $block */
+/** @var \Magento\Framework\Escaper $escaper */
+
+use Walkwizus\MeilisearchAi\Model\EmbeddingStatus;
+
+$status = $block->getStatus();
+?>
+<div class="messages">
+    <div class="message message-<?= $escaper->escapeHtmlAttr($block->getMessageType($status)) ?>">
+        <div>
+            <strong><?= $escaper->escapeHtml(__('Embeddings:')) ?></strong>
+            <?= $escaper->escapeHtml($block->getLabel($status)) ?>
+        </div>
+        <?php if ($status['state'] === EmbeddingStatus::STATE_PROCESSING): ?>
+            <div><?= $escaper->escapeHtml(__('Vector search is applied on the storefront once the embedder is available in Meilisearch. Until embeddings are complete, products without embeddings only match through keyword search.')) ?></div>
+        <?php elseif ($status['state'] === EmbeddingStatus::STATE_FAILED): ?>
+            <div><?= $escaper->escapeHtml(__('The storefront keeps using keyword search. Fix the embedder configuration (document template, API key, quota) and save it again.')) ?></div>
+        <?php elseif ($status['state'] === EmbeddingStatus::STATE_INCOMPLETE): ?>
+            <div><?= $escaper->escapeHtml(__('Some documents have no embedding. Run a full reindex to complete them.')) ?></div>
+        <?php elseif ($status['state'] === EmbeddingStatus::STATE_NONE): ?>
+            <div><?= $escaper->escapeHtml(__('Link at least one embedder to this index and save it to generate embeddings.')) ?></div>
+        <?php endif; ?>
+    </div>
+</div>

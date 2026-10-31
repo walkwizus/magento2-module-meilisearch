@@ -10,6 +10,9 @@
                 <item name="sortOrder" xsi:type="number">100</item>
             </item>
         </argument>
+        <htmlContent name="embedding_status" sortOrder="5">
+            <block name="meilisearch_ai_embedding_status" class="Walkwizus\MeilisearchAi\Block\Adminhtml\Index\EmbeddingStatus"/>
+        </htmlContent>
         <field name="is_vector_enabled" formElement="checkbox" sortOrder="10">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">

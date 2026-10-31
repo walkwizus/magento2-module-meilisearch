@@ -18,4 +18,14 @@
     <type name="Walkwizus\MeilisearchIndices\Controller\Adminhtml\Indices\Save">
         <plugin name="walkwizus_meilisearch_ai_save_index_links" type="Walkwizus\MeilisearchAi\Plugin\Controller\IndexSavePlugin"/>
     </type>
+    <type name="Walkwizus\MeilisearchIndices\Ui\DataProvider\IndicesListing">
+        <plugin name="walkwizus_meilisearch_ai_embedding_status" type="Walkwizus\MeilisearchAi\Plugin\Ui\IndicesListingPlugin"/>
+    </type>
+    <type name="Magento\Framework\Notification\MessageList">
+        <arguments>
+            <argument name="messages" xsi:type="array">
+                <item name="meilisearch_ai_embedding_status" xsi:type="string">Walkwizus\MeilisearchAi\Model\System\Message\EmbeddingStatus</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

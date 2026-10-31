@@ -9,6 +9,8 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Meilisearch\Contracts\HybridSearchOptions;
+use Meilisearch\Exceptions\ApiException;
+use Psr\Log\LoggerInterface;
 use Meilisearch\Contracts\MultiSearchQueryFactory;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
@@ -33,6 +35,7 @@ class Ssr implements ArgumentInterface
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
      * @param PriceCurrencyInterface $priceCurrency
+     * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly RequestInterface $request,
@@ -40,7 +43,8 @@ class Ssr implements ArgumentInterface
         private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
-        private readonly PriceCurrencyInterface $priceCurrency
+        private readonly PriceCurrencyInterface $priceCurrency,
+        private readonly LoggerInterface $logger
     ) {
         $this->config = $this->configProvider->get();
     }
@@ -55,7 +59,7 @@ class Ssr implements ArgumentInterface
             return $this->searchResultCache;
         }
 
-        $query = $this->request->getParam('q', '');
+        $query = (string)$this->request->getParam('q', '');
         $currentPageParam = (int)$this->request->getParam('page', 1);
         $currentPage = $currentPageParam > 0 ? $currentPageParam : 1;
 
@@ -83,6 +87,49 @@ class Ssr implements ArgumentInterface
             }
         }
 
+        $sort = $this->buildSort($sortBy, $sortDirection, $defaultSortBy);
+        $queries = $this->buildQueries($indexName, $query, $facets, $selectedFacets, $currentPage, $hitsPerPage, $sort, $hybridOptions, $threshold);
+
+        try {
+            $results = $this->searchManager->multisearch($queries);
+        } catch (ApiException $e) {
+            if ($hybridOptions === null) {
+                throw $e;
+            }
+
+            $this->logger->warning('Meilisearch: hybrid search failed, falling back to keyword search', ['exception' => $e]);
+            $queries = $this->buildQueries($indexName, $query, $facets, $selectedFacets, $currentPage, $hitsPerPage, $sort, null, null);
+            $results = $this->searchManager->multisearch($queries);
+        }
+
+        $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
+
+        return $this->searchResultCache;
+    }
+
+    /**
+     * @param string $indexName
+     * @param string $query
+     * @param array $facets
+     * @param array $selectedFacets
+     * @param int $currentPage
+     * @param int $hitsPerPage
+     * @param string|null $sort
+     * @param HybridSearchOptions|null $hybridOptions
+     * @param float|null $threshold
+     * @return array
+     */
+    private function buildQueries(
+        string $indexName,
+        string $query,
+        array $facets,
+        array $selectedFacets,
+        int $currentPage,
+        int $hitsPerPage,
+        ?string $sort,
+        ?HybridSearchOptions $hybridOptions,
+        ?float $threshold
+    ): array {
         $queries = [];
         $mainFilters = $this->buildFilters($selectedFacets);
 
@@ -104,14 +151,13 @@ class Ssr implements ArgumentInterface
             $mainQuery->setFilter($mainFilters);
         }
 
-        $sort = $this->buildSort($sortBy, $sortDirection, $defaultSortBy);
         if ($sort !== null) {
             $mainQuery->setSort([$sort]);
         }
 
         $queries[] = $mainQuery;
 
-        foreach ($activeCodes as $code) {
+        foreach (array_keys($selectedFacets) as $code) {
             $excludeFilters = $selectedFacets;
             unset($excludeFilters[$code]);
 
@@ -138,10 +184,7 @@ class Ssr implements ArgumentInterface
             $queries[] = $disjunctiveQuery;
         }
 
-        $results = $this->searchManager->multisearch($queries);
-        $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
-
-        return $this->searchResultCache;
+        return $queries;
     }
 
     /**

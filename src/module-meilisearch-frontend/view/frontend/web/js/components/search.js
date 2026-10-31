@@ -41,6 +41,20 @@ define([
         return params;
     }
 
+    function withHybridFallback(searchQuery, request) {
+        const hybridParams = getHybridParams(searchQuery);
+
+        return request(hybridParams).catch(function (error) {
+            if (!hybridParams.hybrid) {
+                throw error;
+            }
+
+            console.warn('Meilisearch hybrid search failed, falling back to keyword search.', error);
+
+            return request({});
+        });
+    }
+
     function init(initialState) {
         searchService = meilisearchService({
             host: meilisearchConfig.host,
@@ -106,20 +120,19 @@ define([
         const currentPage = facetsState.currentPage();
         const facetList = meilisearchConfig.facets.facetList;
         const hitsPerPage = limiterState.currentLimit();
-        const hybridParams = getHybridParams(searchQuery);
 
         if (activeFacetCodes.length === 0) {
             const filterParams = queryBuilder.buildFilters({}, meilisearchConfig.currentCategoryId, meilisearchConfig.categoryRule);
-            const searchParams = Object.assign({
-                filter: filterParams,
-                facets: facetList,
-                sort: sortParams,
-                page: currentPage,
-                hitsPerPage: hitsPerPage
-            }, hybridParams);
 
-            searchService
-                .search(searchQuery, searchParams)
+            withHybridFallback(searchQuery, function (hybridParams) {
+                return searchService.search(searchQuery, Object.assign({
+                    filter: filterParams,
+                    facets: facetList,
+                    sort: sortParams,
+                    page: currentPage,
+                    hitsPerPage: hitsPerPage
+                }, hybridParams));
+            })
                 .then(updateResults)
                 .finally(() => {
                     searchState.isLoading(false);
@@ -128,33 +141,35 @@ define([
             return;
         }
 
-        const queries = disjunctiveSearch.buildDisjunctiveQueries({
-            indexName: meilisearchConfig.indexName,
-            query: searchQuery,
-            selectedFacets: selectedFilters,
-            facetList: facetList,
-            buildFilters: function (sel) {
-                return queryBuilder.buildFilters(
-                    sel,
-                    meilisearchConfig.currentCategoryId,
-                    meilisearchConfig.categoryRule
-                );
-            },
-            page: currentPage,
-            hitsPerPage: hitsPerPage,
-            sort: sortParams
-        });
-
-        if (hybridParams.hybrid) {
-            queries.forEach(query => {
-                query.hybrid = hybridParams.hybrid;
-                if (hybridParams.rankingScoreThreshold !== undefined) {
-                    query.rankingScoreThreshold = hybridParams.rankingScoreThreshold;
-                }
+        withHybridFallback(searchQuery, function (hybridParams) {
+            const queries = disjunctiveSearch.buildDisjunctiveQueries({
+                indexName: meilisearchConfig.indexName,
+                query: searchQuery,
+                selectedFacets: selectedFilters,
+                facetList: facetList,
+                buildFilters: function (sel) {
+                    return queryBuilder.buildFilters(
+                        sel,
+                        meilisearchConfig.currentCategoryId,
+                        meilisearchConfig.categoryRule
+                    );
+                },
+                page: currentPage,
+                hitsPerPage: hitsPerPage,
+                sort: sortParams
             });
-        }
 
-        searchService.multiSearch(queries)
+            if (hybridParams.hybrid) {
+                queries.forEach(query => {
+                    query.hybrid = hybridParams.hybrid;
+                    if (hybridParams.rankingScoreThreshold !== undefined) {
+                        query.rankingScoreThreshold = hybridParams.rankingScoreThreshold;
+                    }
+                });
+            }
+
+            return searchService.multiSearch(queries);
+        })
             .then(function (response) {
                 const merged = disjunctiveSearch.mergeDisjunctiveResults(
                     response.results,
