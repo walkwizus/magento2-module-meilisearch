@@ -7,6 +7,17 @@
 }(this, function() {
     'use strict';
 
+    // Option labels are stored as HTML in Magento (Luma's sample data has "Cocona&reg; performance fabric").
+    function decodeLabel(label) {
+        const text = String(label);
+
+        if (text.indexOf('&') === -1 || typeof DOMParser === 'undefined') {
+            return text;
+        }
+
+        return new DOMParser().parseFromString(text, 'text/html').documentElement.textContent;
+    }
+
     function compareLabels(a, b) {
         return String(a.label || a.value || '').localeCompare(String(b.label || b.value || ''), undefined, {numeric: true, sensitivity: 'base'});
     }
@@ -75,7 +86,7 @@
 
                 const options = Object.entries(valuesDistribution).map(function([rawValue, count]) {
                     const parts = rawValue.split('|');
-                    const label = parts[0];
+                    const label = decodeLabel(parts[0]);
                     const swatchType = parts[1] || null;
                     let swatchValue = parts[2] || null;
 
@@ -104,6 +115,7 @@
 
     return {
         getAvailableFacets,
-        orderOptions
+        orderOptions,
+        decodeLabel
     };
 }));

@@ -1,0 +1,433 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\View\\Result\\Page\:\:setActiveMenu\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-ai/Controller/Adminhtml/Embedders/Edit.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method Magento\\Framework\\View\\Page\\Title\:\:prepend\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-ai/Controller/Adminhtml/Embedders/Edit.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\View\\Result\\Page\:\:setActiveMenu\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-ai/Controller/Adminhtml/Embedders/Index.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method Magento\\Framework\\View\\Page\\Title\:\:prepend\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-ai/Controller/Adminhtml/Embedders/Index.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\App\\RequestInterface\:\:getPostValue\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-ai/Controller/Adminhtml/Embedders/Save.php
+
+		-
+			message: '#^Call to an undefined method Walkwizus\\MeilisearchAi\\Api\\Data\\EmbedderInterface\:\:getId\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/module-meilisearch-ai/Controller/Adminhtml/Embedders/Save.php
+
+		-
+			message: '#^Call to an undefined method Walkwizus\\MeilisearchAi\\Api\\Data\\EmbedderInterface\:\:setData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-ai/Controller/Adminhtml/Embedders/Save.php
+
+		-
+			message: '#^Parameter \#2 \$value of method Magento\\Framework\\App\\Config\\Storage\\WriterInterface\:\:save\(\) expects string, bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-ai/Model/Config/VectorSettings.php
+
+		-
+			message: '#^Parameter \#2 \$value of method Magento\\Framework\\App\\Config\\Storage\\WriterInterface\:\:save\(\) expects string, float given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/module-meilisearch-ai/Model/Config/VectorSettings.php
+
+		-
+			message: '#^Parameter \#2 \$value of method Magento\\Framework\\App\\Config\\Storage\\WriterInterface\:\:save\(\) expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-ai/Model/Config/VectorSettings.php
+
+		-
+			message: '#^Call to an undefined method Walkwizus\\MeilisearchAi\\Api\\Data\\EmbedderInterface\:\:getId\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/module-meilisearch-ai/Model/EmbedderRepository.php
+
+		-
+			message: '#^Parameter \#1 \$object of method Magento\\Framework\\Model\\ResourceModel\\Db\\AbstractDb\:\:delete\(\) expects Magento\\Framework\\Model\\AbstractModel, Walkwizus\\MeilisearchAi\\Api\\Data\\EmbedderInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-ai/Model/EmbedderRepository.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\App\\RequestInterface\:\:getPostValue\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-ai/Plugin/Controller/IndexSavePlugin.php
+
+		-
+			message: '#^Property Walkwizus\\MeilisearchAi\\Ui\\DataProvider\\EmbedderForm\:\:\$loadedData \(array\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: src/module-meilisearch-ai/Ui/DataProvider/EmbedderForm.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/module-meilisearch-ai/Ui/DataProvider/EmbedderForm.php
+
+		-
+			message: '#^Anonymous function has invalid return type Magento\\Setup\\Console\\Command\\InstallCommand\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Call to method bootstrap\(\) on an unknown class Magento\\Setup\\Application\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Class Magento\\Setup\\Console\\Command\\AdminUserCreateCommand not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Class Magento\\Setup\\Console\\Command\\InstallStoreConfigurationCommand not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Class Magento\\Setup\\Model\\ConfigModel not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Class Magento\\Setup\\Model\\ObjectManagerProvider not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Constant BP not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Method Walkwizus\\MeilisearchBase\\Console\\SetupCommandList\:\:createInstallCommand\(\) has invalid return type Magento\\Setup\\Console\\Command\\InstallCommand\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Parameter \$setupApplication of method Walkwizus\\MeilisearchBase\\Console\\SetupCommandList\:\:__construct\(\) has invalid type Magento\\Setup\\Application\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Property Walkwizus\\MeilisearchBase\\Console\\SetupCommandList\:\:\$setupApplication has unknown class Magento\\Setup\\Application as its type\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/module-meilisearch-base/Console/SetupCommandList.php
+
+		-
+			message: '#^Access to undefined constant Walkwizus\\MeilisearchBase\\Setup\\SearchConfigOptionsList\:\:INPUT_KEY_SEARCH_ENGINE\.$#'
+			identifier: classConstant.notFound
+			count: 1
+			path: src/module-meilisearch-base/Setup/InstallConfig.php
+
+		-
+			message: '#^Call to an undefined method Meilisearch\\Endpoints\\Keys\:\:getKey\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-base/Setup/InstallConfig.php
+
+		-
+			message: '#^Call to an undefined method Meilisearch\\Endpoints\\Keys\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-base/Setup/InstallConfig.php
+
+		-
+			message: '#^Parameter \#1 \$attribute of method Magento\\Swatches\\Helper\\Data\:\:isSwatchAttribute\(\) expects Magento\\Catalog\\Model\\ResourceModel\\Eav\\Attribute, Magento\\Eav\\Model\\Entity\\Attribute given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-catalog/Model/AttributeMapper/CatalogProduct/Eav.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\CategoryInterface\:\:getProductCollection\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-catalog/Model/ResourceModel/Indexer/Category/Action/Full.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\CategoryInterface\:\:getRequestPath\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-catalog/Model/ResourceModel/Indexer/Category/Action/Full.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Store\\Api\\Data\\StoreInterface\:\:getRootCategoryId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-catalog/Model/ResourceModel/Indexer/Category/Action/Full.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\App\\RequestInterface\:\:getFullActionName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-frontend/Block/Search.php
+
+		-
+			message: '#^Cannot call method addCrumb\(\) on Magento\\Framework\\View\\Element\\BlockInterface\|true\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/module-meilisearch-frontend/Block/Search.php
+
+		-
+			message: '#^Parameter \#1 \$title of method Magento\\Framework\\View\\Page\\Title\:\:set\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-frontend/Block/Search.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Store\\Api\\Data\\StoreInterface\:\:getCurrentCurrencyCode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-frontend/Model/ConfigProvider/LocaleConfigProvider.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\CategoryInterface\:\:getDisplayMode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-frontend/Model/LayoutHandle/AddMeilisearchResultHandle.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\View\\Result\\Page\:\:setActiveMenu\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-indices/Controller/Adminhtml/Indices/Edit.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method Magento\\Framework\\View\\Page\\Title\:\:prepend\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-indices/Controller/Adminhtml/Indices/Edit.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\View\\Result\\Page\:\:setActiveMenu\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-indices/Controller/Adminhtml/Indices/Index.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method Magento\\Framework\\View\\Page\\Title\:\:prepend\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-indices/Controller/Adminhtml/Indices/Index.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\App\\RequestInterface\:\:getPost\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: src/module-meilisearch-indices/Controller/Adminhtml/Indices/Save.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Store\\Api\\Data\\StoreInterface\:\:getRootCategoryId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Category/Tree.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getFrontendLabel\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getMeilisearchHideIfNonDiscriminant\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getMeilisearchOperator\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getMeilisearchSearchable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getMeilisearchSearchboxFuzzyEnabled\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getMeilisearchShowMore\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getMeilisearchShowMoreLimit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:getMeilisearchSortValuesBy\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Block/Adminhtml/Facet/Configuration.php
+
+		-
+			message: '#^Property Walkwizus\\MeilisearchMerchandising\\Controller\\Adminhtml\\Category\\Ajax\\DeleteRule\:\:\$categoryFactory is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Category/Ajax/DeleteRule.php
+
+		-
+			message: '#^Call to an undefined method Walkwizus\\MeilisearchMerchandising\\Api\\Data\\CategoryInterface\:\:toArray\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Category/Ajax/GetRule.php
+
+		-
+			message: '#^Parameter \#1 \$label of method Magento\\Backend\\App\\AbstractAction\:\:_addBreadcrumb\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Category/Index.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method Magento\\Framework\\View\\Page\\Title\:\:prepend\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Category/Index.php
+
+		-
+			message: '#^Parameter \#2 \$title of method Magento\\Backend\\App\\AbstractAction\:\:_addBreadcrumb\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Category/Index.php
+
+		-
+			message: '#^Return type \(void\) of method Walkwizus\\MeilisearchMerchandising\\Controller\\Adminhtml\\Category\\Index\:\:execute\(\) should be compatible with return type \(Magento\\Framework\\App\\ResponseInterface\|Magento\\Framework\\Controller\\ResultInterface\) of method Magento\\Framework\\App\\ActionInterface\:\:execute\(\)$#'
+			identifier: method.childReturnType
+			count: 4
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Category/Index.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Framework\\View\\Result\\Page\:\:setActiveMenu\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Index.php
+
+		-
+			message: '#^Parameter \#1 \$prefix of method Magento\\Framework\\View\\Page\\Title\:\:prepend\(\) expects string, Magento\\Framework\\Phrase given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Index.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:setMeilisearchHideIfNonDiscriminant\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Save.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:setMeilisearchSearchable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Save.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:setMeilisearchSearchboxFuzzyEnabled\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Save.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:setMeilisearchShowMore\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Save.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:setMeilisearchShowMoreLimit\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Save.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Catalog\\Api\\Data\\ProductAttributeInterface\:\:setMeilisearchSortValuesBy\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Controller/Adminhtml/Facet/Save.php
+
+		-
+			message: '#^Parameter \#1 \$array \(non\-empty\-list\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: src/module-meilisearch-merchandising/Model/AttributePostMapper/CatalogProduct/Category.php
+
+		-
+			message: '#^Parameter \#1 \$object of method Magento\\Framework\\Model\\ResourceModel\\Db\\AbstractDb\:\:save\(\) expects Magento\\Framework\\Model\\AbstractModel, Walkwizus\\MeilisearchMerchandising\\Api\\Data\\CategoryInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-merchandising/Model/CategoryRepository.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Store\\Api\\Data\\StoreInterface\:\:getRootCategoryId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Plugin/Catalog/Helper/ProductPlugin.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/module-meilisearch-merchandising/Plugin/Catalog/Helper/ProductPlugin.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Eav\\Api\\Data\\AttributeInterface\:\:getSource\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/module-meilisearch-merchandising/Service/QueryBuilderService.php
+
+		-
+			message: '#^Call to an undefined method Magento\\Eav\\Api\\Data\\AttributeInterface\:\:setStoreId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/module-meilisearch-merchandising/Service/QueryBuilderService.php
+
+		-
+			message: '#^Parameter \#1 \$attribute of method Magento\\Swatches\\Helper\\Data\:\:isSwatchAttribute\(\) expects Magento\\Catalog\\Model\\ResourceModel\\Eav\\Attribute, Magento\\Eav\\Api\\Data\\AttributeInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/module-meilisearch-merchandising/Service/QueryBuilderService.php

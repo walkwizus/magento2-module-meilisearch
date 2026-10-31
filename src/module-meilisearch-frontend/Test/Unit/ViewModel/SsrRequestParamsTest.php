@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchFrontend\Test\Unit\ViewModel;
 
+use Magento\Catalog\Model\Product\Image\UrlBuilder as ImageUrlBuilder;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Meilisearch\Contracts\HybridSearchOptions;
 use Meilisearch\Contracts\MultiSearchQuery;
 use Meilisearch\Contracts\MultiSearchQueryFactory;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
 use Walkwizus\MeilisearchFrontend\ViewModel\Ssr;
@@ -51,6 +53,7 @@ class SsrRequestParamsTest extends TestCase
         self::assertSame(12, $this->createSsr(['product_list_limit' => '1000'])->getHitsPerPage());
         self::assertSame(12, $this->createSsr(['product_list_limit' => '1e3'])->getHitsPerPage());
         self::assertSame(12, $this->createSsr(['product_list_limit' => '2.4e1'])->getHitsPerPage());
+        // phpcs:ignore PHPCompatibility.Numbers.RemovedHexadecimalNumericStrings.Found -- deliberately invalid input
         self::assertSame(12, $this->createSsr(['product_list_limit' => '0x18'])->getHitsPerPage());
         self::assertSame(36, $this->createSsr(['product_list_limit' => '36'])->getHitsPerPage());
     }
@@ -127,7 +130,9 @@ class SsrRequestParamsTest extends TestCase
             $this->createMock(HybridSearchOptions::class),
             $searchManager ?? $this->createMock(SearchManager::class),
             $configProvider,
-            $this->createMock(PriceCurrencyInterface::class)
+            $this->createMock(PriceCurrencyInterface::class),
+            $this->createMock(LoggerInterface::class),
+            $this->createMock(ImageUrlBuilder::class)
         );
     }
 }

@@ -154,7 +154,7 @@ class Pagination implements ArgumentInterface
             '_current' => true,
             '_escape' => true,
             '_use_rewrite' => true,
-            '_fragment' => (string)(parse_url($baseUrl, PHP_URL_FRAGMENT) ?? ''),
+            '_fragment' => explode('#', $baseUrl, 2)[1] ?? '',
             '_query' => ['page' => $page > 1 ? $page : null],
         ]);
     }

@@ -9,9 +9,12 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Meilisearch\Contracts\HybridSearchOptions;
+use Meilisearch\Exceptions\ApiException;
+use Psr\Log\LoggerInterface;
 use Meilisearch\Contracts\MultiSearchQueryFactory;
 use Walkwizus\MeilisearchBase\Service\SearchManager;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider;
+use Magento\Catalog\Model\Product\Image\UrlBuilder as ImageUrlBuilder;
 use Walkwizus\MeilisearchFrontend\Model\ConfigProvider\SearchConfigProvider;
 
 class Ssr implements ArgumentInterface
@@ -33,6 +36,8 @@ class Ssr implements ArgumentInterface
      * @param SearchManager $searchManager
      * @param ConfigProvider $configProvider
      * @param PriceCurrencyInterface $priceCurrency
+     * @param LoggerInterface $logger
+     * @param ImageUrlBuilder $imageUrlBuilder
      */
     public function __construct(
         private readonly RequestInterface $request,
@@ -40,7 +45,9 @@ class Ssr implements ArgumentInterface
         private readonly HybridSearchOptions $hybridSearchOptions,
         private readonly SearchManager $searchManager,
         private readonly ConfigProvider $configProvider,
-        private readonly PriceCurrencyInterface $priceCurrency
+        private readonly PriceCurrencyInterface $priceCurrency,
+        private readonly LoggerInterface $logger,
+        private readonly ImageUrlBuilder $imageUrlBuilder
     ) {
         $this->config = $this->configProvider->get();
     }
@@ -83,6 +90,58 @@ class Ssr implements ArgumentInterface
             }
         }
 
+        $sort = $this->buildSort($sortBy, $sortDirection, $defaultSortBy);
+        $queries = $this->buildQueries($indexName, $query, $facets, $selectedFacets, $currentPage, $hitsPerPage, $sort, $hybridOptions, $threshold);
+
+        try {
+            $results = $this->searchManager->multisearch($queries);
+        } catch (ApiException $e) {
+            if ($hybridOptions === null) {
+                throw $e;
+            }
+
+            $this->logger->warning('Meilisearch: hybrid search failed, falling back to keyword search', ['exception' => $e]);
+            $queries = $this->buildQueries($indexName, $query, $facets, $selectedFacets, $currentPage, $hitsPerPage, $sort, null, null);
+            $results = $this->searchManager->multisearch($queries);
+        }
+
+        $lastPage = (int)($results['results'][0]['totalPages'] ?? 0);
+        if ($currentPage > $lastPage && $lastPage > 0) {
+            // past the last page, show the last page, as core's product collection does
+            foreach ($queries as $pageQuery) {
+                $pageQuery->setPage($lastPage);
+            }
+            $results = $this->searchManager->multisearch($queries);
+        }
+
+        $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
+
+        return $this->searchResultCache;
+    }
+
+    /**
+     * @param string $indexName
+     * @param string $query
+     * @param array $facets
+     * @param array $selectedFacets
+     * @param int $currentPage
+     * @param int $hitsPerPage
+     * @param string|null $sort
+     * @param HybridSearchOptions|null $hybridOptions
+     * @param float|null $threshold
+     * @return array
+     */
+    private function buildQueries(
+        string $indexName,
+        string $query,
+        array $facets,
+        array $selectedFacets,
+        int $currentPage,
+        int $hitsPerPage,
+        ?string $sort,
+        ?HybridSearchOptions $hybridOptions,
+        ?float $threshold
+    ): array {
         $queries = [];
         $mainFilters = $this->buildFilters($selectedFacets);
 
@@ -104,14 +163,13 @@ class Ssr implements ArgumentInterface
             $mainQuery->setFilter($mainFilters);
         }
 
-        $sort = $this->buildSort($sortBy, $sortDirection, $defaultSortBy);
         if ($sort !== null) {
             $mainQuery->setSort([$sort]);
         }
 
         $queries[] = $mainQuery;
 
-        foreach ($activeCodes as $code) {
+        foreach (array_keys($selectedFacets) as $code) {
             $excludeFilters = $selectedFacets;
             unset($excludeFilters[$code]);
 
@@ -138,18 +196,7 @@ class Ssr implements ArgumentInterface
             $queries[] = $disjunctiveQuery;
         }
 
-        $results = $this->searchManager->multisearch($queries);
-        $lastPage = (int)($results['results'][0]['totalPages'] ?? 0);
-        if ($currentPage > $lastPage && $lastPage > 0) {
-            // past the last page, show the last page, as core's product collection does
-            foreach ($queries as $pageQuery) {
-                $pageQuery->setPage($lastPage);
-            }
-            $results = $this->searchManager->multisearch($queries);
-        }
-        $this->searchResultCache = $this->mergeDisjunctiveResults($results, $activeCodes);
-
-        return $this->searchResultCache;
+        return $queries;
     }
 
     /**
@@ -486,7 +533,16 @@ class Ssr implements ArgumentInterface
      */
     public function getProductImage(string $image): string
     {
-        return $this->config['mediaBaseUrl'] . $image;
+        $mode = $this->getProductListMode();
+
+        // The view mode is an unvalidated request parameter. An unknown value resolves to an
+        // image display area that has no view.xml entry, which silently renders the placeholder
+        // on every tile instead of the product image.
+        if (!in_array($mode, ['grid', 'list'], true)) {
+            $mode = 'grid';
+        }
+
+        return $this->imageUrlBuilder->getUrl($image, 'category_page_' . $mode);
     }
 
     /**

@@ -7,7 +7,7 @@
         <column xsi:type="varchar" name="identifier" nullable="false" length="100" comment="Meilisearch Technical Key (e.g. 'default')"/>
         <column xsi:type="varchar" name="source" nullable="false" length="50" comment="Provider: openAi, huggingFace, ollama, rest, userProvided"/>
         <column xsi:type="varchar" name="url" nullable="true" length="255" comment="The URL Meilisearch contacts"/>
-        <column xsi:type="varchar" name="api_key" nullable="true" length="255" comment="Authentication token"/>
+        <column xsi:type="text" name="api_key" nullable="true" comment="Encrypted authentication token"/>
         <column xsi:type="varchar" name="model" nullable="true" length="255" comment="The model name (e.g. text-embedding-3-small)"/>
         <column xsi:type="text" name="document_template" nullable="true" comment="Liquid Template defining data to vectorize"/>
         <column xsi:type="int" name="document_template_max_bytes" unsigned="true" nullable="true" comment="Maximum size of rendered template"/>

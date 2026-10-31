@@ -101,4 +101,10 @@
             }
         }
     }
+
+    // Server-rendered stand-in for the Knockout filter block, so the list does not move down when the block appears.
+    // Knockout renders the block in front of it, so a sibling selector hides it without needing :has().
+    #layered-filter-block ~ .meilisearch-layers-placeholder {
+        display: none;
+    }
 }

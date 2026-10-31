@@ -7,6 +7,7 @@ namespace Walkwizus\MeilisearchMerchandising\Block\Adminhtml\Category;
 use Magento\Backend\Block\Template;
 use Magento\Catalog\Api\CategoryManagementInterface;
 use Magento\Directory\Helper\Data as DirectoryHelper;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
 use Walkwizus\MeilisearchMerchandising\Model\ResourceModel\Category\CollectionFactory;
 
@@ -60,7 +61,7 @@ class Tree extends Template
 
     /**
      * @return false|string
-     * @throws \Exception
+     * @throws LocalizedException
      */
     public function getCategoryTree(): bool|string
     {
@@ -72,7 +73,7 @@ class Tree extends Template
             $jsTreeData = $this->convertToJsTreeFormat($rootCategory);
             return json_encode([$jsTreeData]);
         } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
+            throw new LocalizedException(__($exception->getMessage()), $exception);
         }
     }
 

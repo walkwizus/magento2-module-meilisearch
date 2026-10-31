@@ -19,15 +19,38 @@
         "InstantSearch"
     ],
     "require": {
-        "magento/framework": ">=103.0.4",
+        "php": ">=8.1",
+        "ext-ctype": "*",
+        "ext-filter": "*",
+        "magento/framework": "^103.0.4",
+        "magento/module-advanced-search": "^100.4",
+        "magento/module-backend": "^102.0",
+        "magento/module-catalog": "^104.0",
+        "magento/module-catalog-search": "^102.0",
+        "magento/module-config": "^101.2",
+        "magento/module-customer": "^103.0",
+        "magento/module-directory": "^100.4",
         "magento/module-eav": "^102.1",
-        "magento/module-swatches": "^100.4"
+        "magento/module-search": "^101.1",
+        "magento/module-store": "^101.1",
+        "magento/module-swatches": "^100.4",
+        "magento/module-tax": "^100.4",
+        "magento/module-ui": "^101.2"
     },
     "require-dev": {
+        "bitexpert/phpstan-magento": "^0.44",
+        "magento/magento-coding-standard": "^41",
+        "magento/module-inventory-catalog-api": "^1.2",
+        "magento/module-inventory-indexer": "^2.1",
+        "magento/module-inventory-sales-api": "^1.2",
+        "meilisearch/meilisearch-php": "^2.0@beta",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.5",
-        "phpstan/phpstan": "^1.12",
-        "bitexpert/phpstan-magento": "^0.11.0",
-        "phpstan/extension-installer": "^1.4"
+        "shipmonk/composer-dependency-analyser": "^1.8"
+    },
+    "conflict": {
+        "meilisearch/meilisearch-php": "<2.0.0-beta.8"
     },
     "suggest": {
         "meilisearch/meilisearch-php": "Required to interact with Meilisearch API from PHP.",
@@ -72,6 +95,16 @@
         }
     },
     "scripts": {
+        "cs": "vendor/bin/phpcs",
+        "cs:fix": "vendor/bin/phpcbf",
+        "deps": "vendor/bin/composer-dependency-analyser",
+        "qa": [
+            "@composer validate --strict --no-check-lock",
+            "@cs",
+            "@phpstan",
+            "@deps",
+            "@test:unit"
+        ],
         "test:unit": "vendor/bin/phpunit -c phpunit.xml.dist",
         "phpstan": "vendor/bin/phpstan analyse",
         "build:js-sdk": "npm --prefix build/meilisearch-js ci && npm --prefix build/meilisearch-js run build",
@@ -83,15 +116,17 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "repositories": {
-        "0": {
+        "mage-os": {
             "type": "composer",
-            "url": "https://repo.magento.com/"
+            "url": "https://mirror.mage-os.org/"
         }
     },
     "config": {
         "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
             "magento/composer-dependency-version-audit-plugin": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "php-http/discovery": true
         }
     }
 }
