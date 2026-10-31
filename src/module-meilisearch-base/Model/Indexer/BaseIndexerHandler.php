@@ -14,7 +14,6 @@ use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Magento\Framework\Indexer\SaveHandler\Batch;
 use Walkwizus\MeilisearchBase\Model\AttributeMapper;
 use Walkwizus\MeilisearchBase\Model\AttributeProvider;
-use Walkwizus\MeilisearchAi\Model\EmbedderSynchronizer;
 use Magento\Framework\Search\Request\Dimension;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
@@ -51,7 +50,7 @@ class BaseIndexerHandler implements IndexerInterface
      * @param string $indexerId
      * @param AttributeMapper $attributeMapper
      * @param AttributeProvider $attributeProvider
-     * @param EmbedderSynchronizer $embedderSynchronizer
+     * @param IndexLifecyclePool $indexLifecyclePool
      * @param LoggerInterface $logger
      * @param int $batchSize
      * @param string $indexPrimaryKey
@@ -68,7 +67,7 @@ class BaseIndexerHandler implements IndexerInterface
         private readonly string $indexerId,
         private readonly AttributeMapper $attributeMapper,
         private readonly AttributeProvider $attributeProvider,
-        private readonly EmbedderSynchronizer $embedderSynchronizer,
+        private readonly IndexLifecyclePool $indexLifecyclePool,
         private readonly LoggerInterface $logger,
         private readonly int $batchSize = 10000,
         private readonly string $indexPrimaryKey = 'id',
@@ -99,7 +98,7 @@ class BaseIndexerHandler implements IndexerInterface
                 $this->settingsManager->updateFilterableAttributes($targetIndexName, $filterableAttributes);
                 $this->settingsManager->updateSortableAttributes($targetIndexName, $this->attributeProvider->getSortableAttributes($indexerId, 'index'));
                 $this->settingsManager->updateSearchableAttributes($targetIndexName, $this->attributeProvider->getSearchableAttributes($indexerId, 'index'));
-                $this->embedderSynchronizer->sync($indexName, $targetIndexName);
+                $this->indexLifecyclePool->prepareIndex($indexName, $targetIndexName);
             } catch (\Exception $e) {
                 throw $this->failure('Unable to prepare the settings of Meilisearch index %1: %2', $targetIndexName, $e);
             }
@@ -180,7 +179,7 @@ class BaseIndexerHandler implements IndexerInterface
             $indexName = $this->searchIndexNameResolver->getIndexName($storeId, $indexerId);
             $tmpIndexName = $indexName . '_' . self::INDEX_SWAP_SUFFIX;
 
-            if ($this->embedderSynchronizer->hasEmbedders($indexName)) {
+            if ($this->indexLifecyclePool->requiresInPlaceReindex($indexName)) {
                 $this->inPlaceRuns[$indexName] = bin2hex(random_bytes(8));
             } else {
                 $this->temporaryIndexes[$indexName] = $tmpIndexName;
@@ -239,7 +238,7 @@ class BaseIndexerHandler implements IndexerInterface
 
             foreach ($this->temporaryIndexes as $realIndex => $tmpIndex) {
                 $this->indexesManager->deleteIndex($tmpIndex);
-                $this->embedderSynchronizer->moveState($tmpIndex, $realIndex);
+                $this->indexLifecyclePool->afterIndexSwap($tmpIndex, $realIndex);
             }
         } catch (\Exception $e) {
             throw $this->failure('Unable to swap Meilisearch indexes %1: %2', implode(', ', array_keys($this->temporaryIndexes)), $e);
