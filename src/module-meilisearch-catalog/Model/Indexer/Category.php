@@ -38,8 +38,8 @@ class Category implements \Magento\Framework\Indexer\ActionInterface, \Magento\F
 
         foreach ($storeIds as $storeId) {
             $dimension = $this->dimensionFactory->create(['name' => 'scope', 'value' => $storeId]);
-            $this->indexerHandler->deleteIndex([$dimension], new \ArrayObject($ids));
-            $this->indexerHandler->saveIndex([$dimension], new \ArrayObject($this->fullAction->getCategories($storeId, $ids)));
+            $this->indexerHandler->deleteIndex([$dimension], new \ArrayIterator($ids));
+            $this->indexerHandler->saveIndex([$dimension], new \ArrayIterator($this->fullAction->getCategories($storeId, $ids)));
         }
     }
 
