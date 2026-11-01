@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Search\Model\AdapterFactory">
+        <arguments>
+            <argument name="adapters" xsi:type="array">
+                <item name="meilisearch" xsi:type="string">Walkwizus\MeilisearchSearchAdapter\SearchAdapter\Adapter</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchSearchAdapter\SearchAdapter\Adapter">
+        <arguments>
+            <argument name="responseFactory" xsi:type="object">Magento\Elasticsearch\SearchAdapter\ResponseFactory</argument>
+            <argument name="customerSession" xsi:type="object">Magento\Customer\Model\Session\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeMapper">
+        <arguments>
+            <argument name="mappers" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="optionIds" xsi:type="object">Walkwizus\MeilisearchSearchAdapter\Model\AttributeMapper\CatalogProduct\OptionIds</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Model\AttributeProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="index" xsi:type="array">
+                        <item name="optionIds" xsi:type="object">Walkwizus\MeilisearchSearchAdapter\Model\AttributeProvider\CatalogProduct\OptionIds</item>
+                    </item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchBase\Service\SettingsManager">
+        <plugin name="meilisearch_search_adapter_adjust_index_settings" type="Walkwizus\MeilisearchSearchAdapter\Plugin\Service\AdjustIndexSettings"/>
+    </type>
+    <type name="Walkwizus\MeilisearchCatalog\Model\AttributeProvider\CatalogProduct\Eav">
+        <arguments>
+            <argument name="additionalSortableAttributes" xsi:type="array">
+                <item name="id" xsi:type="string">id</item>
+                <item name="stock_is_in_stock" xsi:type="string">stock.is_in_stock</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="elasticsearchLayerCategoryItemCollectionProvider">
+        <arguments>
+            <argument name="factories" xsi:type="array">
+                <item name="meilisearch" xsi:type="object">elasticsearchCategoryCollectionFactory</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="elasticsearchLayerSearchItemCollectionProvider">
+        <arguments>
+            <argument name="factories" xsi:type="array">
+                <item name="meilisearch" xsi:type="object">elasticsearchFulltextSearchCollectionFactory</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\CatalogSearch\Model\Search\ItemCollectionProvider">
+        <arguments>
+            <argument name="factories" xsi:type="array">
+                <item name="meilisearch" xsi:type="object">elasticsearchAdvancedCollectionFactory</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\CatalogSearch\Model\Advanced\ProductCollectionPrepareStrategyProvider">
+        <arguments>
+            <argument name="strategies" xsi:type="array">
+                <item name="meilisearch" xsi:type="object">Magento\Elasticsearch\Model\Advanced\ProductCollectionPrepareStrategy</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\AdvancedSearch\Model\SuggestedQueries">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="meilisearch" xsi:type="string">Magento\AdvancedSearch\Model\DataProvider\Suggestions</item>
+            </argument>
+        </arguments>
+    </type>
+</config>
