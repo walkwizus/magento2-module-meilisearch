@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <catalog>
+            <search>
+                <meilisearch_matching_strategy>last</meilisearch_matching_strategy>
+                <meilisearch_fallback_strategy>frequency</meilisearch_fallback_strategy>
+                <meilisearch_exact_words_first>0</meilisearch_exact_words_first>
+            </search>
+        </catalog>
+    </default>
+</config>

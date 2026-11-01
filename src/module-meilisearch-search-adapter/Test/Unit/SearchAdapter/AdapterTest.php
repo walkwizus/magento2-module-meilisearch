@@ -43,6 +43,7 @@ use Psr\Log\LoggerInterface;
 use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
+use Walkwizus\MeilisearchSearchAdapter\Model\Config;
 use Walkwizus\MeilisearchSearchAdapter\Model\IndexSettings;
 use Walkwizus\MeilisearchSearchAdapter\SearchAdapter\Adapter;
 use Walkwizus\MeilisearchSearchAdapter\SearchAdapter\Dynamic\PriceDataProvider;
@@ -57,6 +58,7 @@ class AdapterTest extends TestCase
     private array $sent = [];
     private array $responseData = [];
     private Adapter $adapter;
+    private Config&MockObject $config;
     private ProductCollection&MockObject $productCollection;
     private int $customerGroupId = 0;
     private array $posts = [];
@@ -134,6 +136,9 @@ class AdapterTest extends TestCase
         $productCollectionFactory = $this->createMock(ProductCollectionFactory::class);
         $productCollectionFactory->method('create')->willReturn($this->productCollection);
 
+        $this->config = $this->createMock(Config::class);
+        $this->config->method('getMatchingStrategy')->willReturn('all');
+
         $this->adapter = new Adapter(
             $connectionManager,
             $indexNameResolver,
@@ -146,7 +151,8 @@ class AdapterTest extends TestCase
             $customerSession,
             $this->logger,
             $indexSettings,
-            $productCollectionFactory
+            $productCollectionFactory,
+            $this->config
         );
     }
 
@@ -354,6 +360,60 @@ class AdapterTest extends TestCase
         self::assertSame('"summit kit"', $this->sent['q']);
     }
 
+    public function testSearchTextUsesTheConfiguredMatchingStrategy(): void
+    {
+        $this->adapter->query($this->request(new MatchQuery('search', 'running shorts', 1, [['field' => '*']]), [], [], 0, 12));
+
+        self::assertSame([['running shorts', 'all']], $this->searches());
+    }
+
+    public function testExactWordsAreTriedBeforeTypos(): void
+    {
+        $this->config->method('isExactWordsFirst')->willReturn(true);
+        $this->matching(['running shorts']);
+
+        $this->adapter->query($this->request(new MatchQuery('search', 'running shorts', 1, [['field' => '*']]), [], [], 0, 12));
+
+        self::assertSame([['"running" "shorts"', 'all'], ['running shorts', 'all']], $this->searches());
+        self::assertSame(2, $this->responseData['total']);
+    }
+
+    public function testWordsNoProductHasAreDroppedWhenNothingMatches(): void
+    {
+        $this->matching(['running', 'shorts', 'running shorts']);
+
+        $this->adapter->query($this->request(new BoolQuery('container', 1, [
+            'search' => new MatchQuery('search', 'nike running shorts', 1, [['field' => '*']]),
+            'visibility' => new FilterQuery('visibility', 1, FilterQuery::REFERENCE_FILTER, new TermFilter('visibility_filter', ['in' => [3, 4]], 'visibility')),
+        ]), [], [], 0, 12));
+
+        self::assertSame([['nike running shorts', 'all'], ['running shorts', 'all']], $this->searches());
+        self::assertSame(2, $this->responseData['total']);
+        $lookups = array_values(array_filter($this->posts, fn ($body) => isset($body['indexUid'])));
+        self::assertSame(['nike', 'running', 'shorts'], array_column($lookups, 'q'));
+        self::assertSame(array_fill(0, 3, '(visibility_ids IN ["3", "4"])'), array_column($lookups, 'filter'));
+    }
+
+    public function testFallbackStrategyRunsWhenEveryWordMatchesButNotTogether(): void
+    {
+        $this->config->method('getFallbackStrategy')->willReturn('frequency');
+        $this->matching(['yoga', 'backpack']);
+
+        $this->adapter->query($this->request(new MatchQuery('search', 'yoga backpack', 1, [['field' => '*']]), [], [], 0, 12));
+
+        self::assertSame([['yoga backpack', 'all'], ['yoga backpack', 'frequency']], $this->searches());
+    }
+
+    public function testCategoryPagesSearchOnce(): void
+    {
+        $this->config->method('getFallbackStrategy')->willReturn('frequency');
+        $this->matching([]);
+
+        $this->adapter->query($this->request(new FilterQuery('category', 1, FilterQuery::REFERENCE_FILTER, new TermFilter('category_filter', 4, 'category_ids')), [], [], 0, 12));
+
+        self::assertCount(1, $this->posts);
+    }
+
     public function testTextWithNothingToMatchReturnsNoResultsWithoutSearching(): void
     {
         $query = new MatchQuery('search', '" * \\', 1, [['field' => '*']]);
@@ -522,6 +582,34 @@ class AdapterTest extends TestCase
      * @param int $size
      * @return Request
      */
+    /**
+     * Only the given texts (searched with any strategy, or looked up word by word) find products.
+     *
+     * @param string[] $texts
+     */
+    private function matching(array $texts): void
+    {
+        $post = $this->post;
+        $this->post = function (string $path, $body) use ($post, $texts) {
+            $result = $post($path, $body);
+
+            return in_array(((array)$body)['q'] ?? '', $texts, true)
+                ? $result + ['estimatedTotalHits' => $result['totalHits']]
+                : ['hits' => [], 'totalHits' => 0, 'estimatedTotalHits' => 0];
+        };
+    }
+
+    /**
+     * @return array[] the text and matching strategy of each search, lookups left out
+     */
+    private function searches(): array
+    {
+        return array_values(array_map(
+            fn ($body) => [$body['q'], $body['matchingStrategy']],
+            array_filter($this->posts, fn ($body) => isset($body['matchingStrategy']) && !isset($body['indexUid']))
+        ));
+    }
+
     private function request(QueryInterface $query, array $buckets, array $sort, int $from, int $size): Request
     {
         return new Request('catalog_view_container', 'catalogsearch_fulltext', $query, $from, $size, [

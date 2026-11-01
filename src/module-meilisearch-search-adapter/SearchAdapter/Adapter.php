@@ -35,6 +35,7 @@ use Psr\Log\LoggerInterface;
 use Walkwizus\MeilisearchBase\SearchAdapter\ConnectionManager;
 use Walkwizus\MeilisearchBase\SearchAdapter\SearchIndexNameResolver;
 use Walkwizus\MeilisearchSearchAdapter\Model\AttributeProvider\CatalogProduct\OptionIds;
+use Walkwizus\MeilisearchSearchAdapter\Model\Config;
 use Walkwizus\MeilisearchSearchAdapter\Model\IndexSettings;
 use Walkwizus\MeilisearchSearchAdapter\SearchAdapter\Dynamic\PriceDataProvider;
 
@@ -83,6 +84,7 @@ class Adapter implements AdapterInterface
      * @param LoggerInterface $logger
      * @param IndexSettings $indexSettings
      * @param ProductCollectionFactory $productCollectionFactory
+     * @param Config $config
      */
     public function __construct(
         private readonly ConnectionManager $connectionManager,
@@ -96,7 +98,8 @@ class Adapter implements AdapterInterface
         private readonly CustomerSession $customerSession,
         private readonly LoggerInterface $logger,
         private readonly IndexSettings $indexSettings,
-        private readonly ProductCollectionFactory $productCollectionFactory
+        private readonly ProductCollectionFactory $productCollectionFactory,
+        private readonly Config $config
     ) { }
 
     /**
@@ -134,7 +137,7 @@ class Adapter implements AdapterInterface
                 'page' => $size ? intdiv((int)$request->getFrom(), $size) + 1 : 1,
             ], fn ($value) => $value !== null && $value !== []);
 
-            $result = $this->connectionManager->getConnection()->index($this->indexName)->rawSearch($text, $params);
+            $result = $this->search($text, $params);
         } catch (\Exception $e) {
             $this->logger->critical($e);
             if ($e instanceof ApiException && in_array($e->httpStatus, [400, 404], true)) {
@@ -147,6 +150,87 @@ class Adapter implements AdapterInterface
         }
 
         return $this->response($request, $result['hits'] ?? [], $result, $result['totalHits'] ?? 0);
+    }
+
+    /**
+     * Relaxes the search only while nothing matches: exact words, typos, known words only, fallback strategy.
+     *
+     * @param string $text
+     * @param array $params
+     * @return array
+     */
+    private function search(string $text, array $params): array
+    {
+        $strategy = $this->config->getMatchingStrategy($this->storeId);
+        $result = $this->searchWords($text, $strategy, $params);
+        if ($text === '' || ($result['totalHits'] ?? 0) > 0 || str_contains($text, '"')) {
+            return $result;
+        }
+
+        $known = $this->knownWords($text, $params['filter'] ?? null);
+        if ($known !== '' && $known !== $text) {
+            $result = $this->searchWords($known, $strategy, $params);
+            if (($result['totalHits'] ?? 0) > 0) {
+                return $result;
+            }
+        }
+
+        $fallback = $this->config->getFallbackStrategy($this->storeId);
+
+        return $fallback !== null
+            ? $this->rawSearch($known ?: $text, $fallback, $params)
+            : $result;
+    }
+
+    /**
+     * @param string $text
+     * @param string $strategy
+     * @param array $params
+     * @return array
+     */
+    private function searchWords(string $text, string $strategy, array $params): array
+    {
+        if ($text !== '' && !str_contains($text, '"') && $this->config->isExactWordsFirst($this->storeId)) {
+            // a quoted word matches without typos (or as a prefix)
+            $result = $this->rawSearch('"' . implode('" "', explode(' ', $text)) . '"', $strategy, $params);
+            if (($result['totalHits'] ?? 0) > 0) {
+                return $result;
+            }
+        }
+
+        return $this->rawSearch($text, $strategy, $params);
+    }
+
+    /**
+     * @param string $text
+     * @param string|null $filter
+     * @return string the words of the text that match at least one product
+     */
+    private function knownWords(string $text, ?string $filter): string
+    {
+        $words = array_slice(explode(' ', $text), 0, self::MAX_WORDS);
+        $results = $this->connectionManager->getConnection()->multiSearch(array_map(
+            function ($word) use ($filter) {
+                $query = (new MultiSearchQuery())->setIndexUid($this->indexName)->setQuery($word)->setLimit(0);
+
+                return $filter !== null ? $query->setFilter($filter) : $query;
+            },
+            $words
+        ))['results'] ?? [];
+
+        return implode(' ', array_filter($words, fn ($i) => ($results[$i]['estimatedTotalHits'] ?? 0) > 0, ARRAY_FILTER_USE_KEY));
+    }
+
+    /**
+     * @param string $text
+     * @param string $strategy
+     * @param array $params
+     * @return array
+     */
+    private function rawSearch(string $text, string $strategy, array $params): array
+    {
+        return $this->connectionManager->getConnection()->index($this->indexName)
+            ->rawSearch($text, $params + ['matchingStrategy' => $strategy]);
     }
 
     /**

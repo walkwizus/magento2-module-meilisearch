@@ -11,6 +11,7 @@ Magento search adapter for the `meilisearch` engine. Magento's own search reques
 - Resolves `url_key` filters (the GraphQL product page lookup) to product IDs from the database, because the index holds the product's URL path rather than the attribute.
 - Builds price buckets with Magento's auto and manual algorithms from the price facet of the same search.
 - Registers `meilisearch` with the layered navigation, advanced search and suggestion providers from `Magento_Elasticsearch`, which it depends on.
+- Searches with Meilisearch's [matching strategy](https://www.meilisearch.com/docs/reference/api/search#matching-strategy) set under Stores > Configuration > Catalog > Catalog > Catalog Search (default `last`). When nothing matches, it searches again without the words no product has, then with the fallback strategy (default `frequency`).
 
 **Index settings**
 - Raises `faceting.maxValuesPerFacet` (10000) and `pagination.maxTotalHits` (100000) when filterable attributes are pushed, so totals and price buckets are exact up to those limits. Change them through the `maxValuesPerFacet` and `maxTotalHits` arguments of `Walkwizus\MeilisearchSearchAdapter\Plugin\Service\AdjustIndexSettings`. With `Walkwizus_MeilisearchFrontend` enabled, its public search key can then ask for up to `maxTotalHits` hits in one request.
