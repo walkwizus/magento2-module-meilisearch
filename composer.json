@@ -31,6 +31,7 @@
         "magento/module-customer": "^103.0",
         "magento/module-directory": "^100.4",
         "magento/module-eav": "^102.1",
+        "magento/module-elasticsearch": "^101.0",
         "magento/module-search": "^101.1",
         "magento/module-store": "^101.1",
         "magento/module-swatches": "^100.4",
@@ -47,6 +48,7 @@
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^10.5",
+        "psr/http-message": "^1.1 || ^2.0",
         "shipmonk/composer-dependency-analyser": "^1.8"
     },
     "conflict": {
@@ -63,7 +65,8 @@
         "walkwizus/module-meilisearch-catalog": "self.version",
         "walkwizus/module-meilisearch-frontend": "self.version",
         "walkwizus/module-meilisearch-indices": "self.version",
-        "walkwizus/module-meilisearch-merchandising": "self.version"
+        "walkwizus/module-meilisearch-merchandising": "self.version",
+        "walkwizus/module-meilisearch-search-adapter": "self.version"
     },
     "autoload": {
         "files": [
@@ -73,7 +76,8 @@
             "src/module-meilisearch-catalog/registration.php",
             "src/module-meilisearch-frontend/registration.php",
             "src/module-meilisearch-indices/registration.php",
-            "src/module-meilisearch-merchandising/registration.php"
+            "src/module-meilisearch-merchandising/registration.php",
+            "src/module-meilisearch-search-adapter/registration.php"
         ],
         "psr-4": {
             "Walkwizus\\MeilisearchAi\\": "src/module-meilisearch-ai",
@@ -81,7 +85,8 @@
             "Walkwizus\\MeilisearchCatalog\\": "src/module-meilisearch-catalog",
             "Walkwizus\\MeilisearchFrontend\\": "src/module-meilisearch-frontend",
             "Walkwizus\\MeilisearchIndices\\": "src/module-meilisearch-indices",
-            "Walkwizus\\MeilisearchMerchandising\\": "src/module-meilisearch-merchandising"
+            "Walkwizus\\MeilisearchMerchandising\\": "src/module-meilisearch-merchandising",
+            "Walkwizus\\MeilisearchSearchAdapter\\": "src/module-meilisearch-search-adapter"
         }
     },
     "autoload-dev": {
@@ -91,7 +96,8 @@
             "Walkwizus\\MeilisearchCatalog\\Test\\": "src/module-meilisearch-catalog/Test",
             "Walkwizus\\MeilisearchFrontend\\Test\\": "src/module-meilisearch-frontend/Test",
             "Walkwizus\\MeilisearchIndices\\Test\\": "src/module-meilisearch-indices/Test",
-            "Walkwizus\\MeilisearchMerchandising\\Test\\": "src/module-meilisearch-merchandising/Test"
+            "Walkwizus\\MeilisearchMerchandising\\Test\\": "src/module-meilisearch-merchandising/Test",
+            "Walkwizus\\MeilisearchSearchAdapter\\Test\\": "src/module-meilisearch-search-adapter/Test"
         }
     },
     "scripts": {

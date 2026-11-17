@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="catalog">
+            <group id="search">
+                <field id="meilisearch_matching_strategy" translate="label comment" type="select" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Matching Strategy</label>
+                    <source_model>Walkwizus\MeilisearchSearchAdapter\Model\Config\Source\MatchingStrategy</source_model>
+                    <comment><![CDATA["All" only returns products matching every word of the search. "Last" and "Frequency" also return products matching some of the words, dropping words from the end of the search or the most common words first. <a href="https://www.meilisearch.com/docs/reference/api/search#matching-strategy" target="_blank">Learn more</a>]]></comment>
+                    <depends>
+                        <field id="engine">meilisearch</field>
+                    </depends>
+                </field>
+                <field id="meilisearch_fallback_strategy" translate="label comment" type="select" sortOrder="201" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Fallback Matching Strategy</label>
+                    <source_model>Walkwizus\MeilisearchSearchAdapter\Model\Config\Source\FallbackStrategy</source_model>
+                    <comment>Searches again with this strategy when the matching strategy finds nothing, so a word no product has does not empty the results.</comment>
+                    <depends>
+                        <field id="engine">meilisearch</field>
+                    </depends>
+                </field>
+                <field id="meilisearch_exact_words_first" translate="label comment" type="select" sortOrder="202" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Prefer Exact Words Over Typos</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Only returns typo matches when nothing matches the words as typed, so "shorts" does not also return "shirts" and "sports". Exact matches also skip synonyms and other word forms ("shoe" does not match "shoes"), so leave this off for languages with many word endings or when relying on synonyms.</comment>
+                    <depends>
+                        <field id="engine">meilisearch</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
