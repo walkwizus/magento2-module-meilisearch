@@ -9,6 +9,24 @@
         </div>
     </div>
 <?php else : ?>
+<?php $searchRulesStatus = $block->getSearchRulesStatus(); ?>
+<?php if ($searchRulesStatus === \Walkwizus\MeilisearchBase\Service\DynamicSearchRuleManager::STATUS_DISABLED) : ?>
+    <div class="messages">
+        <div class="message message-notice notice merch-search-rules-notice">
+            <div><?= $escaper->escapeHtml(__('Pinned products only stay in place with the Position sort. Enable the Meilisearch search rules (experimental feature) to keep them pinned on every sort.')) ?></div>
+            <form method="post" action="<?= $escaper->escapeUrl($block->getEnableSearchRulesUrl()) ?>">
+                <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                <button type="submit" class="action-secondary"><?= $escaper->escapeHtml(__('Enable search rules')) ?></button>
+            </form>
+        </div>
+    </div>
+<?php elseif ($searchRulesStatus === \Walkwizus\MeilisearchBase\Service\DynamicSearchRuleManager::STATUS_UNSUPPORTED) : ?>
+    <div class="messages">
+        <div class="message message-notice notice">
+            <div><?= $escaper->escapeHtml(__('Pinned products only stay in place with the Position sort. Upgrade Meilisearch to %1 or later to keep them pinned on every sort.', $block->getMinimumSearchRulesVersion())) ?></div>
+        </div>
+    </div>
+<?php endif; ?>
 <div id="category-merchandising-query-builder-container" data-bind="scope: 'meilisearch-merchandising-query-builder'">
     <!-- ko template: getTemplate() --><!-- /ko -->
 </div>

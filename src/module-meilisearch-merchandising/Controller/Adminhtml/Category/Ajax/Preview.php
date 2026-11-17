@@ -47,11 +47,13 @@ class Preview extends Action implements HttpPostActionInterface
         $storeId = (int) $this->getRequest()->getParam('storeId');
         $categoryId = (int) $this->getRequest()->getParam('categoryId');
         $saved = null;
+        $arranged = null;
 
         try {
             if ($this->getRequest()->getParam('withSaved')) {
                 $saved = $this->categoryProductArrangement->getSaved($storeId, $categoryId);
                 $arrangement = json_decode((string) json_encode($saved), true);
+                $arranged = $this->categoryProductArrangement->isArranged($storeId, $categoryId);
             }
 
             $result = $this->categoryProductPreview->getPage(
@@ -68,6 +70,6 @@ class Preview extends Action implements HttpPostActionInterface
             return $json->setData(['success' => false, 'message' => $e->getMessage()]);
         }
 
-        return $json->setData(['success' => true, 'saved' => $saved] + $result);
+        return $json->setData(['success' => true, 'saved' => $saved, 'arranged' => $arranged] + $result);
     }
 }

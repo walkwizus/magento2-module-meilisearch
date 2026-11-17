@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_category_delete_commit_after">
+        <observer name="meilisearch_merchandising_delete_category_pin_rules" instance="Walkwizus\MeilisearchMerchandising\Observer\DeleteCategoryPinRules"/>
+    </event>
+</config>

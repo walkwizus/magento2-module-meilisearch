@@ -8,6 +8,7 @@ use Magento\Backend\App\Action;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Walkwizus\MeilisearchMerchandising\Model\CategoryFactory;
 use Walkwizus\MeilisearchMerchandising\Api\CategoryRepositoryInterface;
 use Magento\Framework\Controller\ResultInterface;
@@ -37,6 +38,7 @@ class SaveRule extends Action implements HttpPostActionInterface
 
     /**
      * @return ResultInterface
+     * @throws LocalizedException
      */
     public function execute(): ResultInterface
     {
@@ -68,7 +70,11 @@ class SaveRule extends Action implements HttpPostActionInterface
             return $json->setData(['success' => false, 'message' => __($e->getMessage())]);
         }
 
-        return $json->setData(['success' => true, 'message' => __('Category merchandising was saved')]);
+        return $json->setData([
+            'success' => true,
+            'message' => __('Category merchandising was saved'),
+            'arranged' => $this->categoryProductArrangement->isArranged($storeId, $categoryId)
+        ]);
     }
 
     /**

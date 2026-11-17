@@ -126,7 +126,7 @@ class Ssr implements ArgumentInterface
      * @param array $selectedFacets
      * @param int $currentPage
      * @param int $hitsPerPage
-     * @param string|null $sort
+     * @param array $sort
      * @param HybridSearchOptions|null $hybridOptions
      * @param float|null $threshold
      * @return array
@@ -138,7 +138,7 @@ class Ssr implements ArgumentInterface
         array $selectedFacets,
         int $currentPage,
         int $hitsPerPage,
-        ?string $sort,
+        array $sort,
         ?HybridSearchOptions $hybridOptions,
         ?float $threshold
     ): array {
@@ -163,8 +163,8 @@ class Ssr implements ArgumentInterface
             $mainQuery->setFilter($mainFilters);
         }
 
-        if ($sort !== null) {
-            $mainQuery->setSort([$sort]);
+        if ($sort !== []) {
+            $mainQuery->setSort($sort);
         }
 
         $queries[] = $mainQuery;
@@ -203,23 +203,27 @@ class Ssr implements ArgumentInterface
      * @param string $sortBy
      * @param string $sortDirection
      * @param string $defaultSortBy
-     * @return string|null
+     * @return array
      */
-    private function buildSort(string $sortBy, string $sortDirection, string $defaultSortBy): ?string
+    private function buildSort(string $sortBy, string $sortDirection, string $defaultSortBy): array
     {
         if ($sortBy === SearchConfigProvider::SORT_RELEVANCE) {
-            return null;
+            return [];
         }
 
-        if ($sortBy !== '') {
-            return $sortBy . ':' . $sortDirection;
+        if ($sortBy === '') {
+            if ($defaultSortBy === '' || $defaultSortBy === SearchConfigProvider::SORT_RELEVANCE) {
+                return [];
+            }
+
+            $sortBy = $defaultSortBy;
+            $sortDirection = 'asc';
         }
 
-        if ($defaultSortBy !== '' && $defaultSortBy !== SearchConfigProvider::SORT_RELEVANCE) {
-            return $defaultSortBy . ':asc';
-        }
-
-        return null;
+        return array_map(
+            static fn (string $field): string => $field . ':' . $sortDirection,
+            $this->config['sortFields'][$sortBy] ?? [$sortBy]
+        );
     }
 
     /**

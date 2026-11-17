@@ -33,6 +33,7 @@
                 <item name="catalog_product" xsi:type="array">
                     <item name="index" xsi:type="array">
                         <item name="categoryPromote" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeProvider\CatalogProduct\Index\CategoryPromote</item>
+                        <item name="categoryRank" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeProvider\CatalogProduct\Index\CategoryRank</item>
                     </item>
                     <item name="merchandising" xsi:type="array">
                         <item name="eav" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeProvider\CatalogProduct\Merchandising\Eav</item>
@@ -49,6 +50,22 @@
             <argument name="resolvers" xsi:type="array">
                 <item name="price" xsi:type="object">Walkwizus\MeilisearchMerchandising\Model\AttributeResolver\Attribute\PriceResolver</item>
             </argument>
+        </arguments>
+    </type>
+    <type name="Magento\CatalogSearch\Model\Indexer\Fulltext">
+        <plugin name="meilisearch_merchandising_rank_sort_ready" type="Walkwizus\MeilisearchMerchandising\Plugin\CatalogSearch\Indexer\FulltextPlugin"/>
+    </type>
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="meilisearch_merchandising_sync_rules" xsi:type="object">Walkwizus\MeilisearchMerchandising\Console\Command\SyncSearchRules</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Walkwizus\MeilisearchMerchandising\Console\Command\SyncSearchRules">
+        <arguments>
+            <argument name="ruleManager" xsi:type="object">Walkwizus\MeilisearchBase\Service\DynamicSearchRuleManager\Proxy</argument>
+            <argument name="categoryPinRuleSync" xsi:type="object">Walkwizus\MeilisearchMerchandising\Service\CategoryPinRuleSync\Proxy</argument>
         </arguments>
     </type>
 </config>

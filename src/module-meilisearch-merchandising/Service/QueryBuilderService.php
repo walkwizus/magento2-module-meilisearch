@@ -266,7 +266,7 @@ class QueryBuilderService
                     return (string)$option['label'];
                 }
 
-                if (!$isTrue && ($option['value'] == '0' || $option['value'] === 0)) {
+                if (!$isTrue && $option['value'] == '0') {
                     return (string)$option['label'];
                 }
             }

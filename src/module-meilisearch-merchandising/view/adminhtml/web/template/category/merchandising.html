@@ -86,7 +86,7 @@
                 <!-- /ko -->
                 <!-- ko if: truncated() -->
                 <div class="message message-notice notice merch-message">
-                    <div data-bind="text: $t('Only the first %1 of the %2 matching products can be displayed and arranged.').replace('%1', sortableCount()).replace('%2', total())"></div>
+                    <div data-bind="text: $t('Only the first %1 of the %2 matching products can be displayed.').replace('%1', pageableCount()).replace('%2', total())"></div>
                 </div>
                 <!-- /ko -->
 
@@ -114,10 +114,6 @@
                             </div>
                         </div>
                         <div class="col-xs-9 merch-toolbar-actions">
-                            <label class="merch-sort-by">
-                                <span data-bind="i18n: 'Then sort by'"></span>
-                                <select class="admin__control-select" data-bind="options: sortByOptions, optionsText: 'label', optionsValue: 'value', value: sortBy"></select>
-                            </label>
                             <div class="merch-view-switch" role="group" data-bind="attr: {'aria-label': $t('View')}">
                                 <button type="button"
                                         class="merch-view-button _grid"
@@ -135,9 +131,6 @@
                     </div>
                 </div>
 
-                <!-- ko if: isAutoSort() && !isFiltered() -->
-                <p class="merch-note" data-bind="i18n: 'Products are sorted automatically after the pinned ones. Drag a product to pin it at a position.'"></p>
-                <!-- /ko -->
                 <!-- ko if: isFiltered() -->
                 <p class="merch-note" data-bind="i18n: 'Drag and drop is disabled while searching or filtering. Use the position field to move a product.'"></p>
                 <!-- /ko -->

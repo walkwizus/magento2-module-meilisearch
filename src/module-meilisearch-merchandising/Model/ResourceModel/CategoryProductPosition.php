@@ -71,6 +71,27 @@ class CategoryProductPosition extends AbstractDb
 
     /**
      * @param int $storeId
+     * @return array
+     * @throws LocalizedException
+     */
+    public function getPinnedProducts(int $storeId): array
+    {
+        $connection = $this->getConnection();
+        $select = $connection->select()
+            ->from($this->getMainTable(), ['category_id', 'product_id', 'position'])
+            ->where('store_id = ?', $storeId)
+            ->where('is_pinned = ?', 1);
+
+        $pins = [];
+        foreach ($connection->fetchAll($select) as $row) {
+            $pins[(int) $row['category_id']][(int) $row['product_id']] = (int) $row['position'];
+        }
+
+        return $pins;
+    }
+
+    /**
+     * @param int $storeId
      * @param array $productIds
      * @return array
      * @throws LocalizedException
@@ -83,13 +104,16 @@ class CategoryProductPosition extends AbstractDb
 
         $connection = $this->getConnection();
         $select = $connection->select()
-            ->from($this->getMainTable(), ['product_id', 'category_id', 'position'])
+            ->from($this->getMainTable(), ['product_id', 'category_id', 'position', 'is_buried'])
             ->where('store_id = ?', $storeId)
             ->where('product_id IN (?)', array_map('intval', $productIds));
 
         $positions = [];
         foreach ($connection->fetchAll($select) as $row) {
-            $positions[(int) $row['product_id']][(int) $row['category_id']] = (int) $row['position'];
+            $positions[(int) $row['product_id']][(int) $row['category_id']] = [
+                'position' => (int) $row['position'],
+                'is_buried' => (bool) $row['is_buried']
+            ];
         }
 
         return $positions;

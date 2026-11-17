@@ -117,7 +117,7 @@ define([
         const sortField = sorterState.sortBy() ?? meilisearchConfig.defaultSortBy;
         const sortDirection = sorterState.isDescending() ? 'desc' : 'asc';
         const sortParams = sortField && sortField !== SORT_RELEVANCE
-            ? [`${sortField}:${sortDirection}`]
+            ? ((meilisearchConfig.sortFields || {})[sortField] || [sortField]).map(field => `${field}:${sortDirection}`)
             : undefined;
         const selectedFilters = facetsState.selectedFacets();
         const activeFacetCodes = Object.keys(selectedFilters);
