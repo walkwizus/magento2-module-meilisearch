@@ -8,28 +8,30 @@ use Magento\Catalog\Model\Category;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Indexer\CacheContext;
-use Walkwizus\MeilisearchMerchandising\Model\CategoryProduct\RemainingSorter;
+use Psr\Log\LoggerInterface;
 use Walkwizus\MeilisearchMerchandising\Model\ResourceModel\CategoryProductPosition;
-use Walkwizus\MeilisearchMerchandising\Model\ResourceModel\CategorySort;
 
 class CategoryProductArrangement
 {
     /**
      * @param CategoryProductPosition $positionResource
-     * @param CategorySort $sortResource
      * @param CategoryProductPreview $categoryProductPreview
      * @param SaveProductPosition $saveProductPosition
+     * @param CategoryPinRuleSync $categoryPinRuleSync
      * @param CacheContext $cacheContext
      * @param EventManager $eventManager
+     * @param LoggerInterface $logger
      */
     public function __construct(
         private readonly CategoryProductPosition $positionResource,
-        private readonly CategorySort $sortResource,
         private readonly CategoryProductPreview $categoryProductPreview,
         private readonly SaveProductPosition $saveProductPosition,
+        private readonly CategoryPinRuleSync $categoryPinRuleSync,
         private readonly CacheContext $cacheContext,
-        private readonly EventManager $eventManager
-    ) { }
+        private readonly EventManager $eventManager,
+        private readonly LoggerInterface $logger
+    ) {
+    }
 
     /**
      * @param int $storeId
@@ -52,8 +54,7 @@ class CategoryProductArrangement
 
         return [
             'pins' => (object) $pins,
-            'buried' => $buried,
-            'sortBy' => $this->sortResource->getSortBy($storeId, $categoryId) ?? RemainingSorter::SORT_POSITION
+            'buried' => $buried
         ];
     }
 
@@ -67,24 +68,64 @@ class CategoryProductArrangement
      */
     public function save(?array $rules, int $storeId, int $categoryId, array $arrangement): void
     {
-        $arrangement = $this->categoryProductPreview->normalizeArrangement($arrangement);
-        $positions = $this->categoryProductPreview->getPositions($rules, $storeId, $categoryId, $arrangement);
+        $previous = $this->positionResource->getCategoryPositions($storeId, $categoryId);
+        $arrangedDepth = count(array_filter($previous, static fn (array $row): bool => !$row['is_buried']));
+        $rows = $this->categoryProductPreview->getPositions($rules, $storeId, $categoryId, $arrangement, $arrangedDepth);
 
-        $this->positionResource->replaceCategoryPositions($storeId, $categoryId, array_map(
-            static fn (array $row): array => [
-                'product_id' => $row['id'],
-                'position' => $row['position'],
-                'is_pinned' => $row['is_pinned'],
-                'is_buried' => $row['is_buried']
-            ],
-            $positions
-        ));
-        $this->sortResource->saveSortBy($storeId, $categoryId, $arrangement['sortBy']);
+        $this->apply($storeId, $categoryId, array_keys($previous), $rows);
+    }
+
+    /**
+     * @param int $storeId
+     * @param int $categoryId
+     * @return bool
+     * @throws LocalizedException
+     */
+    public function isArranged(int $storeId, int $categoryId): bool
+    {
+        return $this->positionResource->getCategoryPositions($storeId, $categoryId) !== [];
+    }
+
+    /**
+     * @param int $storeId
+     * @param int $categoryId
+     * @return void
+     * @throws \Exception
+     */
+    public function reset(int $storeId, int $categoryId): void
+    {
+        $previous = $this->positionResource->getCategoryPositions($storeId, $categoryId);
+
+        if ($previous === []) {
+            return;
+        }
+
+        $this->apply($storeId, $categoryId, array_keys($previous), []);
+    }
+
+    /**
+     * @param int $storeId
+     * @param int $categoryId
+     * @param array $previousProductIds
+     * @param array $rows
+     * @return void
+     * @throws \Exception
+     */
+    private function apply(int $storeId, int $categoryId, array $previousProductIds, array $rows): void
+    {
+        $this->positionResource->replaceCategoryPositions($storeId, $categoryId, $rows);
         $this->saveProductPosition->execute(
-            array_map(static fn (array $row): array => ['id' => $row['id'], 'position' => $row['position']], $positions),
+            $storeId,
             $categoryId,
-            $storeId
+            array_values(array_unique(array_merge($previousProductIds, array_map('intval', array_column($rows, 'product_id'))))),
+            $rows
         );
+
+        try {
+            $this->categoryPinRuleSync->sync($storeId, $categoryId);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage(), ['exception' => $e]);
+        }
 
         $this->cacheContext->registerEntities(Category::CACHE_TAG, [$categoryId]);
         $this->eventManager->dispatch('clean_cache_by_tags', ['object' => $this->cacheContext]);

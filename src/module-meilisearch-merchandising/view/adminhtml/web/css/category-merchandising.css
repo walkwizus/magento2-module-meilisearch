@@ -1348,14 +1348,6 @@
     }
 }
 
-.merch-sort-by {
-    align-items: center;
-    display: flex;
-    gap: .8rem;
-    margin: 0;
-    white-space: nowrap;
-}
-
 .merch-product._pinned {
     border-color: #007bdb;
     box-shadow: inset 0 3px 0 #007bdb;
@@ -1434,4 +1426,8 @@
 
 .merch-copy-options .admin__field-option {
     margin-bottom: .6rem;
+}
+
+.merch-search-rules-notice form {
+    margin-top: 10px;
 }

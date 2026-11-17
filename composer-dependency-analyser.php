@@ -16,6 +16,8 @@ return $config
             'guzzlehttp/guzzle',
             'guzzlehttp/psr7',
             'magento/zend-db',
+            'psr/http-client',
+            'psr/http-message',
             'psr/log',
             'symfony/console',
         ],

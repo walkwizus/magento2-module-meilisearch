@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Walkwizus\MeilisearchBase\SearchAdapter;
 
+use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Psr7\HttpFactory;
+use Meilisearch\Client;
 use Psr\Log\LoggerInterface;
 use Walkwizus\MeilisearchBase\Model\Config\ServerSettings;
-use GuzzleHttp\Psr7\HttpFactory;
-use GuzzleHttp\Client as HttpClient;
-use Meilisearch\Client;
 
 class ConnectionManager
 {
     /**
-     * @var Client|null
+     * @var Client[]
      */
-    protected ?Client $client = null;
+    protected array $clients = [];
 
     /**
      * @param LoggerInterface $logger
@@ -28,7 +28,8 @@ class ConnectionManager
         private readonly ServerSettings $serverSettings,
         private readonly HttpFactory $httpFactory,
         private readonly HttpClient $httpClient
-    ) { }
+    ) {
+    }
 
     /**
      * @param bool $master
@@ -37,24 +38,24 @@ class ConnectionManager
      */
     public function getConnection(bool $master = false): ?Client
     {
-        if (!$this->client) {
-            $this->connect($master);
+        if (!isset($this->clients[(int) $master])) {
+            $this->clients[(int) $master] = $this->connect($master);
         }
 
-        return $this->client;
+        return $this->clients[(int) $master];
     }
 
     /**
      * @param bool $master
-     * @return void
+     * @return Client
      * @throws \Exception
      */
-    private function connect(bool $master): void
+    private function connect(bool $master): Client
     {
         $apiKey = $master ? $this->serverSettings->getMasterKey() : $this->serverSettings->getServerSettingsApiKey();
 
         try {
-            $this->client = new Client(
+            return new Client(
                 $this->serverSettings->getServerSettingsAddress(),
                 $apiKey,
                 $this->httpClient,

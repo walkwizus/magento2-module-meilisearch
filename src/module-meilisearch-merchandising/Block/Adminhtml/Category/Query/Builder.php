@@ -8,6 +8,7 @@ use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Walkwizus\MeilisearchBase\Service\DynamicSearchRuleManager;
 use Walkwizus\MeilisearchMerchandising\Service\QueryBuilderService;
 use Magento\Framework\Locale\Format;
 use Magento\Framework\Json\Helper\Data as JsonHelper;
@@ -27,6 +28,7 @@ class Builder extends Template
         'loadRule' => 'meilisearch_merchandising/category/ajax_getrule',
         'saveRule' => 'meilisearch_merchandising/category/ajax_saverule',
         'deleteRule' => 'meilisearch_merchandising/category/ajax_deleterule',
+        'resetPositions' => 'meilisearch_merchandising/category/ajax_resetpositions',
         'preview' => 'meilisearch_merchandising/category/ajax_preview'
     ];
 
@@ -45,6 +47,7 @@ class Builder extends Template
      * @param Context $context
      * @param QueryBuilderService $queryBuilderService
      * @param Format $format
+     * @param DynamicSearchRuleManager $ruleManager
      * @param array $data
      * @param JsonHelper|null $jsonHelper
      * @param DirectoryHelper|null $directoryHelper
@@ -53,6 +56,7 @@ class Builder extends Template
         Template\Context $context,
         private readonly QueryBuilderService $queryBuilderService,
         private readonly Format $format,
+        private readonly DynamicSearchRuleManager $ruleManager,
         array $data = [],
         ?JsonHelper $jsonHelper = null,
         ?DirectoryHelper $directoryHelper = null
@@ -160,5 +164,29 @@ class Builder extends Template
     public function getProductEditUrl(): string
     {
         return $this->getUrl('catalog/product/edit', ['id' => '__id__']);
+    }
+
+    /**
+     * @return string
+     */
+    public function getSearchRulesStatus(): string
+    {
+        return $this->ruleManager->getStatus();
+    }
+
+    /**
+     * @return string
+     */
+    public function getEnableSearchRulesUrl(): string
+    {
+        return $this->getUrl('*/*/enableSearchRules', ['store' => $this->getStoreId()]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getMinimumSearchRulesVersion(): string
+    {
+        return DynamicSearchRuleManager::MIN_VERSION;
     }
 }

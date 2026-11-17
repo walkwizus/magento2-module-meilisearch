@@ -32,8 +32,8 @@ define([
             moves: [],
             pins: {},
             buried: [],
-            sortBy: 'position',
             savedArrangement: '',
+            hasSavedOrder: false,
             ruleOpened: true,
             productsOpened: true,
             message: null,
@@ -46,14 +46,6 @@ define([
         initialize: function() {
             this._super();
             this.filters = JSON.parse(this.filters);
-            this.sortByOptions = [
-                {value: 'position', label: $t('Manual order')},
-                {value: 'newest', label: $t('Newest first')},
-                {value: 'name', label: $t('Name')},
-                {value: 'price_asc', label: $t('Price: low to high')},
-                {value: 'price_desc', label: $t('Price: high to low')},
-                {value: 'stock', label: $t('Stock')}
-            ];
             this.initBindings();
 
             this.pages = ko.pureComputed(function() {
@@ -71,9 +63,6 @@ define([
             this.canArrange = ko.pureComputed(function() {
                 return this.previewLoaded();
             }, this);
-            this.isAutoSort = ko.pureComputed(function() {
-                return this.sortBy() !== 'position';
-            }, this);
             this.isArrangementDirty = ko.pureComputed(function() {
                 return this.previewLoaded() && this.serializeArrangement() !== this.savedArrangement();
             }, this);
@@ -84,12 +73,6 @@ define([
             this.isArrangementDirty.subscribe(function(dirty) {
                 merchandising.hasUnsavedChanges(dirty);
             });
-            this.sortBy.subscribe(function() {
-                if (this.previewLoaded() && !this.applyingSaved) {
-                    this.page(1);
-                    this.loadPreview();
-                }
-            }, this);
             this.initViewMode();
             this.pageSize.subscribe(this.onPageSizeChange.bind(this));
             merchandising.currentCategoryId.subscribe(this.onCategoryChange.bind(this));
@@ -106,7 +89,7 @@ define([
         initObservable: function() {
             this._super().observe([
                 'pageSize', 'page', 'total', 'pageableCount', 'sortableCount', 'truncated', 'previewLoaded',
-                'searchQuery', 'appliedQuery', 'viewMode', 'moves', 'pins', 'buried', 'sortBy', 'savedArrangement', 'ruleOpened', 'productsOpened', 'message'
+                'searchQuery', 'appliedQuery', 'viewMode', 'moves', 'pins', 'buried', 'savedArrangement', 'hasSavedOrder', 'ruleOpened', 'productsOpened', 'message'
             ]);
 
             return this;
@@ -291,8 +274,7 @@ define([
             return {
                 moves: this.moves(),
                 pins: this.pins(),
-                buried: this.buried(),
-                sortBy: this.sortBy()
+                buried: this.buried()
             };
         },
 
@@ -304,8 +286,7 @@ define([
                 pins: Object.keys(pins).sort().map(function(id) {
                     return [id, pins[id]];
                 }),
-                buried: this.buried(),
-                sortBy: this.sortBy()
+                buried: this.buried()
             });
         },
 
@@ -313,7 +294,6 @@ define([
             this.moves([]);
             this.pins($.extend({}, saved.pins || {}));
             this.buried((saved.buried || []).map(Number));
-            this.sortBy(saved.sortBy || 'position');
             this.savedArrangement(this.serializeArrangement());
         },
 
@@ -342,9 +322,11 @@ define([
                 }
 
                 if (r.saved) {
-                    self.applyingSaved = true;
                     self.applySavedArrangement(r.saved);
-                    self.applyingSaved = false;
+                }
+
+                if (typeof r.arranged === 'boolean') {
+                    self.hasSavedOrder(r.arranged);
                 }
 
                 merchandising.docs(r.items);
@@ -419,6 +401,7 @@ define([
 
                 self.moves([]);
                 self.savedArrangement(self.serializeArrangement());
+                self.hasSavedOrder(Boolean(r.arranged));
                 self.showMessage('success', r.message);
             });
         },
@@ -455,6 +438,30 @@ define([
             this.loadPreview(false, true);
         },
 
+        resetSavedOrder: function() {
+            let self = this;
+            let categoryId = merchandising.currentCategoryId();
+
+            confirm({
+                title: $t('Reset Product Order'),
+                content: $t('Positions, pinned and buried products of "%1" will be removed for this store view. The category will use the native product order.').replace('%1', merchandising.currentCategoryName()),
+                actions: {
+                    confirm: function() {
+                        self.request(self.ajaxUrl.resetPositions, {storeId: self.storeId, categoryId: categoryId}).done(function(r) {
+                            if (!r.success) {
+                                self.showMessage('error', r.message);
+                                return;
+                            }
+
+                            self.page(1);
+                            self.loadPreview(false, true);
+                            self.showMessage('success', r.message);
+                        });
+                    }
+                }
+            });
+        },
+
         onDrop: function(productId, index) {
             let docs = merchandising.docs().slice();
             let currentIndex = docs.findIndex(function(doc) {
@@ -466,16 +473,32 @@ define([
             }
 
             let product = docs.splice(currentIndex, 1)[0];
-
-            if (this.isAutoSort()) {
-                this.pinAt(product, this.offset() + index + 1);
-                return;
-            }
+            let offset = this.offset();
 
             docs.splice(index, 0, product);
+            this.shiftPins(product, offset + currentIndex + 1, offset + index + 1);
             merchandising.docs([]);
             merchandising.docs(docs);
-            this.moves.push({id: product.id, position: this.offset() + index + 1});
+        },
+
+        shiftPins: function(product, from, to) {
+            let pins = $.extend({}, this.pins());
+
+            Object.keys(pins).forEach(function(id) {
+                if (to < from && pins[id] >= to && pins[id] < from) {
+                    pins[id]++;
+                } else if (to > from && pins[id] > from && pins[id] <= to) {
+                    pins[id]--;
+                }
+            });
+
+            if (this.isPinned(product)) {
+                pins[product.id] = to;
+            } else {
+                this.moves.push({id: product.id, position: to});
+            }
+
+            this.pins(pins);
         },
 
         pinAt: function(product, position) {
@@ -502,7 +525,7 @@ define([
             if (this.isPinned(product)) {
                 delete pins[product.id];
 
-                if (!this.isAutoSort() && position) {
+                if (position) {
                     this.moves.push({id: product.id, position: position});
                 }
 
@@ -539,13 +562,7 @@ define([
             }
 
             position = Math.min(position, this.sortableCount());
-
-            if (this.isAutoSort() || this.isPinned(product)) {
-                this.pinAt(product, position);
-                return;
-            }
-
-            this.moves.push({id: product.id, position: position});
+            this.shiftPins(product, this.getPosition(product), position);
             this.loadPreview();
         },
 

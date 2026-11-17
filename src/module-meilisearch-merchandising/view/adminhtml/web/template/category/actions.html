@@ -4,6 +4,11 @@
         <span data-bind="i18n: 'Discard Changes'"></span>
     </button>
     <!-- /ko -->
+    <!-- ko if: hasSavedOrder() -->
+    <button type="button" class="action-default scalable" data-bind="click: resetSavedOrder">
+        <span data-bind="i18n: 'Reset Product Order'"></span>
+    </button>
+    <!-- /ko -->
     <!-- ko if: merchandising.currentRule() -->
     <button type="button" class="action-default scalable delete" data-bind="click: deleteRule">
         <span data-bind="i18n: 'Delete Rule'"></span>
